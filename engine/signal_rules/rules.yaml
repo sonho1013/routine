@@ -1,0 +1,105 @@
+# ── 地理围栏（迁移自 engine/signal_to_fact.py KNOWN_GEOFENCES）──
+geofences:
+  home:         { lat: 31.2304, lon: 121.4737, radius_m: 200 }
+  workplace:    { lat: 31.2396, lon: 121.4997, radius_m: 100 }
+  office_gate_01: { lat: 31.2388, lon: 121.4975, radius_m: 100 }
+  park:         { lat: 31.2270, lon: 121.4610, radius_m: 200 }
+  mall:         { lat: 31.2350, lon: 121.4900, radius_m: 150 }
+
+# ── 信号规则 ──
+signals:
+
+  hvac_temp_target:
+    category: numeric
+    aliases: []
+    unit: "celsius"
+    value_range: [10, 32]
+    text_template: "set cabin air conditioning temperature to {value} degrees"
+    drift_metric: numeric_mean_diff
+    drift_threshold: 1.5
+
+  hvac_power:
+    category: categorical
+    value_templates:
+      off: "turned off cabin air conditioning"
+    drift_metric: dominant_value_change
+
+  seat_heating:
+    category: numeric
+    value_range: [0, 5]
+    text_template: "turned on seat heating to level {value}"
+    trigger_condition: "value > 0"
+    drift_metric: numeric_mean_diff
+    drift_threshold: 1
+
+  nav_destination:
+    category: categorical
+    text_template: "started navigation to {value}"
+    drift_metric: none
+
+  nav_route_pref:
+    category: categorical
+    text_template: "selected {value} route preference"
+    drift_metric: dominant_value_change
+
+  media_source:
+    category: categorical
+    value_templates:
+      music:   "started playing music {content_id}"
+      podcast: "resumed listening to podcast {content_id}"
+      radio:   "tuned to radio station {content_id}"
+      off:     "stopped all media playback"
+    drift_metric: dominant_value_change
+
+  media_content_id:
+    category: categorical
+    text_template: "selected media content {value}"
+    drift_metric: dominant_value_change
+
+  media_volume:
+    category: numeric
+    value_range: [0, 100]
+    text_template: "adjusted media volume to {value} percent"
+    trigger_condition: "value > 0"
+    drift_metric: numeric_mean_diff
+    drift_threshold: 10
+
+  drive_mode:
+    category: categorical
+    text_template: "switched to {value} driving mode"
+    drift_metric: dominant_value_change
+
+  acc_distance:
+    category: numeric
+    value_range: [1, 5]
+    text_template: "set ACC following distance to {value}"
+    drift_metric: numeric_mean_diff
+    drift_threshold: 1
+
+  window_position:
+    category: numeric
+    value_range: [0, 100]
+    value_templates_by_range:
+      positive: "lowered driver window to {value} percent"
+      zero:     "closed all vehicle windows"
+    drift_metric: numeric_mean_diff
+    drift_threshold: 20
+
+  keyless_entry:
+    category: categorical
+    value_templates:
+      disabled: "disabled keyless proximity entry"
+    drift_metric: dominant_value_change
+
+  engine_status:
+    category: categorical
+    value_templates:
+      off: "shut down the vehicle engine"
+    drift_metric: dominant_value_change
+
+# ── Table 4 上下文信号（映射到 StructuredContext，不产生 Fact.text）──
+context_signals:
+  - gps_latitude
+  - gps_longitude
+  - gear_position
+  - vehicle_speed
