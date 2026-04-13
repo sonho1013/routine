@@ -1,0 +1,1241 @@
+{
+  "user": "Mary",
+  "user_id": "U001",
+  "base_date": "2025-10-06",
+  "scenes": {
+    "morning_commute": [
+      {
+        "scene": "morning_commute",
+        "day": 1,
+        "weekday": "Monday",
+        "date": "2025-10-06",
+        "weather": "sunny",
+        "outside_temp_c": 10.2,
+        "context": {
+          "time_window": "06:00-10:00",
+          "day_type": "weekday",
+          "vehicle_state": "engine_start",
+          "location": "home_departure"
+        },
+        "signals": [
+          {
+            "t": "2025-10-06T08:15:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-06T08:15:06",
+            "signal": "door_status",
+            "value": "closed"
+          },
+          {
+            "t": "2025-10-06T08:15:13",
+            "signal": "gear_position",
+            "value": "D"
+          },
+          {
+            "t": "2025-10-06T08:15:56",
+            "signal": "media_source",
+            "value": "podcast"
+          },
+          {
+            "t": "2025-10-06T08:16:19",
+            "signal": "nav_destination",
+            "value": "work"
+          },
+          {
+            "t": "2025-10-06T08:16:44",
+            "signal": "seat_heating",
+            "value": 2
+          },
+          {
+            "t": "2025-10-06T08:17:04",
+            "signal": "drive_mode",
+            "value": "eco"
+          },
+          {
+            "t": "2025-10-06T08:17:20",
+            "signal": "nav_route_pref",
+            "value": "fastest"
+          },
+          {
+            "t": "2025-10-06T08:17:30",
+            "signal": "media_content_id",
+            "value": "Tech Daily"
+          },
+          {
+            "t": "2025-10-06T08:17:47",
+            "signal": "media_volume",
+            "value": 58
+          },
+          {
+            "t": "2025-10-06T08:18:08",
+            "signal": "hvac_fan_speed",
+            "value": "auto"
+          },
+          {
+            "t": "2025-10-06T08:18:19",
+            "signal": "acc_distance",
+            "value": "medium"
+          },
+          {
+            "t": "2025-10-06T08:18:22",
+            "signal": "hvac_temp_target",
+            "value": 22
+          }
+        ]
+      },
+      {
+        "scene": "morning_commute",
+        "day": 2,
+        "weekday": "Tuesday",
+        "date": "2025-10-07",
+        "weather": "cloudy",
+        "outside_temp_c": 7.8,
+        "context": {
+          "time_window": "06:00-10:00",
+          "day_type": "weekday",
+          "vehicle_state": "engine_start",
+          "location": "home_departure"
+        },
+        "signals": [
+          {
+            "t": "2025-10-07T07:37:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-07T07:37:05",
+            "signal": "door_status",
+            "value": "closed"
+          },
+          {
+            "t": "2025-10-07T07:37:13",
+            "signal": "gear_position",
+            "value": "D"
+          },
+          {
+            "t": "2025-10-07T07:37:33",
+            "signal": "media_source",
+            "value": "podcast"
+          },
+          {
+            "t": "2025-10-07T07:37:47",
+            "signal": "acc_distance",
+            "value": "medium"
+          },
+          {
+            "t": "2025-10-07T07:38:01",
+            "signal": "drive_mode",
+            "value": "eco"
+          },
+          {
+            "t": "2025-10-07T07:38:10",
+            "signal": "seat_heating",
+            "value": 2
+          },
+          {
+            "t": "2025-10-07T07:38:34",
+            "signal": "media_volume",
+            "value": 66
+          },
+          {
+            "t": "2025-10-07T07:38:45",
+            "signal": "hvac_temp_target",
+            "value": 23
+          },
+          {
+            "t": "2025-10-07T07:39:10",
+            "signal": "media_content_id",
+            "value": "Morning Brew"
+          },
+          {
+            "t": "2025-10-07T07:39:34",
+            "signal": "nav_destination",
+            "value": "work"
+          },
+          {
+            "t": "2025-10-07T07:39:57",
+            "signal": "hvac_fan_speed",
+            "value": "auto"
+          },
+          {
+            "t": "2025-10-07T07:40:02",
+            "signal": "nav_route_pref",
+            "value": "fastest"
+          }
+        ]
+      },
+      {
+        "scene": "morning_commute",
+        "day": 3,
+        "weekday": "Wednesday",
+        "date": "2025-10-08",
+        "weather": "rainy",
+        "outside_temp_c": 3.6,
+        "context": {
+          "time_window": "06:00-10:00",
+          "day_type": "weekday",
+          "vehicle_state": "engine_start",
+          "location": "home_departure"
+        },
+        "signals": [
+          {
+            "t": "2025-10-08T08:00:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-08T08:00:15",
+            "signal": "door_status",
+            "value": "closed"
+          },
+          {
+            "t": "2025-10-08T08:00:21",
+            "signal": "gear_position",
+            "value": "D"
+          },
+          {
+            "t": "2025-10-08T08:00:51",
+            "signal": "hvac_temp_target",
+            "value": 24
+          },
+          {
+            "t": "2025-10-08T08:01:06",
+            "signal": "hvac_fan_speed",
+            "value": "auto"
+          },
+          {
+            "t": "2025-10-08T08:01:20",
+            "signal": "media_volume",
+            "value": 61
+          },
+          {
+            "t": "2025-10-08T08:01:30",
+            "signal": "drive_mode",
+            "value": "eco"
+          },
+          {
+            "t": "2025-10-08T08:01:37",
+            "signal": "media_content_id",
+            "value": "Lo-fi Focus"
+          },
+          {
+            "t": "2025-10-08T08:01:56",
+            "signal": "acc_distance",
+            "value": "short"
+          },
+          {
+            "t": "2025-10-08T08:02:14",
+            "signal": "media_source",
+            "value": "music"
+          },
+          {
+            "t": "2025-10-08T08:02:19",
+            "signal": "nav_destination",
+            "value": "work"
+          },
+          {
+            "t": "2025-10-08T08:02:23",
+            "signal": "seat_heating",
+            "value": 2
+          },
+          {
+            "t": "2025-10-08T08:02:29",
+            "signal": "nav_route_pref",
+            "value": "fastest"
+          }
+        ]
+      },
+      {
+        "scene": "morning_commute",
+        "day": 4,
+        "weekday": "Thursday",
+        "date": "2025-10-09",
+        "weather": "sunny",
+        "outside_temp_c": 15.5,
+        "context": {
+          "time_window": "06:00-10:00",
+          "day_type": "weekday",
+          "vehicle_state": "engine_start",
+          "location": "home_departure"
+        },
+        "signals": [
+          {
+            "t": "2025-10-09T08:18:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-09T08:18:05",
+            "signal": "door_status",
+            "value": "closed"
+          },
+          {
+            "t": "2025-10-09T08:18:13",
+            "signal": "gear_position",
+            "value": "D"
+          },
+          {
+            "t": "2025-10-09T08:18:34",
+            "signal": "nav_route_pref",
+            "value": "fastest"
+          },
+          {
+            "t": "2025-10-09T08:18:54",
+            "signal": "nav_destination",
+            "value": "work"
+          },
+          {
+            "t": "2025-10-09T08:19:13",
+            "signal": "hvac_temp_target",
+            "value": 21
+          },
+          {
+            "t": "2025-10-09T08:19:16",
+            "signal": "media_volume",
+            "value": 58
+          },
+          {
+            "t": "2025-10-09T08:19:38",
+            "signal": "acc_distance",
+            "value": "short"
+          },
+          {
+            "t": "2025-10-09T08:19:51",
+            "signal": "media_source",
+            "value": "podcast"
+          },
+          {
+            "t": "2025-10-09T08:20:09",
+            "signal": "media_content_id",
+            "value": "Morning Brew"
+          },
+          {
+            "t": "2025-10-09T08:20:12",
+            "signal": "hvac_fan_speed",
+            "value": "auto"
+          },
+          {
+            "t": "2025-10-09T08:20:18",
+            "signal": "seat_heating",
+            "value": 0
+          },
+          {
+            "t": "2025-10-09T08:20:32",
+            "signal": "drive_mode",
+            "value": "eco"
+          }
+        ]
+      },
+      {
+        "scene": "morning_commute",
+        "day": 5,
+        "weekday": "Friday",
+        "date": "2025-10-10",
+        "weather": "cloudy",
+        "outside_temp_c": 5.4,
+        "context": {
+          "time_window": "06:00-10:00",
+          "day_type": "weekday",
+          "vehicle_state": "engine_start",
+          "location": "home_departure"
+        },
+        "signals": [
+          {
+            "t": "2025-10-10T08:10:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-10T08:10:15",
+            "signal": "door_status",
+            "value": "closed"
+          },
+          {
+            "t": "2025-10-10T08:10:23",
+            "signal": "gear_position",
+            "value": "D"
+          },
+          {
+            "t": "2025-10-10T08:11:00",
+            "signal": "seat_heating",
+            "value": 2
+          },
+          {
+            "t": "2025-10-10T08:11:20",
+            "signal": "nav_destination",
+            "value": "work"
+          },
+          {
+            "t": "2025-10-10T08:11:30",
+            "signal": "nav_route_pref",
+            "value": "fastest"
+          },
+          {
+            "t": "2025-10-10T08:11:51",
+            "signal": "media_content_id",
+            "value": "Tech Daily"
+          },
+          {
+            "t": "2025-10-10T08:12:01",
+            "signal": "media_source",
+            "value": "podcast"
+          },
+          {
+            "t": "2025-10-10T08:12:04",
+            "signal": "hvac_fan_speed",
+            "value": "auto"
+          },
+          {
+            "t": "2025-10-10T08:12:09",
+            "signal": "hvac_temp_target",
+            "value": 22
+          },
+          {
+            "t": "2025-10-10T08:12:34",
+            "signal": "acc_distance",
+            "value": "short"
+          },
+          {
+            "t": "2025-10-10T08:12:57",
+            "signal": "drive_mode",
+            "value": "eco"
+          },
+          {
+            "t": "2025-10-10T08:13:01",
+            "signal": "media_volume",
+            "value": 61
+          }
+        ]
+      }
+    ],
+    "arriving_home": [
+      {
+        "scene": "arriving_home",
+        "day": 1,
+        "weekday": "Monday",
+        "date": "2025-10-06",
+        "context": {
+          "time_window": "17:00-21:00",
+          "day_type": "weekday",
+          "vehicle_state": "parking",
+          "location": "home"
+        },
+        "signals": [
+          {
+            "t": "2025-10-06T18:15:00",
+            "signal": "gps_latitude",
+            "value": 48.875960834330364
+          },
+          {
+            "t": "2025-10-06T18:15:00",
+            "signal": "gps_longitude",
+            "value": 2.351448474529907
+          },
+          {
+            "t": "2025-10-06T18:15:00",
+            "signal": "vehicle_speed",
+            "value": 10
+          },
+          {
+            "t": "2025-10-06T18:15:43",
+            "signal": "vehicle_speed",
+            "value": 0
+          },
+          {
+            "t": "2025-10-06T18:15:43",
+            "signal": "gear_position",
+            "value": "P"
+          },
+          {
+            "t": "2025-10-06T18:15:53",
+            "signal": "media_source",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-06T18:15:53",
+            "signal": "media_volume",
+            "value": 0
+          },
+          {
+            "t": "2025-10-06T18:15:57",
+            "signal": "hvac_power",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-06T18:16:03",
+            "signal": "window_position",
+            "value": 0
+          },
+          {
+            "t": "2025-10-06T18:16:11",
+            "signal": "keyless_entry",
+            "value": "disabled"
+          },
+          {
+            "t": "2025-10-06T18:16:27",
+            "signal": "engine_status",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-06T18:16:41",
+            "signal": "door_status",
+            "value": "open"
+          },
+          {
+            "t": "2025-10-06T18:16:59",
+            "signal": "door_status",
+            "value": "locked"
+          }
+        ]
+      },
+      {
+        "scene": "arriving_home",
+        "day": 2,
+        "weekday": "Tuesday",
+        "date": "2025-10-07",
+        "context": {
+          "time_window": "17:00-21:00",
+          "day_type": "weekday",
+          "vehicle_state": "parking",
+          "location": "home"
+        },
+        "signals": [
+          {
+            "t": "2025-10-07T18:16:00",
+            "signal": "gps_latitude",
+            "value": 48.85993591663218
+          },
+          {
+            "t": "2025-10-07T18:16:00",
+            "signal": "gps_longitude",
+            "value": 2.3509994885162824
+          },
+          {
+            "t": "2025-10-07T18:16:00",
+            "signal": "vehicle_speed",
+            "value": 15
+          },
+          {
+            "t": "2025-10-07T18:16:54",
+            "signal": "vehicle_speed",
+            "value": 0
+          },
+          {
+            "t": "2025-10-07T18:16:54",
+            "signal": "gear_position",
+            "value": "P"
+          },
+          {
+            "t": "2025-10-07T18:17:03",
+            "signal": "media_source",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-07T18:17:03",
+            "signal": "media_volume",
+            "value": 0
+          },
+          {
+            "t": "2025-10-07T18:17:09",
+            "signal": "hvac_power",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-07T18:17:24",
+            "signal": "window_position",
+            "value": 0
+          },
+          {
+            "t": "2025-10-07T18:17:27",
+            "signal": "keyless_entry",
+            "value": "disabled"
+          },
+          {
+            "t": "2025-10-07T18:17:39",
+            "signal": "engine_status",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-07T18:17:44",
+            "signal": "door_status",
+            "value": "open"
+          },
+          {
+            "t": "2025-10-07T18:18:04",
+            "signal": "door_status",
+            "value": "locked"
+          }
+        ]
+      },
+      {
+        "scene": "arriving_home",
+        "day": 3,
+        "weekday": "Wednesday",
+        "date": "2025-10-08",
+        "context": {
+          "time_window": "17:00-21:00",
+          "day_type": "weekday",
+          "vehicle_state": "parking",
+          "location": "home"
+        },
+        "signals": [
+          {
+            "t": "2025-10-08T18:14:00",
+            "signal": "gps_latitude",
+            "value": 48.869053160562146
+          },
+          {
+            "t": "2025-10-08T18:14:00",
+            "signal": "gps_longitude",
+            "value": 2.353574058161709
+          },
+          {
+            "t": "2025-10-08T18:14:00",
+            "signal": "vehicle_speed",
+            "value": 14
+          },
+          {
+            "t": "2025-10-08T18:15:08",
+            "signal": "vehicle_speed",
+            "value": 0
+          },
+          {
+            "t": "2025-10-08T18:15:08",
+            "signal": "gear_position",
+            "value": "P"
+          },
+          {
+            "t": "2025-10-08T18:15:14",
+            "signal": "media_source",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-08T18:15:14",
+            "signal": "media_volume",
+            "value": 0
+          },
+          {
+            "t": "2025-10-08T18:15:23",
+            "signal": "hvac_power",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-08T18:15:34",
+            "signal": "window_position",
+            "value": 0
+          },
+          {
+            "t": "2025-10-08T18:15:44",
+            "signal": "keyless_entry",
+            "value": "disabled"
+          },
+          {
+            "t": "2025-10-08T18:15:57",
+            "signal": "engine_status",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-08T18:16:10",
+            "signal": "door_status",
+            "value": "open"
+          },
+          {
+            "t": "2025-10-08T18:16:20",
+            "signal": "door_status",
+            "value": "locked"
+          }
+        ]
+      },
+      {
+        "scene": "arriving_home",
+        "day": 4,
+        "weekday": "Thursday",
+        "date": "2025-10-09",
+        "context": {
+          "time_window": "17:00-21:00",
+          "day_type": "weekday",
+          "vehicle_state": "parking",
+          "location": "home"
+        },
+        "signals": [
+          {
+            "t": "2025-10-09T18:34:00",
+            "signal": "gps_latitude",
+            "value": 48.831141051490526
+          },
+          {
+            "t": "2025-10-09T18:34:00",
+            "signal": "gps_longitude",
+            "value": 2.3509809563195088
+          },
+          {
+            "t": "2025-10-09T18:34:00",
+            "signal": "vehicle_speed",
+            "value": 17
+          },
+          {
+            "t": "2025-10-09T18:35:30",
+            "signal": "vehicle_speed",
+            "value": 0
+          },
+          {
+            "t": "2025-10-09T18:35:30",
+            "signal": "gear_position",
+            "value": "P"
+          },
+          {
+            "t": "2025-10-09T18:35:36",
+            "signal": "media_source",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-09T18:35:36",
+            "signal": "media_volume",
+            "value": 0
+          },
+          {
+            "t": "2025-10-09T18:35:40",
+            "signal": "hvac_power",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-09T18:35:52",
+            "signal": "window_position",
+            "value": 0
+          },
+          {
+            "t": "2025-10-09T18:35:57",
+            "signal": "keyless_entry",
+            "value": "disabled"
+          },
+          {
+            "t": "2025-10-09T18:36:06",
+            "signal": "engine_status",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-09T18:36:21",
+            "signal": "door_status",
+            "value": "open"
+          },
+          {
+            "t": "2025-10-09T18:36:46",
+            "signal": "door_status",
+            "value": "locked"
+          }
+        ]
+      },
+      {
+        "scene": "arriving_home",
+        "day": 5,
+        "weekday": "Friday",
+        "date": "2025-10-10",
+        "context": {
+          "time_window": "17:00-21:00",
+          "day_type": "weekday",
+          "vehicle_state": "parking",
+          "location": "home"
+        },
+        "signals": [
+          {
+            "t": "2025-10-10T18:24:00",
+            "signal": "gps_latitude",
+            "value": 48.814329301740706
+          },
+          {
+            "t": "2025-10-10T18:24:00",
+            "signal": "gps_longitude",
+            "value": 2.3499955791198643
+          },
+          {
+            "t": "2025-10-10T18:24:00",
+            "signal": "vehicle_speed",
+            "value": 13
+          },
+          {
+            "t": "2025-10-10T18:24:34",
+            "signal": "vehicle_speed",
+            "value": 0
+          },
+          {
+            "t": "2025-10-10T18:24:34",
+            "signal": "gear_position",
+            "value": "P"
+          },
+          {
+            "t": "2025-10-10T18:24:47",
+            "signal": "media_source",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-10T18:24:47",
+            "signal": "media_volume",
+            "value": 0
+          },
+          {
+            "t": "2025-10-10T18:24:53",
+            "signal": "hvac_power",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-10T18:25:02",
+            "signal": "window_position",
+            "value": 0
+          },
+          {
+            "t": "2025-10-10T18:25:08",
+            "signal": "keyless_entry",
+            "value": "disabled"
+          },
+          {
+            "t": "2025-10-10T18:25:17",
+            "signal": "engine_status",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-10T18:25:31",
+            "signal": "door_status",
+            "value": "open"
+          },
+          {
+            "t": "2025-10-10T18:25:59",
+            "signal": "door_status",
+            "value": "locked"
+          }
+        ]
+      }
+    ],
+    "toll_parking_entry": [
+      {
+        "scene": "toll_parking_entry",
+        "day": 1,
+        "date": "2025-10-06",
+        "poi": "toll_A6",
+        "weather": "sunny",
+        "wiper": "off",
+        "speed_kph": 2.1,
+        "context": {
+          "vehicle_state": "approaching_poi",
+          "location": "toll A6",
+          "speed_below_5kph": true,
+          "wiper_not_max": true
+        },
+        "signals": [
+          {
+            "t": "2025-10-06T16:45:00",
+            "signal": "gps_latitude",
+            "value": 48.80451321873214
+          },
+          {
+            "t": "2025-10-06T16:45:00",
+            "signal": "gps_longitude",
+            "value": 2.3093268547576438
+          },
+          {
+            "t": "2025-10-06T16:45:00",
+            "signal": "vehicle_speed",
+            "value": 2.1
+          },
+          {
+            "t": "2025-10-06T16:45:00",
+            "signal": "wiper_state",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-06T16:45:09",
+            "signal": "window_position",
+            "value": 73
+          }
+        ]
+      },
+      {
+        "scene": "toll_parking_entry",
+        "day": 2,
+        "date": "2025-10-07",
+        "poi": "toll_A6",
+        "weather": "sunny",
+        "wiper": "off",
+        "speed_kph": 1.7,
+        "context": {
+          "vehicle_state": "approaching_poi",
+          "location": "toll A6",
+          "speed_below_5kph": true,
+          "wiper_not_max": true
+        },
+        "signals": [
+          {
+            "t": "2025-10-07T17:25:00",
+            "signal": "gps_latitude",
+            "value": 48.818331216024866
+          },
+          {
+            "t": "2025-10-07T17:25:00",
+            "signal": "gps_longitude",
+            "value": 2.308194822928971
+          },
+          {
+            "t": "2025-10-07T17:25:00",
+            "signal": "vehicle_speed",
+            "value": 1.7
+          },
+          {
+            "t": "2025-10-07T17:25:00",
+            "signal": "wiper_state",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-07T17:25:06",
+            "signal": "window_position",
+            "value": 80
+          }
+        ]
+      },
+      {
+        "scene": "toll_parking_entry",
+        "day": 3,
+        "date": "2025-10-08",
+        "poi": "toll_A6",
+        "weather": "cloudy",
+        "wiper": "low",
+        "speed_kph": 2.9,
+        "context": {
+          "vehicle_state": "approaching_poi",
+          "location": "toll A6",
+          "speed_below_5kph": true,
+          "wiper_not_max": true
+        },
+        "signals": [
+          {
+            "t": "2025-10-08T12:04:00",
+            "signal": "gps_latitude",
+            "value": 48.785353321658434
+          },
+          {
+            "t": "2025-10-08T12:04:00",
+            "signal": "gps_longitude",
+            "value": 2.311730125107806
+          },
+          {
+            "t": "2025-10-08T12:04:00",
+            "signal": "vehicle_speed",
+            "value": 2.9
+          },
+          {
+            "t": "2025-10-08T12:04:00",
+            "signal": "wiper_state",
+            "value": "low"
+          },
+          {
+            "t": "2025-10-08T12:04:04",
+            "signal": "window_position",
+            "value": 78
+          }
+        ]
+      },
+      {
+        "scene": "toll_parking_entry",
+        "day": 4,
+        "date": "2025-10-09",
+        "poi": "toll_A6",
+        "weather": "sunny",
+        "wiper": "off",
+        "speed_kph": 3.7,
+        "context": {
+          "vehicle_state": "approaching_poi",
+          "location": "toll A6",
+          "speed_below_5kph": true,
+          "wiper_not_max": true
+        },
+        "signals": [
+          {
+            "t": "2025-10-09T17:21:00",
+            "signal": "gps_latitude",
+            "value": 48.83476371679333
+          },
+          {
+            "t": "2025-10-09T17:21:00",
+            "signal": "gps_longitude",
+            "value": 2.311969815461498
+          },
+          {
+            "t": "2025-10-09T17:21:00",
+            "signal": "vehicle_speed",
+            "value": 3.7
+          },
+          {
+            "t": "2025-10-09T17:21:00",
+            "signal": "wiper_state",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-09T17:21:06",
+            "signal": "window_position",
+            "value": 70
+          }
+        ]
+      },
+      {
+        "scene": "toll_parking_entry",
+        "day": 5,
+        "date": "2025-10-10",
+        "poi": "toll_A6",
+        "weather": "sunny",
+        "wiper": "off",
+        "speed_kph": 2.2,
+        "context": {
+          "vehicle_state": "approaching_poi",
+          "location": "toll A6",
+          "speed_below_5kph": true,
+          "wiper_not_max": true
+        },
+        "signals": [
+          {
+            "t": "2025-10-10T11:56:00",
+            "signal": "gps_latitude",
+            "value": 48.82826956993079
+          },
+          {
+            "t": "2025-10-10T11:56:00",
+            "signal": "gps_longitude",
+            "value": 2.308450623500875
+          },
+          {
+            "t": "2025-10-10T11:56:00",
+            "signal": "vehicle_speed",
+            "value": 2.2
+          },
+          {
+            "t": "2025-10-10T11:56:00",
+            "signal": "wiper_state",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-10T11:56:03",
+            "signal": "window_position",
+            "value": 82
+          }
+        ]
+      }
+    ],
+    "noise": [
+      {
+        "scene": "noise",
+        "day": 1,
+        "date": "2025-10-09",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-09T15:59:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-09T15:59:23",
+            "signal": "hvac_temp_target",
+            "value": 25
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 2,
+        "date": "2025-10-11",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-11T10:47:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-11T10:47:07",
+            "signal": "drive_mode",
+            "value": "eco"
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 3,
+        "date": "2025-10-12",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-12T13:04:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-12T13:04:24",
+            "signal": "drive_mode",
+            "value": "sport"
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 4,
+        "date": "2025-10-06",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-06T11:26:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-06T11:26:17",
+            "signal": "media_content_id",
+            "value": "News Radio"
+          },
+          {
+            "t": "2025-10-06T11:26:26",
+            "signal": "media_source",
+            "value": "off"
+          },
+          {
+            "t": "2025-10-06T11:26:52",
+            "signal": "seat_heating",
+            "value": 3
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 5,
+        "date": "2025-10-11",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-11T15:29:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-11T15:29:11",
+            "signal": "drive_mode",
+            "value": "eco"
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 6,
+        "date": "2025-10-10",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-10T15:08:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-10T15:08:30",
+            "signal": "nav_destination",
+            "value": "supermarket"
+          },
+          {
+            "t": "2025-10-10T15:08:55",
+            "signal": "media_content_id",
+            "value": "FM 98.5"
+          },
+          {
+            "t": "2025-10-10T15:09:16",
+            "signal": "drive_mode",
+            "value": "sport"
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 7,
+        "date": "2025-10-06",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-06T15:59:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-06T15:59:24",
+            "signal": "media_source",
+            "value": "radio"
+          },
+          {
+            "t": "2025-10-06T15:59:35",
+            "signal": "media_content_id",
+            "value": "FM 98.5"
+          },
+          {
+            "t": "2025-10-06T16:00:02",
+            "signal": "nav_destination",
+            "value": "supermarket"
+          }
+        ]
+      },
+      {
+        "scene": "noise",
+        "day": 8,
+        "date": "2025-10-08",
+        "context": {
+          "time_window": "random",
+          "day_type": "any",
+          "note": "non-habitual"
+        },
+        "signals": [
+          {
+            "t": "2025-10-08T14:43:00",
+            "signal": "engine_status",
+            "value": "on"
+          },
+          {
+            "t": "2025-10-08T14:43:05",
+            "signal": "window_position",
+            "value": 100
+          },
+          {
+            "t": "2025-10-08T14:43:20",
+            "signal": "media_content_id",
+            "value": "News Radio"
+          },
+          {
+            "t": "2025-10-08T14:43:49",
+            "signal": "hvac_temp_target",
+            "value": 28
+          }
+        ]
+      }
+    ]
+  }
+}

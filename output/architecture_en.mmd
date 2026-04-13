@@ -1,0 +1,49 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#E3F2FD', 'primaryBorderColor': '#1565C0', 'primaryTextColor': '#0D47A1', 'lineColor': '#42A5F5', 'secondaryColor': '#FFF3E0', 'tertiaryColor': '#E8F5E9', 'fontSize': '14px'}}}%%
+
+flowchart TB
+    subgraph INPUT["① Signal Input"]
+        S["🚗 Vehicle Signals<br/><i>hvac_temp, seat_heating,<br/>nav_destination, window_pos, ...</i>"]
+    end
+
+    subgraph FACT["② Signal → Fact Conversion"]
+        F["Bare Action Fact<br/><i>'set AC temperature to 22°C'</i>"]
+        CTX["StructuredContext<br/><i>time_bucket · vehicle_state<br/>geofence · weekday · hour</i>"]
+    end
+
+    subgraph STORE["③ ChromaDB Storage"]
+        EMB["OpenAI ada-002<br/>Embedding<br/><i>text → 1536-dim vector</i>"]
+        DB[("ChromaDB<br/><i>vector + ctx_* metadata<br/>persistent storage</i>")]
+    end
+
+    subgraph CLUSTER["④ Hybrid DBSCAN Clustering"]
+        DIST["Hybrid Distance Matrix<br/><i>0.8 × text_cosine + 0.2 × context_dist</i>"]
+        DBSCAN["DBSCAN<br/><i>ε=0.10, min_samples=3<br/>metric=precomputed</i>"]
+        CONSEC["Consecutiveness<br/>Check<br/><i>recent 5 occurrences<br/>all in cluster?</i>"]
+        CONF["Cluster Confidence<br/><i>cohesion · core_ratio<br/>size_factor → [0,1]</i>"]
+    end
+
+    subgraph OUTPUT["⑤ Habit Output"]
+        LLM["LLM Synthesis<br/><i>GPT-4.1<br/>cluster → habit text</i>"]
+        SCENE["Scene Card Naming<br/><i>LLM generates scene name<br/>'Morning Commute' (0.96)</i>"]
+        HABIT["🎯 Habit Fact<br/><i>text + context + confidence<br/>+ scene_name</i>"]
+    end
+
+    S --> F
+    S --> CTX
+    F --> EMB
+    CTX -.->|"stored as metadata"| DB
+    EMB --> DB
+    DB -->|"facts + embeddings"| DIST
+    DIST --> DBSCAN
+    DBSCAN --> CONSEC
+    DBSCAN --> CONF
+    CONSEC -->|"pass"| LLM
+    CONF -.->|"clustering_confidence"| HABIT
+    LLM --> SCENE
+    SCENE --> HABIT
+
+    style INPUT fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    style FACT fill:#FFF3E0,stroke:#E65100,stroke-width:2px
+    style STORE fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
+    style CLUSTER fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px
+    style OUTPUT fill:#FBE9E7,stroke:#BF360C,stroke-width:2px

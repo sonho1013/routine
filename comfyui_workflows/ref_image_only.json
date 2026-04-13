@@ -1,0 +1,37 @@
+{
+  "1": {
+    "inputs": {
+      "prompt": "Character reference of Mary, a 30-year-old European woman with light brown hair in a casual updo, warm brown eyes, natural look. Wearing a smart-casual light blue jacket over a cream top with a thin wool scarf. Sitting in the driver seat of a modern compact electric vehicle. Three-quarter portrait, face and upper body clearly visible. Soft natural light from car window. French animation style, watercolor textures, soft pastel palette, ink linework.",
+      "negative_prompt": "photorealistic, 3D render, CGI, anime style, cartoon style, low quality, blurry, distorted face, extra limbs, deformed hands, text, watermark, logo, signature, frame border, uncanny valley",
+      "image_type": "subject",
+      "image_fidelity": 0.5,
+      "human_fidelity": 0.45,
+      "model_name": "kling-v2",
+      "aspect_ratio": "1:1",
+      "n": 1
+    },
+    "class_type": "KlingImageGenerationNode",
+    "_meta": {
+      "title": "Kling T2I: Mary Character Reference"
+    }
+  },
+  "2": {
+    "inputs": {
+      "images": ["1", 0],
+      "filename_prefix": "mary/reference"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Reference Image"
+    }
+  },
+  "3": {
+    "inputs": {
+      "images": ["1", 0]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Reference"
+    }
+  }
+}

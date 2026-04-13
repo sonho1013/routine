@@ -1,0 +1,1085 @@
+{
+  "best_alpha": 0.8,
+  "best_eps": 0.1,
+  "facts": [
+    {
+      "text": "set cabin air conditioning temperature to 22 degrees",
+      "_scene_label": "morning_commute",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 0
+    },
+    {
+      "text": "turned on seat heating to level 2",
+      "_scene_label": "morning_commute",
+      "signal": "seat_heating",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 1
+    },
+    {
+      "text": "started navigation to work",
+      "_scene_label": "morning_commute",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 2
+    },
+    {
+      "text": "selected fastest route preference",
+      "_scene_label": "morning_commute",
+      "signal": "nav_route_pref",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 3
+    },
+    {
+      "text": "resumed listening to podcast Tech Daily",
+      "_scene_label": "morning_commute",
+      "signal": "media_source",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 4
+    },
+    {
+      "text": "adjusted media volume to 58 percent",
+      "_scene_label": "morning_commute",
+      "signal": "media_volume",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 5
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "morning_commute",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 6
+    },
+    {
+      "text": "set ACC following distance to medium",
+      "_scene_label": "morning_commute",
+      "signal": "acc_distance",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 7
+    },
+    {
+      "text": "set cabin air conditioning temperature to 23 degrees",
+      "_scene_label": "morning_commute",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 0
+    },
+    {
+      "text": "turned on seat heating to level 2",
+      "_scene_label": "morning_commute",
+      "signal": "seat_heating",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 1
+    },
+    {
+      "text": "started navigation to work",
+      "_scene_label": "morning_commute",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 2
+    },
+    {
+      "text": "selected fastest route preference",
+      "_scene_label": "morning_commute",
+      "signal": "nav_route_pref",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 3
+    },
+    {
+      "text": "resumed listening to podcast Morning Brew",
+      "_scene_label": "morning_commute",
+      "signal": "media_source",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 4
+    },
+    {
+      "text": "adjusted media volume to 66 percent",
+      "_scene_label": "morning_commute",
+      "signal": "media_volume",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 5
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "morning_commute",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 6
+    },
+    {
+      "text": "set ACC following distance to medium",
+      "_scene_label": "morning_commute",
+      "signal": "acc_distance",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 7,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 7
+    },
+    {
+      "text": "set cabin air conditioning temperature to 24 degrees",
+      "_scene_label": "morning_commute",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 0
+    },
+    {
+      "text": "turned on seat heating to level 2",
+      "_scene_label": "morning_commute",
+      "signal": "seat_heating",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 1
+    },
+    {
+      "text": "started navigation to work",
+      "_scene_label": "morning_commute",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 2
+    },
+    {
+      "text": "selected fastest route preference",
+      "_scene_label": "morning_commute",
+      "signal": "nav_route_pref",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 3
+    },
+    {
+      "text": "started playing music Lo-fi Focus",
+      "_scene_label": "morning_commute",
+      "signal": "media_source",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "adjusted media volume to 61 percent",
+      "_scene_label": "morning_commute",
+      "signal": "media_volume",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 5
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "morning_commute",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 6
+    },
+    {
+      "text": "set ACC following distance to short",
+      "_scene_label": "morning_commute",
+      "signal": "acc_distance",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 7
+    },
+    {
+      "text": "set cabin air conditioning temperature to 21 degrees",
+      "_scene_label": "morning_commute",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 0
+    },
+    {
+      "text": "started navigation to work",
+      "_scene_label": "morning_commute",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 2
+    },
+    {
+      "text": "selected fastest route preference",
+      "_scene_label": "morning_commute",
+      "signal": "nav_route_pref",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 3
+    },
+    {
+      "text": "resumed listening to podcast Morning Brew",
+      "_scene_label": "morning_commute",
+      "signal": "media_source",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 4
+    },
+    {
+      "text": "adjusted media volume to 58 percent",
+      "_scene_label": "morning_commute",
+      "signal": "media_volume",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 5
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "morning_commute",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 6
+    },
+    {
+      "text": "set ACC following distance to short",
+      "_scene_label": "morning_commute",
+      "signal": "acc_distance",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 7
+    },
+    {
+      "text": "set cabin air conditioning temperature to 22 degrees",
+      "_scene_label": "morning_commute",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 0
+    },
+    {
+      "text": "turned on seat heating to level 2",
+      "_scene_label": "morning_commute",
+      "signal": "seat_heating",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 1
+    },
+    {
+      "text": "started navigation to work",
+      "_scene_label": "morning_commute",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 2
+    },
+    {
+      "text": "selected fastest route preference",
+      "_scene_label": "morning_commute",
+      "signal": "nav_route_pref",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 3
+    },
+    {
+      "text": "resumed listening to podcast Tech Daily",
+      "_scene_label": "morning_commute",
+      "signal": "media_source",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 4
+    },
+    {
+      "text": "adjusted media volume to 61 percent",
+      "_scene_label": "morning_commute",
+      "signal": "media_volume",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 5
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "morning_commute",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 6
+    },
+    {
+      "text": "set ACC following distance to short",
+      "_scene_label": "morning_commute",
+      "signal": "acc_distance",
+      "context": {
+        "time_bucket": "early_morning",
+        "hour": 8,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 7
+    },
+    {
+      "text": "turned off cabin air conditioning",
+      "_scene_label": "arriving_home",
+      "signal": "hvac_power",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 8
+    },
+    {
+      "text": "stopped all media playback",
+      "_scene_label": "arriving_home",
+      "signal": "media_off",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 9
+    },
+    {
+      "text": "closed all vehicle windows",
+      "_scene_label": "arriving_home",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "disabled keyless proximity entry",
+      "_scene_label": "arriving_home",
+      "signal": "keyless_entry",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 11
+    },
+    {
+      "text": "shut down the vehicle engine",
+      "_scene_label": "arriving_home",
+      "signal": "engine_status",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "turned off cabin air conditioning",
+      "_scene_label": "arriving_home",
+      "signal": "hvac_power",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": "home"
+      },
+      "cluster": 8
+    },
+    {
+      "text": "stopped all media playback",
+      "_scene_label": "arriving_home",
+      "signal": "media_off",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": "home"
+      },
+      "cluster": 9
+    },
+    {
+      "text": "closed all vehicle windows",
+      "_scene_label": "arriving_home",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": "home"
+      },
+      "cluster": 10
+    },
+    {
+      "text": "disabled keyless proximity entry",
+      "_scene_label": "arriving_home",
+      "signal": "keyless_entry",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": "home"
+      },
+      "cluster": 11
+    },
+    {
+      "text": "shut down the vehicle engine",
+      "_scene_label": "arriving_home",
+      "signal": "engine_status",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": "home"
+      },
+      "cluster": 10
+    },
+    {
+      "text": "turned off cabin air conditioning",
+      "_scene_label": "arriving_home",
+      "signal": "hvac_power",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 8
+    },
+    {
+      "text": "stopped all media playback",
+      "_scene_label": "arriving_home",
+      "signal": "media_off",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 9
+    },
+    {
+      "text": "closed all vehicle windows",
+      "_scene_label": "arriving_home",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "disabled keyless proximity entry",
+      "_scene_label": "arriving_home",
+      "signal": "keyless_entry",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 11
+    },
+    {
+      "text": "shut down the vehicle engine",
+      "_scene_label": "arriving_home",
+      "signal": "engine_status",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "turned off cabin air conditioning",
+      "_scene_label": "arriving_home",
+      "signal": "hvac_power",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 8
+    },
+    {
+      "text": "stopped all media playback",
+      "_scene_label": "arriving_home",
+      "signal": "media_off",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 9
+    },
+    {
+      "text": "closed all vehicle windows",
+      "_scene_label": "arriving_home",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "disabled keyless proximity entry",
+      "_scene_label": "arriving_home",
+      "signal": "keyless_entry",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 11
+    },
+    {
+      "text": "shut down the vehicle engine",
+      "_scene_label": "arriving_home",
+      "signal": "engine_status",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "turned off cabin air conditioning",
+      "_scene_label": "arriving_home",
+      "signal": "hvac_power",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 8
+    },
+    {
+      "text": "stopped all media playback",
+      "_scene_label": "arriving_home",
+      "signal": "media_off",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 9
+    },
+    {
+      "text": "closed all vehicle windows",
+      "_scene_label": "arriving_home",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "disabled keyless proximity entry",
+      "_scene_label": "arriving_home",
+      "signal": "keyless_entry",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 11
+    },
+    {
+      "text": "shut down the vehicle engine",
+      "_scene_label": "arriving_home",
+      "signal": "engine_status",
+      "context": {
+        "time_bucket": "evening",
+        "hour": 18,
+        "weekday": true,
+        "vehicle_state": "parked",
+        "geofence": null
+      },
+      "cluster": 10
+    },
+    {
+      "text": "lowered driver window to 73 percent",
+      "_scene_label": "toll_parking_entry",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 16,
+        "weekday": true,
+        "vehicle_state": "crawling",
+        "geofence": null
+      },
+      "cluster": 12
+    },
+    {
+      "text": "lowered driver window to 80 percent",
+      "_scene_label": "toll_parking_entry",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 17,
+        "weekday": true,
+        "vehicle_state": "crawling",
+        "geofence": null
+      },
+      "cluster": 12
+    },
+    {
+      "text": "lowered driver window to 78 percent",
+      "_scene_label": "toll_parking_entry",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "midday",
+        "hour": 12,
+        "weekday": true,
+        "vehicle_state": "crawling",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "lowered driver window to 70 percent",
+      "_scene_label": "toll_parking_entry",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 17,
+        "weekday": true,
+        "vehicle_state": "crawling",
+        "geofence": null
+      },
+      "cluster": 12
+    },
+    {
+      "text": "lowered driver window to 82 percent",
+      "_scene_label": "toll_parking_entry",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "midday",
+        "hour": 11,
+        "weekday": true,
+        "vehicle_state": "crawling",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "set cabin air conditioning temperature to 25 degrees",
+      "_scene_label": "noise",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "noise",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "midday",
+        "hour": 10,
+        "weekday": false,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 13
+    },
+    {
+      "text": "switched to sport driving mode",
+      "_scene_label": "noise",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "midday",
+        "hour": 13,
+        "weekday": false,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 13
+    },
+    {
+      "text": "turned on seat heating to level 3",
+      "_scene_label": "noise",
+      "signal": "seat_heating",
+      "context": {
+        "time_bucket": "midday",
+        "hour": 11,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "stopped all media playback",
+      "_scene_label": "noise",
+      "signal": "media_off",
+      "context": {
+        "time_bucket": "midday",
+        "hour": 11,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "switched to eco driving mode",
+      "_scene_label": "noise",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": false,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 13
+    },
+    {
+      "text": "started navigation to supermarket",
+      "_scene_label": "noise",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "selected media content FM 98.5",
+      "_scene_label": "noise",
+      "signal": "media_content_id",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 14
+    },
+    {
+      "text": "switched to sport driving mode",
+      "_scene_label": "noise",
+      "signal": "drive_mode",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 13
+    },
+    {
+      "text": "started navigation to supermarket",
+      "_scene_label": "noise",
+      "signal": "nav_destination",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "tuned to radio station FM 98.5",
+      "_scene_label": "noise",
+      "signal": "media_source",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 15,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 14
+    },
+    {
+      "text": "set cabin air conditioning temperature to 28 degrees",
+      "_scene_label": "noise",
+      "signal": "hvac_temp_target",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 14,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    },
+    {
+      "text": "selected media content News Radio",
+      "_scene_label": "noise",
+      "signal": "media_content_id",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 14,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": 14
+    },
+    {
+      "text": "lowered driver window to 100 percent",
+      "_scene_label": "noise",
+      "signal": "window_position",
+      "context": {
+        "time_bucket": "afternoon",
+        "hour": 14,
+        "weekday": true,
+        "vehicle_state": "engine_started",
+        "geofence": null
+      },
+      "cluster": -1
+    }
+  ]
+}

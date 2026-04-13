@@ -1,0 +1,235 @@
+{
+  "id": "week_case_01_w04",
+  "header_defaults": {
+    "week_start_date": "2026-04-20",
+    "timezone": "Asia/Shanghai",
+    "vehicle_id": "veh_demo_001",
+    "driver_id": "driver_001",
+    "city": "Shanghai",
+    "daily_environment": {
+      "Monday": {
+        "weather": "Sunny",
+        "season": "Spring",
+        "temperature_offset_c": 0.3
+      },
+      "Tuesday": {
+        "weather": "Overcast",
+        "season": "Spring",
+        "temperature_offset_c": 1.5
+      },
+      "Wednesday": {
+        "weather": "Windy",
+        "season": "Spring",
+        "temperature_offset_c": 0.6
+      },
+      "Thursday": {
+        "weather": "Overcast",
+        "season": "Spring",
+        "temperature_offset_c": 1.1
+      },
+      "Friday": {
+        "weather": "Overcast",
+        "season": "Spring",
+        "temperature_offset_c": 0.1
+      },
+      "Saturday": {
+        "weather": "Sunny",
+        "season": "Spring",
+        "temperature_offset_c": 1.5
+      },
+      "Sunday": {
+        "weather": "Sunny",
+        "season": "Spring",
+        "temperature_offset_c": -0.2
+      }
+    }
+  },
+  "trip_config": {
+    "request_text": "Generate one week of trip records. User1 usually leaves home for work on weekday mornings, passes the office site entrance on the way, and returns home in the evening. On Saturday the user goes to the park, and on Sunday the user goes to the mall."
+  },
+  "interaction_rules": [
+    {
+      "rule_id": "rule_01",
+      "rule_description": "In the morning, when I leave for work, I want the navigation I usually use to start automatically and suggest the best route, and I want my cockpit to be at 22C.",
+      "triggers": [
+        {
+          "type": "day_of_week",
+          "parameters": {
+            "day_of_week": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ]
+          }
+        },
+        {
+          "type": "time_window",
+          "parameters": {
+            "time_window": [
+              "07:00",
+              "10:00"
+            ]
+          }
+        },
+        {
+          "type": "geofence",
+          "parameters": {
+            "geofence_type": "home_perimeter",
+            "position_source": "trip_origin",
+            "geofence_id": "home_geofence_100m"
+          }
+        },
+        {
+          "type": "trip_phase",
+          "parameters": {
+            "phase": "pre_departure"
+          }
+        },
+        {
+          "type": "speed",
+          "parameters": {
+            "operator": "eq",
+            "value_kph": 0
+          }
+        }
+      ],
+      "actions": [
+        {
+          "name": "map_app_start",
+          "payload": {
+            "app_id": "google_maps"
+          }
+        },
+        {
+          "name": "route_set_origin_destination",
+          "payload": {
+            "origin": "current_position",
+            "destination": "office_park"
+          }
+        },
+        {
+          "name": "hvac_start",
+          "payload": {}
+        },
+        {
+          "name": "hvac_temperature_set",
+          "payload": {
+            "target_celsius": 22
+          }
+        }
+      ],
+      "notes": "Weekday morning departure rule."
+    },
+    {
+      "rule_id": "rule_02",
+      "rule_description": "When I'm back at home, I want the sound source faded out and APRUN to be automatically deactivated until I leave home for work the day after.",
+      "triggers": [
+        {
+          "type": "day_of_week",
+          "parameters": {
+            "day_of_week": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ]
+          }
+        },
+        {
+          "type": "geofence",
+          "parameters": {
+            "geofence_type": "home_perimeter",
+            "position_source": "trip_destination",
+            "geofence_id": "home_geofence_100m"
+          }
+        },
+        {
+          "type": "trip_phase",
+          "parameters": {
+            "phase": "post_arrival"
+          }
+        },
+        {
+          "type": "speed",
+          "parameters": {
+            "operator": "eq",
+            "value_kph": 0
+          }
+        }
+      ],
+      "actions": [
+        {
+          "name": "media_volume_set",
+          "payload": {
+            "target_volume_percent": 0
+          }
+        },
+        {
+          "name": "approach_unlock_set",
+          "payload": {
+            "enabled": false
+          }
+        }
+      ],
+      "notes": "Home arrival rule."
+    },
+    {
+      "rule_id": "rule_03",
+      "rule_description": "On weekdays, whenever I am approaching a site entrance during a trip and my vehicle speed is below 5 kph, I want the driver window to lower automatically unless the wiper speed is at its highest setting.",
+      "triggers": [
+        {
+          "type": "day_of_week",
+          "parameters": {
+            "day_of_week": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ]
+          }
+        },
+        {
+          "type": "poi",
+          "parameters": {
+            "poi_type": "site_entrance",
+            "place_id": "office_gate_01"
+          }
+        },
+        {
+          "type": "trip_phase",
+          "parameters": {
+            "phase": "en_route"
+          }
+        },
+        {
+          "type": "speed",
+          "parameters": {
+            "operator": "lt",
+            "value_kph": 5
+          }
+        },
+        {
+          "type": "vehicle_state",
+          "parameters": {
+            "field": "wiper_speed_level",
+            "operator": "lt",
+            "value": "max"
+          }
+        }
+      ],
+      "actions": [
+        {
+          "name": "window_open_request",
+          "payload": {
+            "window_position": "OPEN"
+          }
+        }
+      ],
+      "notes": "POI low-speed window rule."
+    }
+  ]
+}

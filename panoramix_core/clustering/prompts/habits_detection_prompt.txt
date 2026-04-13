@@ -1,0 +1,42 @@
+You are given a list of similar or closely related facts about the user.
+These facts are assumed to be repetitive and could be considered as a habit.
+Your goal is to reword all these facts into a SINGLE one fact describing the habit.
+Use ONLY stated information, no assumptions.
+Output a signe habit text and a confidence score of the habit detection from 0.0 (not confident at all) to 1.0 (really sure).
+If you are not confident at all, cannot make a decision or think there is no real habit in the list of facts, output "NO_HABIT",0.0.
+If you can reword all the facts into a single habit, output <habit_text>,<confidence_score>
+
+# INPUT format:
+- text fact 1
+- text fact 2
+...
+
+# OUTPUT FORMAT (1 line CSV):
+habit_text,confidence_score
+
+# EXAMPLES:
+
+## EX-1
+### INPUT FACTS
+- request podcast about art shows on 2025-03-12
+- listen to Le Bruit de l'Art podcast episode on Art Brut on 2025-04-02
+- request to play podcast about Art Brut on 2025-04-26
+- listen to Visual Arts podcast on 2025-05-14
+- listen to The Week In Art podcast on 2025-05-21
+### OUTPUT HABIT
+listen to podcasts about art,0.9
+
+## EX-2
+### INPUT FACTS
+- meeting with Pierre Martin about new kite product on 2025-03-10
+- schedule virtual meeting with Pierre to discuss progress on kite product at 15:00 on 2025-03-19
+- have meeting with Pierre Martin at Station F office about new kite project at 10:30 on 2025-03-21
+- focus on email from Pierre about kite project on 2025-03-24
+- meeting with Pierre about kite project on 2025-05-12
+### OUTPUT HABIT
+work with Pierre Martin on kite project,0.8
+
+# INPUT FACTS:
+{facts}
+
+Now, reword the facts as a single habit and ouput as 1 line CSV without column names on the first row, just data:

@@ -1,0 +1,583 @@
+[
+  {
+    "index": 0,
+    "_scene_label": "morning_commute",
+    "signal": "hvac_temp_target",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, set cabin air conditioning temperature to 22 degrees"
+  },
+  {
+    "index": 1,
+    "_scene_label": "morning_commute",
+    "signal": "seat_heating",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, turned on seat heating to level 2"
+  },
+  {
+    "index": 2,
+    "_scene_label": "morning_commute",
+    "signal": "nav_destination",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, started navigation to work"
+  },
+  {
+    "index": 3,
+    "_scene_label": "morning_commute",
+    "signal": "nav_route_pref",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, selected fastest route preference"
+  },
+  {
+    "index": 4,
+    "_scene_label": "morning_commute",
+    "signal": "media_source",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, resumed listening to podcast Tech Daily"
+  },
+  {
+    "index": 5,
+    "_scene_label": "morning_commute",
+    "signal": "media_volume",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, adjusted media volume to 58 percent"
+  },
+  {
+    "index": 6,
+    "_scene_label": "morning_commute",
+    "signal": "drive_mode",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 7,
+    "_scene_label": "morning_commute",
+    "signal": "acc_distance",
+    "day": 1,
+    "text": "in the early morning, after starting the vehicle, set ACC following distance to medium"
+  },
+  {
+    "index": 8,
+    "_scene_label": "morning_commute",
+    "signal": "hvac_temp_target",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, set cabin air conditioning temperature to 23 degrees"
+  },
+  {
+    "index": 9,
+    "_scene_label": "morning_commute",
+    "signal": "seat_heating",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, turned on seat heating to level 2"
+  },
+  {
+    "index": 10,
+    "_scene_label": "morning_commute",
+    "signal": "nav_destination",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, started navigation to work"
+  },
+  {
+    "index": 11,
+    "_scene_label": "morning_commute",
+    "signal": "nav_route_pref",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, selected fastest route preference"
+  },
+  {
+    "index": 12,
+    "_scene_label": "morning_commute",
+    "signal": "media_source",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, resumed listening to podcast Morning Brew"
+  },
+  {
+    "index": 13,
+    "_scene_label": "morning_commute",
+    "signal": "media_volume",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, adjusted media volume to 66 percent"
+  },
+  {
+    "index": 14,
+    "_scene_label": "morning_commute",
+    "signal": "drive_mode",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 15,
+    "_scene_label": "morning_commute",
+    "signal": "acc_distance",
+    "day": 2,
+    "text": "in the early morning, after starting the vehicle, set ACC following distance to medium"
+  },
+  {
+    "index": 16,
+    "_scene_label": "morning_commute",
+    "signal": "hvac_temp_target",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, set cabin air conditioning temperature to 24 degrees"
+  },
+  {
+    "index": 17,
+    "_scene_label": "morning_commute",
+    "signal": "seat_heating",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, turned on seat heating to level 2"
+  },
+  {
+    "index": 18,
+    "_scene_label": "morning_commute",
+    "signal": "nav_destination",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, started navigation to work"
+  },
+  {
+    "index": 19,
+    "_scene_label": "morning_commute",
+    "signal": "nav_route_pref",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, selected fastest route preference"
+  },
+  {
+    "index": 20,
+    "_scene_label": "morning_commute",
+    "signal": "media_source",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, started playing music Lo-fi Focus"
+  },
+  {
+    "index": 21,
+    "_scene_label": "morning_commute",
+    "signal": "media_volume",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, adjusted media volume to 61 percent"
+  },
+  {
+    "index": 22,
+    "_scene_label": "morning_commute",
+    "signal": "drive_mode",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 23,
+    "_scene_label": "morning_commute",
+    "signal": "acc_distance",
+    "day": 3,
+    "text": "in the early morning, after starting the vehicle, set ACC following distance to short"
+  },
+  {
+    "index": 24,
+    "_scene_label": "morning_commute",
+    "signal": "hvac_temp_target",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, set cabin air conditioning temperature to 21 degrees"
+  },
+  {
+    "index": 25,
+    "_scene_label": "morning_commute",
+    "signal": "nav_destination",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, started navigation to work"
+  },
+  {
+    "index": 26,
+    "_scene_label": "morning_commute",
+    "signal": "nav_route_pref",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, selected fastest route preference"
+  },
+  {
+    "index": 27,
+    "_scene_label": "morning_commute",
+    "signal": "media_source",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, resumed listening to podcast Morning Brew"
+  },
+  {
+    "index": 28,
+    "_scene_label": "morning_commute",
+    "signal": "media_volume",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, adjusted media volume to 58 percent"
+  },
+  {
+    "index": 29,
+    "_scene_label": "morning_commute",
+    "signal": "drive_mode",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 30,
+    "_scene_label": "morning_commute",
+    "signal": "acc_distance",
+    "day": 4,
+    "text": "in the early morning, after starting the vehicle, set ACC following distance to short"
+  },
+  {
+    "index": 31,
+    "_scene_label": "morning_commute",
+    "signal": "hvac_temp_target",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, set cabin air conditioning temperature to 22 degrees"
+  },
+  {
+    "index": 32,
+    "_scene_label": "morning_commute",
+    "signal": "seat_heating",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, turned on seat heating to level 2"
+  },
+  {
+    "index": 33,
+    "_scene_label": "morning_commute",
+    "signal": "nav_destination",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, started navigation to work"
+  },
+  {
+    "index": 34,
+    "_scene_label": "morning_commute",
+    "signal": "nav_route_pref",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, selected fastest route preference"
+  },
+  {
+    "index": 35,
+    "_scene_label": "morning_commute",
+    "signal": "media_source",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, resumed listening to podcast Tech Daily"
+  },
+  {
+    "index": 36,
+    "_scene_label": "morning_commute",
+    "signal": "media_volume",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, adjusted media volume to 61 percent"
+  },
+  {
+    "index": 37,
+    "_scene_label": "morning_commute",
+    "signal": "drive_mode",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 38,
+    "_scene_label": "morning_commute",
+    "signal": "acc_distance",
+    "day": 5,
+    "text": "in the early morning, after starting the vehicle, set ACC following distance to short"
+  },
+  {
+    "index": 39,
+    "_scene_label": "arriving_home",
+    "signal": "hvac_power",
+    "day": 1,
+    "text": "in the evening, after parking the vehicle, turned off cabin air conditioning"
+  },
+  {
+    "index": 40,
+    "_scene_label": "arriving_home",
+    "signal": "media_off",
+    "day": 1,
+    "text": "in the evening, after parking the vehicle, stopped all media playback"
+  },
+  {
+    "index": 41,
+    "_scene_label": "arriving_home",
+    "signal": "window_position",
+    "day": 1,
+    "text": "in the evening, after parking the vehicle, closed all vehicle windows"
+  },
+  {
+    "index": 42,
+    "_scene_label": "arriving_home",
+    "signal": "keyless_entry",
+    "day": 1,
+    "text": "in the evening, after parking the vehicle, disabled keyless proximity entry"
+  },
+  {
+    "index": 43,
+    "_scene_label": "arriving_home",
+    "signal": "engine_status",
+    "day": 1,
+    "text": "in the evening, after parking the vehicle, shut down the vehicle engine"
+  },
+  {
+    "index": 44,
+    "_scene_label": "arriving_home",
+    "signal": "hvac_power",
+    "day": 2,
+    "text": "in the evening, after parking the vehicle, near home, turned off cabin air conditioning"
+  },
+  {
+    "index": 45,
+    "_scene_label": "arriving_home",
+    "signal": "media_off",
+    "day": 2,
+    "text": "in the evening, after parking the vehicle, near home, stopped all media playback"
+  },
+  {
+    "index": 46,
+    "_scene_label": "arriving_home",
+    "signal": "window_position",
+    "day": 2,
+    "text": "in the evening, after parking the vehicle, near home, closed all vehicle windows"
+  },
+  {
+    "index": 47,
+    "_scene_label": "arriving_home",
+    "signal": "keyless_entry",
+    "day": 2,
+    "text": "in the evening, after parking the vehicle, near home, disabled keyless proximity entry"
+  },
+  {
+    "index": 48,
+    "_scene_label": "arriving_home",
+    "signal": "engine_status",
+    "day": 2,
+    "text": "in the evening, after parking the vehicle, near home, shut down the vehicle engine"
+  },
+  {
+    "index": 49,
+    "_scene_label": "arriving_home",
+    "signal": "hvac_power",
+    "day": 3,
+    "text": "in the evening, after parking the vehicle, turned off cabin air conditioning"
+  },
+  {
+    "index": 50,
+    "_scene_label": "arriving_home",
+    "signal": "media_off",
+    "day": 3,
+    "text": "in the evening, after parking the vehicle, stopped all media playback"
+  },
+  {
+    "index": 51,
+    "_scene_label": "arriving_home",
+    "signal": "window_position",
+    "day": 3,
+    "text": "in the evening, after parking the vehicle, closed all vehicle windows"
+  },
+  {
+    "index": 52,
+    "_scene_label": "arriving_home",
+    "signal": "keyless_entry",
+    "day": 3,
+    "text": "in the evening, after parking the vehicle, disabled keyless proximity entry"
+  },
+  {
+    "index": 53,
+    "_scene_label": "arriving_home",
+    "signal": "engine_status",
+    "day": 3,
+    "text": "in the evening, after parking the vehicle, shut down the vehicle engine"
+  },
+  {
+    "index": 54,
+    "_scene_label": "arriving_home",
+    "signal": "hvac_power",
+    "day": 4,
+    "text": "in the evening, after parking the vehicle, turned off cabin air conditioning"
+  },
+  {
+    "index": 55,
+    "_scene_label": "arriving_home",
+    "signal": "media_off",
+    "day": 4,
+    "text": "in the evening, after parking the vehicle, stopped all media playback"
+  },
+  {
+    "index": 56,
+    "_scene_label": "arriving_home",
+    "signal": "window_position",
+    "day": 4,
+    "text": "in the evening, after parking the vehicle, closed all vehicle windows"
+  },
+  {
+    "index": 57,
+    "_scene_label": "arriving_home",
+    "signal": "keyless_entry",
+    "day": 4,
+    "text": "in the evening, after parking the vehicle, disabled keyless proximity entry"
+  },
+  {
+    "index": 58,
+    "_scene_label": "arriving_home",
+    "signal": "engine_status",
+    "day": 4,
+    "text": "in the evening, after parking the vehicle, shut down the vehicle engine"
+  },
+  {
+    "index": 59,
+    "_scene_label": "arriving_home",
+    "signal": "hvac_power",
+    "day": 5,
+    "text": "in the evening, after parking the vehicle, turned off cabin air conditioning"
+  },
+  {
+    "index": 60,
+    "_scene_label": "arriving_home",
+    "signal": "media_off",
+    "day": 5,
+    "text": "in the evening, after parking the vehicle, stopped all media playback"
+  },
+  {
+    "index": 61,
+    "_scene_label": "arriving_home",
+    "signal": "window_position",
+    "day": 5,
+    "text": "in the evening, after parking the vehicle, closed all vehicle windows"
+  },
+  {
+    "index": 62,
+    "_scene_label": "arriving_home",
+    "signal": "keyless_entry",
+    "day": 5,
+    "text": "in the evening, after parking the vehicle, disabled keyless proximity entry"
+  },
+  {
+    "index": 63,
+    "_scene_label": "arriving_home",
+    "signal": "engine_status",
+    "day": 5,
+    "text": "in the evening, after parking the vehicle, shut down the vehicle engine"
+  },
+  {
+    "index": 64,
+    "_scene_label": "toll_parking_entry",
+    "signal": "window_position",
+    "day": 1,
+    "text": "in the afternoon, at very low speed, lowered driver window to 73 percent"
+  },
+  {
+    "index": 65,
+    "_scene_label": "toll_parking_entry",
+    "signal": "window_position",
+    "day": 2,
+    "text": "in the afternoon, at very low speed, lowered driver window to 80 percent"
+  },
+  {
+    "index": 66,
+    "_scene_label": "toll_parking_entry",
+    "signal": "window_position",
+    "day": 3,
+    "text": "around midday, at very low speed, lowered driver window to 78 percent"
+  },
+  {
+    "index": 67,
+    "_scene_label": "toll_parking_entry",
+    "signal": "window_position",
+    "day": 4,
+    "text": "in the afternoon, at very low speed, lowered driver window to 70 percent"
+  },
+  {
+    "index": 68,
+    "_scene_label": "toll_parking_entry",
+    "signal": "window_position",
+    "day": 5,
+    "text": "around midday, at very low speed, lowered driver window to 82 percent"
+  },
+  {
+    "index": 69,
+    "_scene_label": "noise",
+    "signal": "hvac_temp_target",
+    "day": 1,
+    "text": "in the afternoon, after starting the vehicle, set cabin air conditioning temperature to 25 degrees"
+  },
+  {
+    "index": 70,
+    "_scene_label": "noise",
+    "signal": "drive_mode",
+    "day": 2,
+    "text": "around midday, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 71,
+    "_scene_label": "noise",
+    "signal": "drive_mode",
+    "day": 3,
+    "text": "around midday, after starting the vehicle, switched to sport driving mode"
+  },
+  {
+    "index": 72,
+    "_scene_label": "noise",
+    "signal": "seat_heating",
+    "day": 4,
+    "text": "around midday, after starting the vehicle, turned on seat heating to level 3"
+  },
+  {
+    "index": 73,
+    "_scene_label": "noise",
+    "signal": "media_off",
+    "day": 4,
+    "text": "around midday, after starting the vehicle, stopped all media playback"
+  },
+  {
+    "index": 74,
+    "_scene_label": "noise",
+    "signal": "drive_mode",
+    "day": 5,
+    "text": "in the afternoon, after starting the vehicle, switched to eco driving mode"
+  },
+  {
+    "index": 75,
+    "_scene_label": "noise",
+    "signal": "nav_destination",
+    "day": 6,
+    "text": "in the afternoon, after starting the vehicle, started navigation to supermarket"
+  },
+  {
+    "index": 76,
+    "_scene_label": "noise",
+    "signal": "media_content_id",
+    "day": 6,
+    "text": "in the afternoon, after starting the vehicle, selected media content FM 98.5"
+  },
+  {
+    "index": 77,
+    "_scene_label": "noise",
+    "signal": "drive_mode",
+    "day": 6,
+    "text": "in the afternoon, after starting the vehicle, switched to sport driving mode"
+  },
+  {
+    "index": 78,
+    "_scene_label": "noise",
+    "signal": "nav_destination",
+    "day": 7,
+    "text": "in the afternoon, after starting the vehicle, started navigation to supermarket"
+  },
+  {
+    "index": 79,
+    "_scene_label": "noise",
+    "signal": "media_source",
+    "day": 7,
+    "text": "in the afternoon, after starting the vehicle, tuned to radio station FM 98.5"
+  },
+  {
+    "index": 80,
+    "_scene_label": "noise",
+    "signal": "hvac_temp_target",
+    "day": 8,
+    "text": "in the afternoon, after starting the vehicle, set cabin air conditioning temperature to 28 degrees"
+  },
+  {
+    "index": 81,
+    "_scene_label": "noise",
+    "signal": "media_content_id",
+    "day": 8,
+    "text": "in the afternoon, after starting the vehicle, selected media content News Radio"
+  },
+  {
+    "index": 82,
+    "_scene_label": "noise",
+    "signal": "window_position",
+    "day": 8,
+    "text": "in the afternoon, after starting the vehicle, lowered driver window to 100 percent"
+  }
+]

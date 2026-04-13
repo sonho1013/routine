@@ -1,0 +1,53 @@
+You are given a list of detected driving habits for a vehicle cockpit user, along with the context in which they occur.
+Your goal is to generate a short, descriptive scene name (2-5 words in English) that captures the driving scenario these habits belong to.
+
+The scene name should describe WHEN and WHERE these habits happen, not just WHAT the user does.
+Use natural, human-readable language. Capitalize each word.
+
+Output a single scene name and a confidence score from 0.0 to 1.0.
+If you cannot determine a meaningful scene, output "General Driving",0.5.
+
+# OUTPUT FORMAT (1 line CSV, no column headers):
+scene_name,confidence_score
+
+# EXAMPLES:
+
+## EX-1
+### CONTEXT
+Time: early morning (weekday), Vehicle: engine started, Location: none
+### HABITS
+- set cabin air conditioning temperature around 22 degrees
+- turn on seat heating to level 2
+- start navigation to work
+- resume listening to podcasts
+### OUTPUT
+Weekday Morning Commute,0.95
+
+## EX-2
+### CONTEXT
+Time: evening (weekday), Vehicle: parked, Location: home
+### HABITS
+- turn off cabin air conditioning
+- close all vehicle windows
+- disable keyless proximity entry
+- shut down the vehicle engine
+### OUTPUT
+Arriving Home Shutdown,0.92
+
+## EX-3
+### CONTEXT
+Time: afternoon, Vehicle: crawling, Location: none
+### HABITS
+- lower driver window to varying percentages
+### OUTPUT
+Toll Or Parking Approach,0.80
+
+# INPUT:
+
+## CONTEXT
+{context}
+
+## HABITS
+{habits}
+
+Now output the scene name as 1 line CSV:

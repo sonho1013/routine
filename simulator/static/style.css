@@ -1,0 +1,353 @@
+/* ══════════════════════════════════════════════════════
+   Habit Memory Demo — Streamlit Dark Theme
+   Design language: cockpit_ai_simulator reference
+   ══════════════════════════════════════════════════════ */
+
+/* ── Design Tokens ── */
+:root {
+    --teal:         #00BFC8;
+    --teal-dark:    #008CA0;
+    --teal-deep:    #00636F;
+    --teal-glow:    rgba(0, 191, 200, 0.12);
+    --green:        #00C896;
+    --green-glow:   rgba(0, 200, 150, 0.12);
+    --amber:        #F5A623;
+    --red:          #E74C3C;
+    --navy:         #101E2C;
+    --dark-bg:      #0A1628;
+    --panel-bg:     #132035;
+    --card-bg:      #1A2A42;
+    --card-hover:   #1E3050;
+    --border:       #1E3A5F;
+    --border-light: #263E5C;
+    --text-primary: #E8EDF3;
+    --text-secondary: #8899AA;
+    --text-muted:   #5D7088;
+    --radius:       10px;
+    --radius-sm:    6px;
+    --shadow:       0 2px 12px rgba(0, 0, 0, 0.25);
+    --shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Global App ── */
+.stApp {
+    background-color: var(--dark-bg) !important;
+    color: var(--text-primary);
+}
+
+/* Remove top padding/margin */
+.stApp > header { display: none !important; }
+.block-container {
+    padding-top: 0.5rem !important;
+    padding-bottom: 1rem !important;
+}
+
+/* ── Typography ── */
+.stApp, .stApp * {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+code, .stCode, [data-testid="stCode"] {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+}
+
+/* Restore Material Symbols font for Streamlit's icon spans.
+   The universal `.stApp *` rule above would otherwise force icons to
+   render in DM Sans, which breaks the ligature that turns the text
+   "keyboard_arrow_down" into an actual chevron glyph — causing the
+   literal characters "keyboard_arrow_down" to appear inside expanders
+   and cover the category labels. */
+.stApp [data-testid="stIconMaterial"],
+.stApp [data-testid^="stExpanderIcon"],
+.stApp [data-testid^="stMaterialIcon"],
+.stApp [data-testid="stIconCheck"],
+.stApp [data-testid="stIconError"],
+.stApp [data-testid="stIconSpinner"],
+.stApp span[translate="no"][aria-hidden="true"] {
+    font-family: "Material Symbols Rounded", "Material Symbols Outlined",
+                  "Material Icons" !important;
+    font-feature-settings: "liga" !important;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--teal-dark); }
+
+/* ══════════════════════════════════════════════════════
+   Tab Navigation
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stTabs"] {
+    gap: 0 !important;
+}
+
+/* Tab buttons */
+[data-testid="stTabs"] button[data-baseweb="tab"] {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    letter-spacing: 0.01em;
+    transition: all 0.2s ease !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+    color: var(--text-primary) !important;
+    background: rgba(0, 191, 200, 0.05) !important;
+}
+[data-testid="stTabs"] button[aria-selected="true"] {
+    color: var(--text-primary) !important;
+    border-bottom-color: var(--green) !important;
+    background: rgba(0, 191, 200, 0.08) !important;
+}
+
+/* Tab highlight bar */
+[data-testid="stTabs"] [role="tablist"] {
+    border-bottom: 1px solid var(--border) !important;
+    gap: 0 !important;
+}
+
+/* Sub-tabs (inside Tab 1 right panel) */
+.stTabs [data-baseweb="tab-highlight"] {
+    background-color: var(--green) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Buttons
+   ══════════════════════════════════════════════════════ */
+
+/* All buttons base */
+.stButton > button {
+    background: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    transition: all 0.2s ease !important;
+    letter-spacing: 0.01em;
+}
+.stButton > button:hover {
+    background: var(--card-hover) !important;
+    border-color: var(--teal) !important;
+    color: var(--teal) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 191, 200, 0.15) !important;
+}
+.stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* Primary button */
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="stBaseButton-primary"] {
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-deep)) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(0, 100, 120, 0.3) !important;
+}
+.stButton > button[kind="primary"]:hover,
+.stButton > button[data-testid="stBaseButton-primary"]:hover {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark)) !important;
+    box-shadow: 0 6px 20px rgba(0, 140, 160, 0.4) !important;
+    color: white !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Form Inputs
+   ══════════════════════════════════════════════════════ */
+
+/* Selectbox */
+[data-testid="stSelectbox"] > div > div {
+    background: var(--card-bg) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-sm) !important;
+}
+[data-testid="stSelectbox"] label {
+    color: var(--text-secondary) !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+}
+
+/* Text input */
+[data-testid="stTextInput"] input {
+    background: var(--card-bg) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-sm) !important;
+}
+[data-testid="stTextInput"] input:focus {
+    border-color: var(--teal) !important;
+    box-shadow: 0 0 0 1px var(--teal-glow) !important;
+}
+
+/* Number input */
+[data-testid="stNumberInput"] input {
+    background: var(--card-bg) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Checkbox */
+[data-testid="stCheckbox"] label span {
+    color: var(--text-primary) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Expanders (Behavior Table categories)
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stExpander"] {
+    background: var(--panel-bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    margin-bottom: 6px !important;
+    overflow: hidden;
+}
+[data-testid="stExpander"] summary {
+    background: var(--card-bg) !important;
+    padding: 10px 14px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border);
+}
+[data-testid="stExpander"] summary:hover {
+    background: var(--card-hover) !important;
+}
+[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+    padding: 8px 14px !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Metrics
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stMetric"] {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    text-align: center;
+}
+[data-testid="stMetricLabel"] {
+    color: var(--text-secondary) !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+[data-testid="stMetricValue"] {
+    color: var(--teal) !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Progress bar
+   ══════════════════════════════════════════════════════ */
+
+.stProgress > div > div {
+    background: var(--border) !important;
+    border-radius: 10px !important;
+}
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--teal), var(--green)) !important;
+    border-radius: 10px !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Info / Success / Warning / Error banners
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stAlert"] {
+    border-radius: var(--radius-sm) !important;
+    font-size: 0.85rem !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Divider
+   ══════════════════════════════════════════════════════ */
+
+hr {
+    border-color: var(--border) !important;
+    opacity: 0.5;
+}
+
+/* ══════════════════════════════════════════════════════
+   Columns — reduce gap for denser layout
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stHorizontalBlock"] {
+    gap: 0.75rem !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Caption text
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stCaption"],
+.stCaption {
+    color: var(--text-secondary) !important;
+    font-size: 0.78rem !important;
+    line-height: 1.5 !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   st.html() iframe integration
+   ══════════════════════════════════════════════════════ */
+
+iframe[srcdoc] {
+    border: none !important;
+    background: transparent !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Spinner
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stSpinner"] {
+    color: var(--teal) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Dropdown menu (selectbox options)
+   ══════════════════════════════════════════════════════ */
+
+[data-baseweb="popover"] {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+}
+[data-baseweb="menu"] {
+    background: var(--card-bg) !important;
+}
+[role="option"] {
+    color: var(--text-primary) !important;
+}
+[role="option"]:hover {
+    background: var(--teal-glow) !important;
+}
+[aria-selected="true"][role="option"] {
+    background: var(--teal-glow) !important;
+    color: var(--teal) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   Plotly chart container
+   ══════════════════════════════════════════════════════ */
+
+[data-testid="stPlotlyChart"] {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}

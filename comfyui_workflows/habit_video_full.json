@@ -1,0 +1,75 @@
+{
+  "_comment": "Full batch workflow template. The Python headless runner iterates scenes_manifest.json and submits this workflow once per scene, patching node 21 (LLM prompt) and node 50 (output filename). Node 10 generates the reference image each run; for efficiency, pre-generate it once and load from disk via the LoadImage variant.",
+
+  "10": {
+    "inputs": {
+      "prompt": "Character reference of Mary, a 30-year-old European woman with light brown hair in a casual updo, warm brown eyes, natural look. Wearing a smart-casual light blue jacket over a cream top with a thin wool scarf. Sitting in the driver seat of a modern compact electric vehicle. Three-quarter portrait, face and upper body clearly visible. Soft natural light from car window. French animation style, watercolor textures, soft pastel palette, ink linework.",
+      "negative_prompt": "photorealistic, 3D render, CGI, anime style, cartoon style, low quality, blurry, distorted face, extra limbs, deformed hands, text, watermark, logo, signature, frame border, uncanny valley",
+      "image_type": "subject",
+      "image_fidelity": 0.5,
+      "human_fidelity": 0.45,
+      "model_name": "kling-v2",
+      "aspect_ratio": "1:1",
+      "n": 1
+    },
+    "class_type": "KlingImageGenerationNode",
+    "_meta": {
+      "title": "SG1 — Mary Reference Image"
+    }
+  },
+
+  "20": {
+    "inputs": {
+      "truncation": "auto",
+      "max_output_tokens": 600,
+      "instructions": "You are a cinematic scene writer for French-style animated short films about daily life in Paris. Given structured driving behavior data, write a vivid scene description suitable for AI video generation.\n\nRules:\n- Write 2-3 sentences of visual storytelling\n- Include: weather atmosphere, time-of-day lighting, character actions, mood\n- Naturally reference the specific driving actions from the data\n- Match the color palette to the time of day\n- The character is Mary, a ~30-year-old European woman\n- DO NOT describe Mary's appearance (reference image handles this)\n- DO describe environment, lighting, weather, actions, dashboard, vehicle\n- Always end with style keywords: \"French animation style, hand-painted watercolor textures, soft pastel palette, delicate ink linework\"\n\nOutput strictly as JSON (no markdown fences):\n{\n  \"prompt\": \"cinematic scene description for video generation\",\n  \"negative_prompt\": \"elements to avoid\",\n  \"camera_type\": \"static | pan_left | pan_right | zoom_in | zoom_out | tracking\"\n}"
+    },
+    "class_type": "OpenAIChatConfig",
+    "_meta": {
+      "title": "SG2 — LLM System Prompt"
+    }
+  },
+
+  "21": {
+    "inputs": {
+      "prompt": "{{SCENE_PROMPT}}",
+      "persist_context": false,
+      "model": "gpt-4o",
+      "advanced_options": ["20", 0]
+    },
+    "class_type": "OpenAIChatNode",
+    "_meta": {
+      "title": "SG2 — LLM Scene Prompt Generator"
+    }
+  },
+
+  "30": {
+    "inputs": {
+      "start_frame": ["10", 0],
+      "prompt": ["21", 0],
+      "negative_prompt": "photorealistic, 3D render, CGI, anime style, cartoon style, low quality, blurry, distorted face, extra limbs, deformed hands, text, watermark, logo, signature, frame border, uncanny valley",
+      "model_name": "kling-v2-1-master",
+      "cfg_scale": 0.5,
+      "mode": "pro",
+      "aspect_ratio": "16:9",
+      "duration": "5"
+    },
+    "class_type": "KlingImage2VideoNode",
+    "_meta": {
+      "title": "SG3 — Kling I2V Scene Animation"
+    }
+  },
+
+  "50": {
+    "inputs": {
+      "video": ["30", 0],
+      "filename_prefix": "{{OUTPUT_PATH}}",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "SG4 — Save Video"
+    }
+  }
+}

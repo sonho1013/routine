@@ -1,0 +1,376 @@
+{
+  "dataset_id": "four_week_week_case_01",
+  "base_case_id": "week_case_01",
+  "base_input": "request/unified_cases.json",
+  "source_mode": "template_raw_outputs",
+  "weeks": [
+    {
+      "week_index": 1,
+      "case_id": "week_case_01_w01",
+      "week_start_date": "2026-03-30",
+      "days": {
+        "Monday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Tuesday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Cloudy",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Wednesday": {
+          "base_weather": "Rainy",
+          "adjusted_weather": "Rainy",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Thursday": {
+          "base_weather": "Overcast",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Friday": {
+          "base_weather": "Windy",
+          "adjusted_weather": "Windy",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Saturday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Sunday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Cloudy",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        }
+      },
+      "outputs": {
+        "directory": "outputs/four_week_week_case_01/week_01",
+        "unified_daily_files": {
+          "Monday": "unified_week_case_01_w01_monday.json",
+          "Tuesday": "unified_week_case_01_w01_tuesday.json",
+          "Wednesday": "unified_week_case_01_w01_wednesday.json",
+          "Thursday": "unified_week_case_01_w01_thursday.json",
+          "Friday": "unified_week_case_01_w01_friday.json",
+          "Saturday": "unified_week_case_01_w01_saturday.json",
+          "Sunday": "unified_week_case_01_w01_sunday.json"
+        },
+        "raw_bundle_file": "target_raw_bundle_week_case_01_w01.json",
+        "raw_daily_files": {
+          "Monday": {
+            "file": "target_raw_week_case_01_w01_monday.json",
+            "sample_count": 30096
+          },
+          "Tuesday": {
+            "file": "target_raw_week_case_01_w01_tuesday.json",
+            "sample_count": 30092
+          },
+          "Wednesday": {
+            "file": "target_raw_week_case_01_w01_wednesday.json",
+            "sample_count": 30986
+          },
+          "Thursday": {
+            "file": "target_raw_week_case_01_w01_thursday.json",
+            "sample_count": 28288
+          },
+          "Friday": {
+            "file": "target_raw_week_case_01_w01_friday.json",
+            "sample_count": 21960
+          },
+          "Saturday": {
+            "file": "target_raw_week_case_01_w01_saturday.json",
+            "sample_count": 21013
+          },
+          "Sunday": {
+            "file": "target_raw_week_case_01_w01_sunday.json",
+            "sample_count": 21013
+          }
+        }
+      }
+    },
+    {
+      "week_index": 2,
+      "case_id": "week_case_01_w02",
+      "week_start_date": "2026-04-06",
+      "days": {
+        "Monday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Cloudy",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": -0.9
+        },
+        "Tuesday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": -1.2
+        },
+        "Wednesday": {
+          "base_weather": "Rainy",
+          "adjusted_weather": "Rainy",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": 1.2
+        },
+        "Thursday": {
+          "base_weather": "Overcast",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.0
+        },
+        "Friday": {
+          "base_weather": "Windy",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": -0.2
+        },
+        "Saturday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": -1.5
+        },
+        "Sunday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Cloudy",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": -0.1
+        }
+      },
+      "outputs": {
+        "directory": "outputs/four_week_week_case_01/week_02",
+        "unified_daily_files": {
+          "Monday": "unified_week_case_01_w02_monday.json",
+          "Tuesday": "unified_week_case_01_w02_tuesday.json",
+          "Wednesday": "unified_week_case_01_w02_wednesday.json",
+          "Thursday": "unified_week_case_01_w02_thursday.json",
+          "Friday": "unified_week_case_01_w02_friday.json",
+          "Saturday": "unified_week_case_01_w02_saturday.json",
+          "Sunday": "unified_week_case_01_w02_sunday.json"
+        },
+        "raw_bundle_file": "target_raw_bundle_week_case_01_w02.json",
+        "raw_daily_files": {
+          "Monday": {
+            "file": "target_raw_week_case_01_w02_monday.json",
+            "sample_count": 30096
+          },
+          "Tuesday": {
+            "file": "target_raw_week_case_01_w02_tuesday.json",
+            "sample_count": 30092
+          },
+          "Wednesday": {
+            "file": "target_raw_week_case_01_w02_wednesday.json",
+            "sample_count": 30986
+          },
+          "Thursday": {
+            "file": "target_raw_week_case_01_w02_thursday.json",
+            "sample_count": 28288
+          },
+          "Friday": {
+            "file": "target_raw_week_case_01_w02_friday.json",
+            "sample_count": 21960
+          },
+          "Saturday": {
+            "file": "target_raw_week_case_01_w02_saturday.json",
+            "sample_count": 21013
+          },
+          "Sunday": {
+            "file": "target_raw_week_case_01_w02_sunday.json",
+            "sample_count": 21013
+          }
+        }
+      }
+    },
+    {
+      "week_index": 3,
+      "case_id": "week_case_01_w03",
+      "week_start_date": "2026-04-13",
+      "days": {
+        "Monday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Cloudy",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": 1.5
+        },
+        "Tuesday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": -1.4
+        },
+        "Wednesday": {
+          "base_weather": "Rainy",
+          "adjusted_weather": "Rainy",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": 0.6
+        },
+        "Thursday": {
+          "base_weather": "Overcast",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": -1.2
+        },
+        "Friday": {
+          "base_weather": "Windy",
+          "adjusted_weather": "Rainy",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": 1.1
+        },
+        "Saturday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Cloudy",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": 0.0
+        },
+        "Sunday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": -1.7
+        }
+      },
+      "outputs": {
+        "directory": "outputs/four_week_week_case_01/week_03",
+        "unified_daily_files": {
+          "Monday": "unified_week_case_01_w03_monday.json",
+          "Tuesday": "unified_week_case_01_w03_tuesday.json",
+          "Wednesday": "unified_week_case_01_w03_wednesday.json",
+          "Thursday": "unified_week_case_01_w03_thursday.json",
+          "Friday": "unified_week_case_01_w03_friday.json",
+          "Saturday": "unified_week_case_01_w03_saturday.json",
+          "Sunday": "unified_week_case_01_w03_sunday.json"
+        },
+        "raw_bundle_file": "target_raw_bundle_week_case_01_w03.json",
+        "raw_daily_files": {
+          "Monday": {
+            "file": "target_raw_week_case_01_w03_monday.json",
+            "sample_count": 30096
+          },
+          "Tuesday": {
+            "file": "target_raw_week_case_01_w03_tuesday.json",
+            "sample_count": 30092
+          },
+          "Wednesday": {
+            "file": "target_raw_week_case_01_w03_wednesday.json",
+            "sample_count": 30986
+          },
+          "Thursday": {
+            "file": "target_raw_week_case_01_w03_thursday.json",
+            "sample_count": 28288
+          },
+          "Friday": {
+            "file": "target_raw_week_case_01_w03_friday.json",
+            "sample_count": 21952
+          },
+          "Saturday": {
+            "file": "target_raw_week_case_01_w03_saturday.json",
+            "sample_count": 21013
+          },
+          "Sunday": {
+            "file": "target_raw_week_case_01_w03_sunday.json",
+            "sample_count": 21013
+          }
+        }
+      }
+    },
+    {
+      "week_index": 4,
+      "case_id": "week_case_01_w04",
+      "week_start_date": "2026-04-20",
+      "days": {
+        "Monday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 0.3
+        },
+        "Tuesday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": 1,
+          "temperature_offset_c": 1.5
+        },
+        "Wednesday": {
+          "base_weather": "Rainy",
+          "adjusted_weather": "Windy",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": 0.6
+        },
+        "Thursday": {
+          "base_weather": "Overcast",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 1.1
+        },
+        "Friday": {
+          "base_weather": "Windy",
+          "adjusted_weather": "Overcast",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": 0.1
+        },
+        "Saturday": {
+          "base_weather": "Sunny",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": 0,
+          "temperature_offset_c": 1.5
+        },
+        "Sunday": {
+          "base_weather": "Cloudy",
+          "adjusted_weather": "Sunny",
+          "weather_shift_steps": -1,
+          "temperature_offset_c": -0.2
+        }
+      },
+      "outputs": {
+        "directory": "outputs/four_week_week_case_01/week_04",
+        "unified_daily_files": {
+          "Monday": "unified_week_case_01_w04_monday.json",
+          "Tuesday": "unified_week_case_01_w04_tuesday.json",
+          "Wednesday": "unified_week_case_01_w04_wednesday.json",
+          "Thursday": "unified_week_case_01_w04_thursday.json",
+          "Friday": "unified_week_case_01_w04_friday.json",
+          "Saturday": "unified_week_case_01_w04_saturday.json",
+          "Sunday": "unified_week_case_01_w04_sunday.json"
+        },
+        "raw_bundle_file": "target_raw_bundle_week_case_01_w04.json",
+        "raw_daily_files": {
+          "Monday": {
+            "file": "target_raw_week_case_01_w04_monday.json",
+            "sample_count": 30096
+          },
+          "Tuesday": {
+            "file": "target_raw_week_case_01_w04_tuesday.json",
+            "sample_count": 30092
+          },
+          "Wednesday": {
+            "file": "target_raw_week_case_01_w04_wednesday.json",
+            "sample_count": 30990
+          },
+          "Thursday": {
+            "file": "target_raw_week_case_01_w04_thursday.json",
+            "sample_count": 28288
+          },
+          "Friday": {
+            "file": "target_raw_week_case_01_w04_friday.json",
+            "sample_count": 21960
+          },
+          "Saturday": {
+            "file": "target_raw_week_case_01_w04_saturday.json",
+            "sample_count": 21013
+          },
+          "Sunday": {
+            "file": "target_raw_week_case_01_w04_sunday.json",
+            "sample_count": 21013
+          }
+        }
+      }
+    }
+  ]
+}

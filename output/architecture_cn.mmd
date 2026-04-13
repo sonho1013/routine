@@ -1,0 +1,49 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#E3F2FD', 'primaryBorderColor': '#1565C0', 'primaryTextColor': '#0D47A1', 'lineColor': '#42A5F5', 'secondaryColor': '#FFF3E0', 'tertiaryColor': '#E8F5E9', 'fontSize': '14px'}}}%%
+
+flowchart TB
+    subgraph INPUT["① 信号输入"]
+        S["🚗 车辆信号<br/><i>空调温度、座椅加热、<br/>导航目的地、车窗位置 ...</i>"]
+    end
+
+    subgraph FACT["② 信号→Fact 转换"]
+        F["裸动作 Fact<br/><i>'set AC temperature to 22°C'</i>"]
+        CTX["结构化上下文<br/><i>时段 · 车辆状态<br/>围栏 · 工作日 · 小时</i>"]
+    end
+
+    subgraph STORE["③ ChromaDB 存储"]
+        EMB["OpenAI ada-002<br/>向量编码<br/><i>文本 → 1536维向量</i>"]
+        DB[("ChromaDB<br/><i>向量 + ctx_* 元数据<br/>持久化存储</i>")]
+    end
+
+    subgraph CLUSTER["④ Hybrid DBSCAN 聚类"]
+        DIST["混合距离矩阵<br/><i>0.8 × 文本余弦 + 0.2 × 上下文距离</i>"]
+        DBSCAN["DBSCAN<br/><i>ε=0.10, min_samples=3<br/>metric=precomputed</i>"]
+        CONSEC["连续性验证<br/><i>最近5次相同行为<br/>是否全在聚类中？</i>"]
+        CONF["聚类置信度<br/><i>紧凑度 · 核心点占比<br/>证据充分度 → [0,1]</i>"]
+    end
+
+    subgraph OUTPUT["⑤ 习惯输出"]
+        LLM["LLM 习惯合成<br/><i>GPT-4.1<br/>聚类 → 习惯文本</i>"]
+        SCENE["场景卡命名<br/><i>LLM生成场景名<br/>'Morning Commute' (0.96)</i>"]
+        HABIT["🎯 习惯 Fact<br/><i>文本 + 上下文 + 置信度<br/>+ 场景名</i>"]
+    end
+
+    S --> F
+    S --> CTX
+    F --> EMB
+    CTX -.->|"作为元数据存储"| DB
+    EMB --> DB
+    DB -->|"facts + embeddings"| DIST
+    DIST --> DBSCAN
+    DBSCAN --> CONSEC
+    DBSCAN --> CONF
+    CONSEC -->|"通过"| LLM
+    CONF -.->|"clustering_confidence"| HABIT
+    LLM --> SCENE
+    SCENE --> HABIT
+
+    style INPUT fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    style FACT fill:#FFF3E0,stroke:#E65100,stroke-width:2px
+    style STORE fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
+    style CLUSTER fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px
+    style OUTPUT fill:#FBE9E7,stroke:#BF360C,stroke-width:2px

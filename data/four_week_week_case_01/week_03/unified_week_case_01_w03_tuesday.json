@@ -1,0 +1,1461 @@
+{
+  "header": {
+    "date": "2026-04-14",
+    "timezone": "Asia/Shanghai",
+    "vehicle_id": "veh_demo_001",
+    "driver_id": "driver_001",
+    "city": "Shanghai",
+    "weekday": "Tuesday",
+    "environment": {
+      "weather": "Sunny",
+      "season": "Spring",
+      "temperature_offset_c": -1.4
+    },
+    "notes": null
+  },
+  "motion_plan": {
+    "trips": [
+      {
+        "trip_id": "trip_001",
+        "origin": {
+          "place_id": "home",
+          "place_type": "home",
+          "trip_role": "origin",
+          "display_name": "Home"
+        },
+        "destination": {
+          "place_id": "work",
+          "place_type": "work",
+          "trip_role": "destination",
+          "display_name": "Work"
+        },
+        "departure_time": "08:24:00",
+        "arrival_time": "09:12:00",
+        "anchors": [
+          {
+            "place_id": "home",
+            "place_type": "home",
+            "trip_role": "origin",
+            "display_name": "Home",
+            "timestamp": "08:24:00"
+          },
+          {
+            "place_id": "office_gate_01",
+            "place_type": "site_entrance",
+            "trip_role": "waypoint",
+            "display_name": "Office Park Gate",
+            "timestamp": "08:48:00"
+          },
+          {
+            "place_id": "office_gate_01",
+            "place_type": "site_entrance",
+            "trip_role": "waypoint",
+            "display_name": "Office Park Gate",
+            "timestamp": "08:49:00"
+          },
+          {
+            "place_id": "work",
+            "place_type": "work",
+            "trip_role": "destination",
+            "display_name": "Work",
+            "timestamp": "09:12:00"
+          }
+        ],
+        "phase_times": {
+          "startup_time": "08:19:00",
+          "pre_departure_status_time": "08:21:00",
+          "departure_time": "08:24:00",
+          "arrival_time": "09:12:00",
+          "post_arrival_status_end": "09:15:00",
+          "shutdown_time": "09:15:00"
+        },
+        "speed_profile": {
+          "kind": "piecewise_linear",
+          "points": [
+            {
+              "timestamp": "08:21:00",
+              "speed_kph": 0.0
+            },
+            {
+              "timestamp": "08:24:00",
+              "speed_kph": 30.0
+            },
+            {
+              "timestamp": "08:48:00",
+              "speed_kph": 3.0
+            },
+            {
+              "timestamp": "08:49:00",
+              "speed_kph": 3.0
+            },
+            {
+              "timestamp": "09:12:00",
+              "speed_kph": 0.0
+            }
+          ]
+        },
+        "location_profile": {
+          "kind": "semantic_path",
+          "points": [
+            {
+              "timestamp": "08:24:00",
+              "lat": 31.2304,
+              "lng": 121.4737,
+              "place_id": "home"
+            },
+            {
+              "timestamp": "08:48:00",
+              "lat": 31.2388,
+              "lng": 121.4975,
+              "place_id": "office_gate_01"
+            },
+            {
+              "timestamp": "08:49:00",
+              "lat": 31.2388,
+              "lng": 121.4975,
+              "place_id": "office_gate_01"
+            },
+            {
+              "timestamp": "09:12:00",
+              "lat": 31.2396,
+              "lng": 121.4997,
+              "place_id": "work"
+            }
+          ]
+        },
+        "lifecycle_plan": [
+          {
+            "timestamp": "08:19:00",
+            "signal": "door_lock",
+            "value": false
+          },
+          {
+            "timestamp": "08:19:00",
+            "signal": "ignition_state",
+            "value": "ON"
+          },
+          {
+            "timestamp": "08:24:00",
+            "signal": "gear",
+            "value": "D"
+          },
+          {
+            "timestamp": "09:12:00",
+            "signal": "gear",
+            "value": "P"
+          },
+          {
+            "timestamp": "09:15:00",
+            "signal": "ignition_state",
+            "value": "OFF"
+          }
+        ]
+      },
+      {
+        "trip_id": "trip_002",
+        "origin": {
+          "place_id": "work",
+          "place_type": "work",
+          "trip_role": "origin",
+          "display_name": "Work"
+        },
+        "destination": {
+          "place_id": "home",
+          "place_type": "home",
+          "trip_role": "destination",
+          "display_name": "Home"
+        },
+        "departure_time": "17:06:00",
+        "arrival_time": "17:48:00",
+        "anchors": [
+          {
+            "place_id": "work",
+            "place_type": "work",
+            "trip_role": "origin",
+            "display_name": "Work",
+            "timestamp": "17:06:00"
+          },
+          {
+            "place_id": "office_gate_01",
+            "place_type": "site_entrance",
+            "trip_role": "waypoint",
+            "display_name": "Office Park Gate",
+            "timestamp": "17:26:00"
+          },
+          {
+            "place_id": "office_gate_01",
+            "place_type": "site_entrance",
+            "trip_role": "waypoint",
+            "display_name": "Office Park Gate",
+            "timestamp": "17:27:00"
+          },
+          {
+            "place_id": "home",
+            "place_type": "home",
+            "trip_role": "destination",
+            "display_name": "Home",
+            "timestamp": "17:48:00"
+          }
+        ],
+        "phase_times": {
+          "startup_time": "17:01:00",
+          "pre_departure_status_time": "17:03:00",
+          "departure_time": "17:06:00",
+          "arrival_time": "17:48:00",
+          "post_arrival_status_end": "17:51:00",
+          "shutdown_time": "17:51:00"
+        },
+        "speed_profile": {
+          "kind": "piecewise_linear",
+          "points": [
+            {
+              "timestamp": "17:03:00",
+              "speed_kph": 0.0
+            },
+            {
+              "timestamp": "17:06:00",
+              "speed_kph": 30.0
+            },
+            {
+              "timestamp": "17:26:00",
+              "speed_kph": 3.0
+            },
+            {
+              "timestamp": "17:27:00",
+              "speed_kph": 3.0
+            },
+            {
+              "timestamp": "17:48:00",
+              "speed_kph": 0.0
+            }
+          ]
+        },
+        "location_profile": {
+          "kind": "semantic_path",
+          "points": [
+            {
+              "timestamp": "17:06:00",
+              "lat": 31.2396,
+              "lng": 121.4997,
+              "place_id": "work"
+            },
+            {
+              "timestamp": "17:26:00",
+              "lat": 31.2388,
+              "lng": 121.4975,
+              "place_id": "office_gate_01"
+            },
+            {
+              "timestamp": "17:27:00",
+              "lat": 31.2388,
+              "lng": 121.4975,
+              "place_id": "office_gate_01"
+            },
+            {
+              "timestamp": "17:48:00",
+              "lat": 31.2304,
+              "lng": 121.4737,
+              "place_id": "home"
+            }
+          ]
+        },
+        "lifecycle_plan": [
+          {
+            "timestamp": "17:01:00",
+            "signal": "door_lock",
+            "value": false
+          },
+          {
+            "timestamp": "17:01:00",
+            "signal": "ignition_state",
+            "value": "ON"
+          },
+          {
+            "timestamp": "17:06:00",
+            "signal": "gear",
+            "value": "D"
+          },
+          {
+            "timestamp": "17:48:00",
+            "signal": "gear",
+            "value": "P"
+          },
+          {
+            "timestamp": "17:51:00",
+            "signal": "ignition_state",
+            "value": "OFF"
+          }
+        ]
+      }
+    ]
+  },
+  "raw_events": [
+    {
+      "event_id": "evt_001",
+      "timestamp": "08:19:00",
+      "event_type": "user_action",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.27,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "vehicle_power_on",
+        "payload": {}
+      }
+    },
+    {
+      "event_id": "evt_002",
+      "timestamp": "08:21:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.26,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_003",
+      "timestamp": "08:21:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.26,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "hvac_start",
+        "payload": {}
+      }
+    },
+    {
+      "event_id": "evt_004",
+      "timestamp": "08:21:20",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.26,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "hvac_temperature_set",
+        "payload": {
+          "target_celsius": 22.0
+        }
+      }
+    },
+    {
+      "event_id": "evt_005",
+      "timestamp": "08:22:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.25,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "map_app_start",
+        "payload": {
+          "app_id": "google_maps"
+        }
+      }
+    },
+    {
+      "event_id": "evt_006",
+      "timestamp": "08:23:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.25,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "route_set_origin_destination",
+        "payload": {
+          "origin": "current_position",
+          "destination": "office_park"
+        }
+      }
+    },
+    {
+      "event_id": "evt_007",
+      "timestamp": "08:24:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.24,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_008",
+      "timestamp": "08:24:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "origin",
+        "display_name": "Home"
+      },
+      "out_temp_c": 22.24,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "google_map_route_set",
+        "payload": {
+          "origin": "current_position",
+          "destination": "office_park",
+          "travel_mode": "driving"
+        }
+      }
+    },
+    {
+      "event_id": "evt_009",
+      "timestamp": "08:27:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.22,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_010",
+      "timestamp": "08:30:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.2,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_011",
+      "timestamp": "08:33:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.18,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_012",
+      "timestamp": "08:36:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.16,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_013",
+      "timestamp": "08:39:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.14,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_014",
+      "timestamp": "08:42:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.12,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_015",
+      "timestamp": "08:45:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.1,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_016",
+      "timestamp": "08:48:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 22.08,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_017",
+      "timestamp": "08:49:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 22.07,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_018",
+      "timestamp": "08:49:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 22.07,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED"
+      },
+      "action": {
+        "name": "window_open_request",
+        "payload": {
+          "window_position": "OPEN"
+        }
+      }
+    },
+    {
+      "event_id": "evt_019",
+      "timestamp": "08:50:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 22.07,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED"
+      },
+      "action": {
+        "name": "window_open_request",
+        "payload": {
+          "window_position": "OPEN"
+        }
+      }
+    },
+    {
+      "event_id": "evt_020",
+      "timestamp": "08:51:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.06,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_021",
+      "timestamp": "08:54:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.04,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_022",
+      "timestamp": "08:57:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.02,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_023",
+      "timestamp": "09:00:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 22.0,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_024",
+      "timestamp": "09:03:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 21.75,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_025",
+      "timestamp": "09:06:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 21.51,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_026",
+      "timestamp": "09:09:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 21.26,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_027",
+      "timestamp": "09:12:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "work",
+        "place_type": "work",
+        "trip_role": "destination",
+        "display_name": "Work"
+      },
+      "out_temp_c": 21.02,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_028",
+      "timestamp": "09:15:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "work",
+        "place_type": "work",
+        "trip_role": "destination",
+        "display_name": "Work"
+      },
+      "out_temp_c": 20.77,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_029",
+      "timestamp": "17:01:00",
+      "event_type": "user_action",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "work",
+        "place_type": "work",
+        "trip_role": "origin",
+        "display_name": "Work"
+      },
+      "out_temp_c": 17.96,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P"
+      },
+      "action": {
+        "name": "vehicle_power_on",
+        "payload": {}
+      }
+    },
+    {
+      "event_id": "evt_030",
+      "timestamp": "17:03:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "work",
+        "place_type": "work",
+        "trip_role": "origin",
+        "display_name": "Work"
+      },
+      "out_temp_c": 17.93,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_031",
+      "timestamp": "17:06:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "work",
+        "place_type": "work",
+        "trip_role": "origin",
+        "display_name": "Work"
+      },
+      "out_temp_c": 17.89,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_032",
+      "timestamp": "17:09:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.84,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_033",
+      "timestamp": "17:12:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.8,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_034",
+      "timestamp": "17:15:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.76,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_035",
+      "timestamp": "17:18:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.71,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_036",
+      "timestamp": "17:21:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.67,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_037",
+      "timestamp": "17:24:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.62,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_038",
+      "timestamp": "17:26:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 17.6,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_039",
+      "timestamp": "17:27:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 17.58,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_040",
+      "timestamp": "17:27:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 17.58,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED"
+      },
+      "action": {
+        "name": "window_open_request",
+        "payload": {
+          "window_position": "OPEN"
+        }
+      }
+    },
+    {
+      "event_id": "evt_041",
+      "timestamp": "17:28:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "office_gate_01",
+        "place_type": "site_entrance",
+        "trip_role": "waypoint",
+        "display_name": "Office Park Gate"
+      },
+      "out_temp_c": 17.57,
+      "vehicle_state": {
+        "velocity_kph": 3.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED"
+      },
+      "action": {
+        "name": "window_open_request",
+        "payload": {
+          "window_position": "OPEN"
+        }
+      }
+    },
+    {
+      "event_id": "evt_042",
+      "timestamp": "17:30:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.54,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_043",
+      "timestamp": "17:33:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.49,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_044",
+      "timestamp": "17:36:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.45,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_045",
+      "timestamp": "17:39:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.41,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_046",
+      "timestamp": "17:42:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.36,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_047",
+      "timestamp": "17:45:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "en_route",
+        "place_type": "custom",
+        "trip_role": "en_route",
+        "display_name": "On Road"
+      },
+      "out_temp_c": 17.32,
+      "vehicle_state": {
+        "velocity_kph": 30.0,
+        "gear": "D",
+        "wiper_speed_level": 0,
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_048",
+      "timestamp": "17:48:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "destination",
+        "display_name": "Home"
+      },
+      "out_temp_c": 17.28,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": true,
+        "media_volume_percent": 35.0
+      },
+      "action": null
+    },
+    {
+      "event_id": "evt_049",
+      "timestamp": "17:49:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "destination",
+        "display_name": "Home"
+      },
+      "out_temp_c": 17.26,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "media_volume_percent": 0.0
+      },
+      "action": {
+        "name": "media_volume_set",
+        "payload": {
+          "target_volume_percent": 0
+        }
+      }
+    },
+    {
+      "event_id": "evt_050",
+      "timestamp": "17:50:00",
+      "event_type": "user_action",
+      "source": "ivi",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "destination",
+        "display_name": "Home"
+      },
+      "out_temp_c": 17.25,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "approach_unlock_enabled": false
+      },
+      "action": {
+        "name": "approach_unlock_set",
+        "payload": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "event_id": "evt_051",
+      "timestamp": "17:51:00",
+      "event_type": "vehicle_status",
+      "source": "vehicle_bus",
+      "driver_id": "driver_001",
+      "place_semantic": {
+        "place_id": "home",
+        "place_type": "home",
+        "trip_role": "destination",
+        "display_name": "Home"
+      },
+      "out_temp_c": 17.23,
+      "vehicle_state": {
+        "velocity_kph": 0.0,
+        "gear": "P",
+        "wiper_speed_level": 0,
+        "window_driver_position": "CLOSED",
+        "approach_unlock_enabled": false,
+        "media_volume_percent": 0.0
+      },
+      "action": null
+    }
+  ]
+}
