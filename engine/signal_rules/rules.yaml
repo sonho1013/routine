@@ -21,7 +21,7 @@ signals:
   hvac_power:
     category: categorical
     value_templates:
-      off: "turned off cabin air conditioning"
+      "off": "turned off cabin air conditioning"
     drift_metric: dominant_value_change
 
   seat_heating:
@@ -45,10 +45,10 @@ signals:
   media_source:
     category: categorical
     value_templates:
-      music:   "started playing music {content_id}"
-      podcast: "resumed listening to podcast {content_id}"
-      radio:   "tuned to radio station {content_id}"
-      off:     "stopped all media playback"
+      music:    "started playing music {content_id}"
+      podcast:  "resumed listening to podcast {content_id}"
+      radio:    "tuned to radio station {content_id}"
+      "off":    "stopped all media playback"
     drift_metric: dominant_value_change
 
   media_content_id:
@@ -94,7 +94,7 @@ signals:
   engine_status:
     category: categorical
     value_templates:
-      off: "shut down the vehicle engine"
+      "off": "shut down the vehicle engine"
     drift_metric: dominant_value_change
 
 # ── Table 4 上下文信号（映射到 StructuredContext，不产生 Fact.text）──
