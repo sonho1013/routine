@@ -13,15 +13,30 @@ HabitDemoEngine — 端到端管线编排
 """
 import json
 import logging
+from datetime import datetime
 from typing import Dict, List, Optional
 
 from engine.signal_to_fact import signals_to_facts
 from engine.consecutiveness import make_cluster_filter
 from engine.scene_card import generate_scene_cards, SceneCard
 from engine.proactive_executor import ProactiveExecutor, RecommendationResult
+from engine.habit_lifecycle import (
+    HabitLifecycleManager,
+    ModifyDrift,
+    NewPending,
+    Reinforce,
+    assert_cluster_pure_signal,
+    compute_structural_key,
+)
+from engine.drift_detection import compute_raw_value_stats
+from engine.signal_rules.engine import SignalRuleEngine
 from panoramix_core.models.fact import Fact, StructuredContext
 from panoramix_core.models.fact_enums import FactType
+from panoramix_core.models.habit import Habit
+from panoramix_core.models.scene_card import SceneCard as SceneCardModel
 from panoramix_core.store.fact_store_chroma import FactStoreChroma
+from panoramix_core.store.habit_store import HabitStore
+from panoramix_core.store.scene_card_store import SceneCardStore
 from panoramix_core.clustering.habits_detector import HabitsDetector
 
 log = logging.getLogger(__name__)
@@ -60,6 +75,17 @@ class HabitDemoEngine:
         self.fact_store = FactStoreChroma(username)
         self.habits_detector = HabitsDetector(llm_client=llm_client)
         self.executor = ProactiveExecutor(self.fact_store)
+
+        # Wave 4: store + lifecycle
+        self.signal_rule_engine = SignalRuleEngine()
+        self.scene_card_store = SceneCardStore(username=self.username)
+        self.habit_store = HabitStore(username=self.username)
+        self.lifecycle = HabitLifecycleManager(
+            scene_card_store=self.scene_card_store,
+            habit_store=self.habit_store,
+            signal_rule_engine=self.signal_rule_engine,
+        )
+
         log.info(
             f"HabitDemoEngine initialized: user={username}, "
             f"llm={'yes' if llm_client else 'no'}, "
@@ -70,80 +96,234 @@ class HabitDemoEngine:
     # 学习阶段
     # ═══════════════════════════════════════════════════
 
-    def ingest_signal_batch(self, events: List[Dict]) -> Dict:
+    def ingest_signal_batch(self, events: List[dict]) -> dict:
         """
-        批量处理信号事件（来自外部埋点系统的全量数据）。
+        两阶段 batch pipeline (§8)。
 
-        流程:
-          1. 批量信号 → Fact对象 (裸动作 + StructuredContext)
-          2. 存入 ChromaDB（自动生成 text embedding + ctx_* 元数据）
-          3. 获取全量 facts + embeddings
-          4. 运行 Hybrid DBSCAN 习惯检测
-          5. 生命周期管理：删除已聚类原始 facts，存入新 habit facts
+        阶段 1 (事务外, ~10-60s)：
+          P1.1 peek batch_id (只用于日志)
+          P1.2 Chroma 读 PREF TTL 窗口
+          P1.3 Hybrid DBSCAN + 连续性过滤 + GPT reword → habits
+          P1.4 按 structural_key 分组候选场景卡 + GPT scene naming
+          P1.5 classify_candidate （含 embedding_fallback 网络调用）
 
-        Args:
-            events: 信号事件列表，每个 event 含 signals 数组
-
-        Returns:
-            dict: facts_ingested, habits_detected, facts_clustered, ...
+        阶段 2 (SQLite 事务内, <200ms)：
+          P2.1 allocate_next_batch_id
+          P2.2 HabitStore.insert_many
+          P2.3 按 classification 落盘 scene_cards
+          P2.4 delete_stale_pending
+          P2.5 delete_stale_recommendation
+          P2.6 delete_old_batches(N=3)
+          COMMIT
         """
-        # Step 1: 信号 → Fact
-        facts: List[Fact] = []
+        import time
+        log = logging.getLogger(__name__)
+
+        # ── Step 0 (peek): 预估 batch_id，仅日志 ──
+        peek_batch_id = self.habit_store.get_latest_batch_id() + 1
+        log.info(f"[batch-peek] starting ingest with peek_batch_id={peek_batch_id}")
+
+        # ── Step 1: 信号 → PREF Fact → Chroma ──
+        pref_facts: List[Fact] = []
         for event in events:
-            facts.extend(signals_to_facts(event))
+            pref_facts.extend(signals_to_facts(event))
+        if pref_facts:
+            self.fact_store.store_facts(self.username, pref_facts)
+            log.info(f"[phase1.1] stored {len(pref_facts)} PREF facts in Chroma")
 
-        if not facts:
-            log.warning("ingest_signal_batch: no facts generated from events")
-            return self._make_result(0, 0, 0, 0, [])
-
-        log.info(f"Step 1: {len(events)} events → {len(facts)} facts")
-
-        # Step 2: 存入 ChromaDB
-        self.fact_store.store_facts(self.username, facts)
-        log.info(f"Step 2: {len(facts)} facts stored in ChromaDB")
-
-        # Step 3: 获取全量 facts + embeddings
+        # ── Step 2: 从 Chroma 拉 facts + embeddings，做 Hybrid DBSCAN + 连续性过滤 ──
         items = self.fact_store.get_facts_with_embeddings(self.username)
-        log.info(f"Step 3: {len(items)} facts with embeddings retrieved")
-
-        # Step 4: Hybrid DBSCAN + 连续性过滤
         consec_filter = make_cluster_filter(self.required_consecutive)
-        new_habits, ids_to_delete = self.habits_detector.detect_habits(
-            items, cluster_filter=consec_filter
-        )
+        t0 = time.monotonic()
+        cluster_facts_groups = self.habits_detector.cluster_pref_facts(
+            items, cluster_filter=consec_filter,
+        )  # list[list[Fact]]；每个 inner list 是一个 PREF cluster
         log.info(
-            f"Step 4: Hybrid DBSCAN + consecutiveness(≥{self.required_consecutive}) "
-            f"→ {len(new_habits)} habits, {len(ids_to_delete)} facts clustered"
+            f"[phase1.2] clustering produced {len(cluster_facts_groups)} clusters "
+            f"in {time.monotonic() - t0:.2f}s"
         )
 
-        # Step 5: 场景卡命名 (LLM 为习惯组生成场景名)
-        scene_cards = []
-        if new_habits:
-            scene_cards = generate_scene_cards(
-                new_habits, llm_client=self.llm_client
-            )
-            log.info(
-                f"Step 5: {len(new_habits)} habits → "
-                f"{len(scene_cards)} scene cards"
-            )
+        # ── Step 3: 每个 cluster → GPT reword → Habit（§3.7 单 signal 假设）──
+        new_habits: List[Habit] = []
+        for cluster_facts in cluster_facts_groups:
+            try:
+                signal_name = assert_cluster_pure_signal(cluster_facts)
+            except Exception as e:
+                log.warning(f"Skipping mixed-signal cluster: {e}")
+                continue
+            rule = self.signal_rule_engine.get_rule(signal_name) or {}
+            signal_category = rule.get("category", "categorical")
 
-        # Step 6: 生命周期管理
-        if new_habits and ids_to_delete:
-            self.fact_store.delete_facts(self.username, ids_to_delete)
-            self.fact_store.store_facts(self.username, new_habits)
-            log.info(
-                f"Step 6: deleted {len(ids_to_delete)} clustered facts, "
-                f"stored {len(new_habits)} habit facts"
-            )
+            stats = compute_raw_value_stats(cluster_facts, signal_category)
+            # cluster 已经过连续性过滤，用第一条的 context 做代表
+            ctx = cluster_facts[0].context
 
-        return self._make_result(
-            facts_ingested=len(facts),
-            total_before_clustering=len(items),
-            habits_detected=len(new_habits),
-            facts_clustered=len(ids_to_delete),
-            new_habits=new_habits,
-            scene_cards=scene_cards,
+            text = self.habits_detector.reword_cluster(
+                [f.text for f in cluster_facts]
+            )
+            stats["habit_text"] = text
+
+            habit = Habit(
+                username=self.username,
+                batch_id=peek_batch_id,  # 阶段 2 会校正
+                text=text,
+                signal_category=signal_category,
+                signal_name=signal_name,
+                structural_key="pending",  # 分组后再填
+                context_time_bucket=ctx.time_bucket,
+                context_vehicle_state=ctx.vehicle_state,
+                context_geofence=ctx.geofence,
+                context_weekday=int(ctx.weekday) if ctx.weekday is not None else None,
+                raw_value_stats=stats,
+                member_fact_ids=[f.id for f in cluster_facts],
+            )
+            new_habits.append(habit)
+
+        # ── Step 4 (前半): 按 structural_key 分组 ──
+        candidates_by_key: dict = {}
+        for h in new_habits:
+            # 单 habit 先单独计算一个临时 key；
+            # 实际分组策略：同 signal + 同 dominant context → 同 key
+            k = compute_structural_key([h])
+            h.structural_key = k
+            candidates_by_key.setdefault(k, []).append(h)
+
+        # ── Step 4 (后半): GPT scene naming per group ──
+        display_names: dict = {}
+        for key, habits in candidates_by_key.items():
+            display_names[key] = self._gpt_scene_name(habits)
+
+        # ── Step 5: Classification ──
+        accepted_cards = self.scene_card_store.get_by_status("accepted")
+        classifications = self.lifecycle.classify_all(
+            candidates_by_key=candidates_by_key,
+            accepted_cards=accepted_cards,
         )
+
+        # ── 阶段 2: 事务内落盘 ──
+        stats_out = {
+            "reinforce": 0, "modify_drift": 0, "new_pending": 0,
+        }
+        with self.scene_card_store.transaction() as conn:
+            # P2.1 权威 batch_id
+            real_batch_id = self.habit_store.allocate_next_batch_id(conn=conn)
+            for h in new_habits:
+                h.batch_id = real_batch_id
+
+            # P2.2 写 habits
+            self.habit_store.insert_many(new_habits, batch_id=real_batch_id, conn=conn)
+
+            # P2.3 按 classification 写 scene_cards
+            for key, habits, result in classifications:
+                display_name = display_names[key]
+                snapshot = self._build_content_snapshot(
+                    habits, batch_id=real_batch_id,
+                )
+
+                if isinstance(result, Reinforce):
+                    self.scene_card_store.update_last_reinforced(
+                        result.card_id, batch_id=real_batch_id, conn=conn,
+                    )
+                    stats_out["reinforce"] += 1
+
+                elif isinstance(result, ModifyDrift):
+                    snapshot["drifted_signals"] = result.drifted_signals
+                    self.scene_card_store.upsert_recommendation_by_target(
+                        target_accepted_id=result.card_id,
+                        card_data={
+                            "structural_key": key,
+                            "display_name": display_name,
+                            "content_snapshot": snapshot,
+                        },
+                        batch_id=real_batch_id,
+                        conn=conn,
+                    )
+                    self.scene_card_store.update_last_reinforced(
+                        result.card_id, batch_id=real_batch_id, conn=conn,
+                    )
+                    stats_out["modify_drift"] += 1
+
+                elif isinstance(result, NewPending):
+                    self.scene_card_store.upsert_pending_by_structural_key(
+                        structural_key=key,
+                        card_data={
+                            "display_name": display_name,
+                            "content_snapshot": snapshot,
+                        },
+                        batch_id=real_batch_id,
+                        conn=conn,
+                    )
+                    stats_out["new_pending"] += 1
+
+            # P2.4 清理陈腐 pending
+            self.scene_card_store.delete_stale_pending(
+                current_batch_id=real_batch_id, conn=conn,
+            )
+            # P2.5 清理陈腐 recommendation
+            self.scene_card_store.delete_stale_recommendation(
+                current_batch_id=real_batch_id, conn=conn,
+            )
+            # P2.6 保留最近 3 批
+            self.habit_store.delete_old_batches(
+                current_batch_id=real_batch_id, retain_n=3, conn=conn,
+            )
+        # COMMIT (transaction context exit)
+
+        log.info(
+            f"[batch-done] batch_id={real_batch_id} "
+            f"habits={len(new_habits)} "
+            f"reinforce={stats_out['reinforce']} "
+            f"drift={stats_out['modify_drift']} "
+            f"new={stats_out['new_pending']}"
+        )
+
+        return {
+            "batch_id": real_batch_id,
+            "habits_count": len(new_habits),
+            "classification_stats": stats_out,
+        }
+
+    def _build_content_snapshot(
+        self, habits: List[Habit], batch_id: int,
+    ) -> dict:
+        """构造 §3.5 格式的 content_snapshot_json"""
+        return {
+            "snapshot_batch_id": batch_id,
+            "snapshot_at": datetime.now().isoformat(),
+            "habits": [
+                {
+                    "habit_text": h.text,
+                    "signal": h.signal_name,
+                    "raw_value_stats": h.raw_value_stats,
+                }
+                for h in habits
+            ],
+            "dominant_context": {
+                "time_bucket": habits[0].context_time_bucket,
+                "vehicle_state": habits[0].context_vehicle_state,
+                "geofence": habits[0].context_geofence,
+                "weekday": bool(habits[0].context_weekday)
+                    if habits[0].context_weekday is not None else None,
+            },
+            "habit_ids": [h.habit_id for h in habits],
+        }
+
+    def _gpt_scene_name(self, habits: List[Habit]) -> str:
+        """
+        调 GPT 对一组 habits 起名。阶段 1 慢动作内完成。
+        GPT 不可用或抛异常 → fallback 到 "<time_bucket> <geofence>"。
+        """
+        tb = habits[0].context_time_bucket
+        geo = habits[0].context_geofence or "routine"
+        fallback = f"{tb} {geo}".strip()
+        try:
+            out = self.habits_detector.reword_scene([h.text for h in habits])
+            return out or fallback
+        except Exception as e:
+            log.warning(
+                f"GPT scene naming failed: {e}; using fallback '{fallback}'"
+            )
+            return fallback
 
     def ingest_from_simulator(self, simulator) -> Dict:
         """

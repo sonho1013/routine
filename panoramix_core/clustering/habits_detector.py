@@ -153,6 +153,80 @@ class HabitsDetector:
 
         return new_habit_facts, ids_to_delete
 
+    # ── 新增：Wave 4 pipeline 使用的薄包装 ──
+
+    def cluster_pref_facts(
+        self,
+        facts_with_embeddings: List[Dict[str, Any]],
+        cluster_filter=None,
+    ) -> List[List["Fact"]]:
+        """
+        返回 list[list[Fact]] — 每个 inner list 是一个已通过连续性过滤的 PREF cluster。
+
+        与 detect_habits 的区别：
+          - 不调用 GPT reword
+          - 不包装成 HABIT Fact
+          - 不返回 ids_to_delete（Wave 4 pipeline 不再删 PREF，保留给下次 batch 自然处理）
+
+        Wave 4 之后，pipeline 由 engine/habit_engine.py 接管 reword + 落盘。
+        """
+        if not facts_with_embeddings:
+            return []
+
+        all_facts = [item["fact"] for item in facts_with_embeddings]
+        result: List[List] = []
+
+        for fact_type in HABIT_CANDIDATE_FACT_TYPES:
+            clusters = self._get_fact_clusters(facts_with_embeddings, fact_type)
+            for cluster in clusters:
+                cluster_facts = [item["fact"] for item in cluster["items"]]
+                if cluster_filter is not None and not cluster_filter(
+                    cluster_facts, all_facts
+                ):
+                    logging.info(
+                        f"cluster_pref_facts: cluster filtered out "
+                        f"({len(cluster_facts)} facts, type={fact_type})"
+                    )
+                    continue
+                result.append(cluster_facts)
+
+        return result
+
+    def reword_cluster(self, fact_texts: List[str]) -> str:
+        """
+        对一个 cluster 的 PREF 文本调 GPT reword。
+
+        沿用 _get_habit_reword 的 confidence 阈值与拒答处理；
+        失败或 LLM=None 时降级到 fact_texts[0]。
+        """
+        if not fact_texts:
+            return ""
+        out = self._get_habit_reword(fact_texts)
+        return out or fact_texts[0]
+
+    def reword_scene(self, habit_texts: List[str]) -> str:
+        """
+        对同 structural_key 的 habit 文本起一个短场景名（<= 6 words, Title Case）。
+
+        无 LLM 时返回空字符串（调用方会 fallback 到 "<time_bucket> <geofence>"）。
+        """
+        if self.llm is None or not habit_texts:
+            return ""
+        joined = "\n".join(f"- {t}" for t in habit_texts)
+        prompt = (
+            "Summarize the following car habits as one short English scene name "
+            "(at most 6 words, Title Case, no punctuation, no quotes):\n"
+            f"{joined}\n\nScene name:"
+        )
+        try:
+            raw = self.llm.invoke(prompt)
+        except Exception as e:
+            logging.warning(f"reword_scene LLM call failed: {e}")
+            return ""
+        # 取第一行，裁 60 字
+        first_line = (raw or "").strip().splitlines()[0] if raw else ""
+        return first_line.strip().strip('"').strip("'")[:60]
+
     # ── 聚类 ──
 
     def _get_fact_clusters(
