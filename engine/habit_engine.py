@@ -18,7 +18,6 @@ from typing import Dict, List, Optional
 
 from engine.signal_to_fact import signals_to_facts
 from engine.consecutiveness import make_cluster_filter
-from engine.scene_card import generate_scene_cards, SceneCard
 from engine.proactive_executor import ProactiveExecutor, RecommendationResult
 from engine.habit_lifecycle import (
     HabitLifecycleManager,
