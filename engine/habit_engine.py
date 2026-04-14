@@ -269,6 +269,12 @@ class HabitDemoEngine:
             )
         # COMMIT (transaction context exit)
 
+        # ── 阶段 2 后: 删除已聚类的 PREF facts（保持 Chroma 滚动窗口干净）──
+        clustered_ids = [f.id for group in cluster_facts_groups for f in group]
+        if clustered_ids:
+            self.fact_store.delete_facts(self.username, clustered_ids)
+            log.info(f"[post-commit] deleted {len(clustered_ids)} clustered PREF facts from Chroma")
+
         log.info(
             f"[batch-done] batch_id={real_batch_id} "
             f"habits={len(new_habits)} "
