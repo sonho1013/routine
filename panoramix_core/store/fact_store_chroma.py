@@ -53,6 +53,19 @@ class FactStoreChroma(FactStore):
     # ── 写入 ──
 
     def store_facts(self, username: str, facts: List[Fact]) -> None:
+        # Wave 5 guard: HABIT facts should be written via HabitStore (SQLite),
+        # not Chroma.  The legacy accept_habit() path in HabitDemoEngine still
+        # writes HABIT facts here; that method is scheduled for removal once
+        # the Tab1 UI layer migrates fully to SceneCardStore / HabitStore.
+        from panoramix_core.models.fact_enums import FactType as _FactType
+        for fact in facts:
+            if fact.type == _FactType.HABIT:
+                logging.warning(
+                    "FactStoreChroma.store_facts: received FactType.HABIT — "
+                    "HABIT facts should use HabitStore (SQLite) instead. "
+                    "This write path is deprecated and will raise in a future wave."
+                )
+
         ids, documents, metadatas = [], [], []
         for fact in facts:
             ids.append(fact.id)
