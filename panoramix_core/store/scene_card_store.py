@@ -270,6 +270,23 @@ class SceneCardStore:
                 "DELETE FROM scene_cards WHERE card_id = ?", (card_id,),
             )
 
+    def dismiss_pending(self, card_id: str) -> None:
+        """用户主动忽略 pending 卡"""
+        with self.transaction() as conn:
+            row = conn.execute(
+                "SELECT status FROM scene_cards WHERE card_id = ? AND username = ?",
+                (card_id, self.username),
+            ).fetchone()
+            if row is None:
+                raise ValueError(f"card not found: {card_id}")
+            if row["status"] != "pending":
+                raise SceneCardImmutableError(
+                    f"dismiss_pending() requires pending; got {row['status']}"
+                )
+            conn.execute(
+                "DELETE FROM scene_cards WHERE card_id = ?", (card_id,),
+            )
+
     # ── 清理 ──
 
     def delete_stale_pending(

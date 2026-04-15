@@ -1,15 +1,14 @@
 """
-Knowledge Graph Panel — 习惯知识图谱展示
+Knowledge Graph Panel — 习惯知识图谱展示 (Tab 1)
 
-对齐 cockpit_ai_simulator 参考设计:
-  - KG 表格: Scene / Context / Actions / Control Params / Confidence
+对齐新后端数据模型（SQLite habits + scene_cards）:
+  - KG 表格: Scene / Context / Control Params / Confidence
   - 置信度色标: High(green ≥0.85) / Mid(teal ≥0.70) / Low(grey <0.70)
-  - 新行高亮动画 (new-row class)
-  - 摘要卡片: Top Scenario / Avg Confidence / Data Coverage / Total Facts
+  - 新行高亮
+  - 摘要卡片: Scenes / Habits / Avg Confidence / Evidence
 """
-import json
 import streamlit as st
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from engine.proactive_executor import parse_habit_actions
 
@@ -77,7 +76,7 @@ def _format_actions(habit_text: str) -> str:
     for k, v in actions.items():
         label = _LABELS.get(k, k)
         if k == "hvac_temp_target":
-            params.append(f"{label}={v}°C")
+            params.append(f"{label}={v:g}°C")
         elif k == "media_volume":
             params.append(f"{label}={v}%")
         elif k == "window_position":
@@ -97,7 +96,7 @@ def render_knowledge_graph(
     username: str = "",
 ):
     """
-    渲染 KG 表格 + 摘要卡片。
+    渲染 KG 表格 + 摘要卡片 (Tab 1 — 学习阶段, 显示 confidence)。
 
     Args:
         habits: habit dict 列表 (from engine.get_status()["habits"])
@@ -108,17 +107,17 @@ def render_knowledge_graph(
         new_habit_ids = set()
 
     if not habits:
-        st.info("No habits detected yet. Run 'Analysis to model' to start learning.")
+        st.info("No habits detected yet. Run 'Load Unified Data' to start learning.")
         return
 
     # ── 按置信度排序 ──
     sorted_habits = sorted(
         habits,
-        key=lambda h: h.get("clustering_confidence") or 0,
+        key=lambda h: h.get("confidence") or 0,
         reverse=True,
     )
 
-    # ── 构建 HTML 表格（使用 st.html 确保渲染） ──
+    # ── 构建 HTML 表格 ──
     rows_html = []
     for h in sorted_habits:
         hid = h.get("id", "")
@@ -129,9 +128,8 @@ def render_knowledge_graph(
         context_str = _format_context(h)
         text = h.get("text", "")
         params_str = _format_actions(text)
-        conf = h.get("clustering_confidence") or 0.0
-        accepted = h.get("accepted", False)
-        status_icon = "✅" if accepted else "⏳"
+        conf = h.get("confidence") or 0.0
+        evidence = h.get("evidence_count", 0)
 
         new_badge = (
             ' <span style="background:#F5A623;color:#fff;padding:1px 5px;'
@@ -141,19 +139,18 @@ def render_knowledge_graph(
 
         rows_html.append(
             f'<tr style="{row_style}">'
-            f'<td style="padding:6px 4px;font-size:0.75rem;color:#8899AA;">{status_icon}</td>'
             f'<td style="padding:6px 4px;">'
             f'<div style="font-weight:600;color:#E8EDF3;">{scene}{new_badge}</div>'
             f'<div style="font-size:0.7rem;color:#8899AA;margin-top:2px;">{text[:60]}</div></td>'
             f'<td style="padding:6px 4px;font-size:0.8rem;color:#C0CCDA;">{context_str}</td>'
             f'<td style="padding:6px 4px;font-size:0.8rem;"><code style="font-size:0.75rem;color:#C0CCDA;">{params_str}</code></td>'
-            f'<td style="padding:6px 4px;">{_conf_badge(conf)}</td>'
+            f'<td style="padding:6px 4px;text-align:center;">{_conf_badge(conf)}'
+            f'<div style="font-size:0.6rem;color:#8899AA;margin-top:1px;">{evidence} facts</div></td>'
             f'</tr>'
         )
 
     full_html = (
         '<div style="font-family:sans-serif;color:#E8EDF3;">'
-        # 表头 + 图例
         '<div style="display:flex;justify-content:space-between;align-items:center;'
         'margin-bottom:8px;padding:4px 0;">'
         '<span style="font-weight:600;font-size:0.9rem;">User Knowledge Graph</span>'
@@ -162,14 +159,12 @@ def render_knowledge_graph(
         '<span style="color:#00BFC8;">●</span> Mid 0.70+ &nbsp;'
         '<span style="color:#8899AA;">●</span> Low &lt;0.70'
         '</span></div>'
-        # 表格
         '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">'
         '<thead><tr style="border-bottom:2px solid #1E3A5F;text-align:left;">'
-        '<th style="padding:8px 4px;color:#00BFC8;font-size:0.75rem;width:30px;"></th>'
         '<th style="padding:8px 4px;color:#00BFC8;font-size:0.75rem;">Scene / Pattern</th>'
         '<th style="padding:8px 4px;color:#00BFC8;font-size:0.75rem;">Context</th>'
         '<th style="padding:8px 4px;color:#00BFC8;font-size:0.75rem;">Control Params</th>'
-        '<th style="padding:8px 4px;color:#00BFC8;font-size:0.75rem;width:60px;">Conf.</th>'
+        '<th style="padding:8px 4px;color:#00BFC8;font-size:0.75rem;width:80px;text-align:center;">Conf.</th>'
         '</tr></thead>'
         f'<tbody>{"".join(rows_html)}</tbody>'
         '</table></div>'
@@ -185,17 +180,17 @@ def _render_summary_cards(habits: List[dict]):
     if not habits:
         return
 
-    confidences = [h.get("clustering_confidence") or 0 for h in habits]
+    scenes = {h.get("scene_name") for h in habits if h.get("scene_name")}
+    confidences = [h.get("confidence") or 0 for h in habits]
     avg_conf = sum(confidences) / len(confidences) if confidences else 0
-    top_scene = habits[0].get("scene_name") or "—" if habits else "—"
-    accepted_count = sum(1 for h in habits if h.get("accepted"))
+    total_evidence = sum(h.get("evidence_count", 0) for h in habits)
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.metric("Top Scene", top_scene)
+        st.metric("Scenes", len(scenes))
     with c2:
-        st.metric("Avg Confidence", f"{avg_conf:.2f}")
+        st.metric("Habits", len(habits))
     with c3:
-        st.metric("Patterns Found", len(habits))
+        st.metric("Avg Confidence", f"{avg_conf:.2f}")
     with c4:
-        st.metric("Accepted", accepted_count)
+        st.metric("Total Evidence", total_evidence)

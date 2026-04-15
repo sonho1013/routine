@@ -118,9 +118,14 @@ def render_cluster_visualization(username: str):
 # ═══════════════════════════════════════════════════
 
 def _load_embedding_data(username: str) -> Optional[Dict]:
-    """从 ChromaDB 取 facts + embeddings"""
-    from panoramix_core.store.fact_store_chroma import FactStoreChroma
+    """从 session state 取 pipeline 缓存的 items，或从 ChromaDB 取 facts + embeddings"""
+    # 优先使用 pipeline 运行时捕获的 items（Chroma 数据在 pipeline 后被删除）
+    cached_items = st.session_state.get(f"t1_viz_items_{username}")
+    if cached_items:
+        return {"items": cached_items}
 
+    # Fallback: try Chroma (may be empty after pipeline)
+    from panoramix_core.store.fact_store_chroma import FactStoreChroma
     store = FactStoreChroma(username)
     items = store.get_facts_with_embeddings(username)
     store.close()

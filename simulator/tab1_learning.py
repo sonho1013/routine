@@ -170,11 +170,14 @@ def _run_single_analysis(username: str, ctx_data: dict, signals: dict):
         st.session_state[f"t1_new_habit_ids_{username}"] = new_ids
         st.session_state[f"t1_last_result_{username}"] = result
 
+        # 保存可视化数据
+        viz_items = result.pop("_viz_items", None)
+        if viz_items:
+            st.session_state[f"t1_viz_items_{username.lower()}"] = viz_items
+        _invalidate_viz_cache(username)
+
         progress_bar.progress(100, text="Knowledge Graph updated!")
         _show_pipeline_metrics(result)
-
-        # 清除可视化缓存，下次渲染时重新计算
-        _invalidate_viz_cache(username)
 
         engine.close()
 
@@ -204,9 +207,10 @@ def _run_clear_data(username: str):
         _invalidate_viz_cache(username)
 
         st.success(
-            f"Cleared ChromaDB for '{username}': "
-            f"{before['total_facts']} facts → {after['total_facts']} facts "
-            f"({before['habit_facts']} habits removed)"
+            f"Cleared data for '{username}': "
+            f"{before['pref_facts']} PREF facts, "
+            f"{before['habits_count']} habits, "
+            f"{before['scene_cards_count']} scene cards removed"
         )
     except Exception as e:
         st.error(f"Clear data error: {e}")
@@ -232,10 +236,9 @@ def _run_batch_load(username: str):
         week_label = ", ".join(f"W{w}" for w in week_nums)
         progress_bar.progress(10, text=f"Loaded {sim.total_events} events ({week_label})...")
 
-        # 重置目标用户数据
+        # 初始化引擎（不 reset，保留已有 accepted 场景卡）
         progress_bar.progress(20, text="Initializing engine + ChromaDB...")
         engine = HabitDemoEngine(username=username.lower(), llm_client=None)
-        engine.reset()
         progress_bar.progress(30, text="Embedding facts (batched OpenAI call)...")
 
         # 运行完整 pipeline
@@ -253,17 +256,20 @@ def _run_batch_load(username: str):
         st.session_state[f"t1_new_habit_ids_{username}"] = new_ids
         st.session_state[f"t1_last_result_{username}"] = result
 
+        # 保存可视化数据（pipeline 删除 Chroma 前捕获的 items）
+        viz_items = result.pop("_viz_items", None)
+        if viz_items:
+            st.session_state[f"t1_viz_items_{username.lower()}"] = viz_items
+        _invalidate_viz_cache(username)
+
         progress_bar.progress(100, text="Batch load complete!")
 
         st.success(
             f"Loaded {sim.total_events} events ({week_label}) → "
             f"{result['facts_ingested']} facts → "
-            f"{result['habits_detected']} habits detected"
+            f"{result['habits_count']} habits detected"
         )
         _show_pipeline_metrics(result)
-
-        # 清除可视化缓存
-        _invalidate_viz_cache(username)
 
         engine.close()
 
@@ -278,15 +284,16 @@ def _run_batch_load(username: str):
 
 def _show_pipeline_metrics(result: dict):
     """pipeline 结果指标行"""
+    cls = result.get("classification", {})
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.metric("Facts Ingested", result.get("facts_ingested", 0))
     with c2:
-        st.metric("Before Clustering", result.get("total_before_clustering", 0))
+        st.metric("Habits Detected", result.get("habits_count", 0))
     with c3:
-        st.metric("Habits Detected", result.get("habits_detected", 0))
+        st.metric("New Pending", cls.get("new_pending", 0))
     with c4:
-        st.metric("Facts Clustered", result.get("facts_clustered", 0))
+        st.metric("Reinforce / Drift", f"{cls.get('reinforce', 0)} / {cls.get('modify_drift', 0)}")
 
 
 def _show_knowledge_graph(username: str):
@@ -299,13 +306,15 @@ def _show_knowledge_graph(username: str):
         engine.close()
 
         # 头部指标
-        mc1, mc2, mc3 = st.columns(3)
+        mc1, mc2, mc3, mc4 = st.columns(4)
         with mc1:
-            st.metric("Total Facts", status["total_facts"])
+            st.metric("PREF Facts", status["pref_facts"])
         with mc2:
-            st.metric("Pref Facts", status["pref_facts"])
+            st.metric("Habits", status["habits_count"])
         with mc3:
-            st.metric("Habit Facts", status["habit_facts"])
+            st.metric("Scene Cards", status["scene_cards_count"])
+        with mc4:
+            st.metric("Batch ID", status["batch_id"])
 
         # KG 表格 — 使用按用户隔离的 new_habit_ids
         new_ids = st.session_state.get(f"t1_new_habit_ids_{username}", set())

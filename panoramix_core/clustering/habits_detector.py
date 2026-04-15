@@ -159,14 +159,16 @@ class HabitsDetector:
         self,
         facts_with_embeddings: List[Dict[str, Any]],
         cluster_filter=None,
-    ) -> List[List["Fact"]]:
+    ) -> List[Dict[str, Any]]:
         """
-        返回 list[list[Fact]] — 每个 inner list 是一个已通过连续性过滤的 PREF cluster。
+        返回 list[dict] — 每个 dict 包含:
+          - "facts": list[Fact]  已通过连续性过滤的 PREF cluster
+          - "confidence": ClusterConfidence | None  DBSCAN 聚类置信度
 
         与 detect_habits 的区别：
           - 不调用 GPT reword
           - 不包装成 HABIT Fact
-          - 不返回 ids_to_delete（Wave 4 pipeline 不再删 PREF，保留给下次 batch 自然处理）
+          - 不返回 ids_to_delete
 
         Wave 4 之后，pipeline 由 engine/habit_engine.py 接管 reword + 落盘。
         """
@@ -174,7 +176,7 @@ class HabitsDetector:
             return []
 
         all_facts = [item["fact"] for item in facts_with_embeddings]
-        result: List[List] = []
+        result: List[Dict[str, Any]] = []
 
         for fact_type in HABIT_CANDIDATE_FACT_TYPES:
             clusters = self._get_fact_clusters(facts_with_embeddings, fact_type)
@@ -188,7 +190,10 @@ class HabitsDetector:
                         f"({len(cluster_facts)} facts, type={fact_type})"
                     )
                     continue
-                result.append(cluster_facts)
+                result.append({
+                    "facts": cluster_facts,
+                    "confidence": cluster.get("confidence"),
+                })
 
         return result
 

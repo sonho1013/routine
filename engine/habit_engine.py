@@ -11,7 +11,6 @@ HabitDemoEngine — 端到端管线编排
     status = engine.get_status()
     engine.close()
 """
-import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -41,19 +40,14 @@ from panoramix_core.clustering.habits_detector import HabitsDetector
 log = logging.getLogger(__name__)
 
 
-def _get_habit_meta(habit: Fact) -> dict:
-    """从 habit 的 json_metadata 提取关键字段"""
-    if habit.json_metadata:
-        try:
-            meta = json.loads(habit.json_metadata)
-            return {
-                "scene_name": meta.get("scene_name"),
-                "scene_confidence": meta.get("scene_confidence"),
-                "clustering_confidence": meta.get("clustering_confidence"),
-            }
-        except (json.JSONDecodeError, TypeError):
-            pass
-    return {"scene_name": None, "scene_confidence": None, "clustering_confidence": None}
+# ═══════════════════════════════════════════════════
+# Confidence 计算
+# ═══════════════════════════════════════════════════
+
+def _get_clustering_confidence(stats: dict) -> float:
+    """从 raw_value_stats 取 DBSCAN 聚类置信度（cohesion/core_ratio/size_factor 合成）。
+    该值在 cluster_pref_facts → pipeline 时写入。"""
+    return stats.get("clustering_confidence", 0.0)
 
 
 class HabitDemoEngine:
@@ -134,17 +128,19 @@ class HabitDemoEngine:
         items = self.fact_store.get_facts_with_embeddings(self.username)
         consec_filter = make_cluster_filter(self.required_consecutive)
         t0 = time.monotonic()
-        cluster_facts_groups = self.habits_detector.cluster_pref_facts(
+        cluster_results = self.habits_detector.cluster_pref_facts(
             items, cluster_filter=consec_filter,
-        )  # list[list[Fact]]；每个 inner list 是一个 PREF cluster
+        )  # list[dict] with "facts" + "confidence"
         log.info(
-            f"[phase1.2] clustering produced {len(cluster_facts_groups)} clusters "
+            f"[phase1.2] clustering produced {len(cluster_results)} clusters "
             f"in {time.monotonic() - t0:.2f}s"
         )
 
         # ── Step 3: 每个 cluster → GPT reword → Habit（§3.7 单 signal 假设）──
         new_habits: List[Habit] = []
-        for cluster_facts in cluster_facts_groups:
+        for cluster_result in cluster_results:
+            cluster_facts = cluster_result["facts"]
+            cluster_conf = cluster_result.get("confidence")
             try:
                 signal_name = assert_cluster_pure_signal(cluster_facts)
             except Exception as e:
@@ -162,6 +158,15 @@ class HabitDemoEngine:
             )
             stats["habit_text"] = text
 
+            # 保留 DBSCAN 聚类置信度
+            if cluster_conf is not None:
+                stats["clustering_confidence"] = cluster_conf.confidence
+                stats["clustering_detail"] = {
+                    "cohesion": cluster_conf.cohesion,
+                    "core_ratio": cluster_conf.core_ratio,
+                    "size_factor": cluster_conf.size_factor,
+                }
+
             habit = Habit(
                 username=self.username,
                 batch_id=peek_batch_id,  # 阶段 2 会校正
@@ -178,14 +183,19 @@ class HabitDemoEngine:
             )
             new_habits.append(habit)
 
-        # ── Step 4 (前半): 按 structural_key 分组 ──
-        candidates_by_key: dict = {}
+        # ── Step 4 (前半): 先按 context 分组，再算 structural_key ──
+        # 同 context (geofence + time_bucket + vehicle_state) 的 habits 归为同一场景卡
+        context_groups: dict = {}
         for h in new_habits:
-            # 单 habit 先单独计算一个临时 key；
-            # 实际分组策略：同 signal + 同 dominant context → 同 key
-            k = compute_structural_key([h])
-            h.structural_key = k
-            candidates_by_key.setdefault(k, []).append(h)
+            ctx_key = f"{h.context_geofence or 'none'}|{h.context_time_bucket}|{h.context_vehicle_state}"
+            context_groups.setdefault(ctx_key, []).append(h)
+
+        candidates_by_key: dict = {}
+        for ctx_key, habits_group in context_groups.items():
+            k = compute_structural_key(habits_group)
+            for h in habits_group:
+                h.structural_key = k
+            candidates_by_key[k] = habits_group
 
         # ── Step 4 (后半): GPT scene naming per group ──
         display_names: dict = {}
@@ -203,6 +213,7 @@ class HabitDemoEngine:
         stats_out = {
             "reinforce": 0, "modify_drift": 0, "new_pending": 0,
         }
+        genuinely_new_habit_ids: set = set()
         with self.scene_card_store.transaction() as conn:
             # P2.1 权威 batch_id
             real_batch_id = self.habit_store.allocate_next_batch_id(conn=conn)
@@ -252,6 +263,7 @@ class HabitDemoEngine:
                         batch_id=real_batch_id,
                         conn=conn,
                     )
+                    genuinely_new_habit_ids.update(h.habit_id for h in habits)
                     stats_out["new_pending"] += 1
 
             # P2.4 清理陈腐 pending
@@ -269,7 +281,7 @@ class HabitDemoEngine:
         # COMMIT (transaction context exit)
 
         # ── 阶段 2 后: 删除已聚类的 PREF facts（保持 Chroma 滚动窗口干净）──
-        clustered_ids = [f.id for group in cluster_facts_groups for f in group]
+        clustered_ids = [f.id for cr in cluster_results for f in cr["facts"]]
         if clustered_ids:
             self.fact_store.delete_facts(self.username, clustered_ids)
             log.info(f"[post-commit] deleted {len(clustered_ids)} clustered PREF facts from Chroma")
@@ -284,8 +296,19 @@ class HabitDemoEngine:
 
         return {
             "batch_id": real_batch_id,
+            "facts_ingested": len(pref_facts),
+            "clusters_found": len(cluster_results),
             "habits_count": len(new_habits),
-            "classification_stats": stats_out,
+            "facts_clustered": len(clustered_ids),
+            "total_in_chroma": len(items),
+            "classification": stats_out,
+            "new_habits": [
+                {"id": h.habit_id, "text": h.text, "signal": h.signal_name}
+                for h in new_habits
+                if h.habit_id in genuinely_new_habit_ids
+            ],
+            # For cluster visualization (items captured before Chroma deletion)
+            "_viz_items": items,
         }
 
     def _build_content_snapshot(
@@ -348,30 +371,79 @@ class HabitDemoEngine:
     # ═══════════════════════════════════════════════════
 
     def get_status(self) -> Dict:
-        """获取当前存储状态摘要"""
-        all_facts = self.fact_store.get_facts(self.username)
-        habits = [f for f in all_facts if f.type == FactType.HABIT]
-        prefs = [f for f in all_facts if f.type == FactType.PREF]
+        """获取当前存储状态摘要 — 从 SQLite (habits/scene_cards) + Chroma (PREF facts) 读取"""
+        # PREF facts from Chroma
+        all_chroma_facts = self.fact_store.get_facts(self.username)
+        pref_count = sum(1 for f in all_chroma_facts if f.type == FactType.PREF)
+
+        # Habits from SQLite
+        sqlite_habits = self.habit_store.get_latest_batch_habits()
+
+        # Scene cards from SQLite — build structural_key → card lookup
+        scene_cards = []
+        for status in ("pending", "accepted", "recommendation"):
+            scene_cards.extend(self.scene_card_store.get_by_status(status))
+        card_by_key: Dict[str, SceneCardModel] = {}
+        for card in scene_cards:
+            card_by_key[card.structural_key] = card
+
+        # Build habit dicts for KG display
+        habit_dicts = []
+        for h in sqlite_habits:
+            card = card_by_key.get(h.structural_key)
+            confidence = _get_clustering_confidence(h.raw_value_stats)
+            habit_dicts.append({
+                "id": h.habit_id,
+                "text": h.text,
+                "signal_name": h.signal_name,
+                "signal_category": h.signal_category,
+                "scene_name": card.display_name if card else None,
+                "card_status": card.status if card else None,
+                "card_id": card.card_id if card else None,
+                "accepted": card.status == "accepted" if card else False,
+                "confidence": confidence,
+                "evidence_count": len(h.member_fact_ids),
+                "context": {
+                    "time_bucket": h.context_time_bucket,
+                    "vehicle_state": h.context_vehicle_state,
+                    "geofence": h.context_geofence,
+                    "weekday": bool(h.context_weekday) if h.context_weekday is not None else None,
+                },
+            })
+
+        # Build scene card dicts with snapshot habits
+        card_dicts = []
+        for c in scene_cards:
+            # Accepted cards: use frozen_content_snapshot
+            # Pending/recommendation: use content_snapshot
+            snapshot = c.frozen_content_snapshot or c.content_snapshot or {}
+            snapshot_habits = snapshot.get("habits", [])
+            dominant_ctx = snapshot.get("dominant_context", {})
+
+            # Per-habit confidence from DBSCAN clustering_confidence
+            for sh in snapshot_habits:
+                stats = sh.get("raw_value_stats", {})
+                sh["confidence"] = _get_clustering_confidence(stats)
+
+            card_dicts.append({
+                "card_id": c.card_id,
+                "status": c.status,
+                "display_name": c.display_name,
+                "structural_key": c.structural_key,
+                "first_seen_batch_id": c.first_seen_batch_id,
+                "last_reinforced_batch_id": c.last_reinforced_batch_id,
+                "snapshot_habits": snapshot_habits,
+                "dominant_context": dominant_ctx,
+            })
+
         return {
             "username": self.username,
-            "total_facts": len(all_facts),
-            "pref_facts": len(prefs),
-            "habit_facts": len(habits),
-            "habits": [
-                {
-                    "id": h.id,
-                    "text": h.text,
-                    "accepted": h.accepted,
-                    **_get_habit_meta(h),
-                    "context": {
-                        "time_bucket": h.context.time_bucket,
-                        "vehicle_state": h.context.vehicle_state,
-                        "geofence": h.context.geofence,
-                        "weekday": h.context.weekday,
-                    },
-                }
-                for h in habits
-            ],
+            "pref_facts": pref_count,
+            "habits_count": len(sqlite_habits),
+            "scene_cards_count": len(scene_cards),
+            "batch_id": self.habit_store.get_latest_batch_id(),
+            "habits": habit_dicts,
+            "scene_cards": card_dicts,
         }
 
     def get_all_facts(self) -> List[Fact]:
@@ -428,16 +500,26 @@ class HabitDemoEngine:
     # ═══════════════════════════════════════════════════
 
     def reset(self):
-        """清空当前用户的全部数据（重新开始学习）"""
+        """清空当前用户的全部数据（Chroma + SQLite，重新开始学习）"""
+        # Chroma: delete all facts
         all_facts = self.fact_store.get_facts(self.username)
         if all_facts:
             ids = [f.id for f in all_facts]
             self.fact_store.delete_facts(self.username, ids)
-            log.info(f"Reset: deleted {len(ids)} facts for user {self.username}")
+            log.info(f"Reset: deleted {len(ids)} Chroma facts for user {self.username}")
+
+        # SQLite: delete habits + scene_cards for this user
+        conn = self.scene_card_store._conn
+        conn.execute("DELETE FROM habits WHERE username = ?", (self.username,))
+        conn.execute("DELETE FROM scene_cards WHERE username = ?", (self.username,))
+        conn.commit()
+        log.info(f"Reset: cleared SQLite habits + scene_cards for user {self.username}")
 
     def close(self):
-        """关闭 ChromaDB 连接"""
+        """关闭所有连接"""
         self.fact_store.close()
+        self.habit_store.close()
+        self.scene_card_store.close()
 
     def __enter__(self):
         return self
@@ -446,23 +528,3 @@ class HabitDemoEngine:
         self.close()
         return False
 
-    # ── 内部 ──
-
-    @staticmethod
-    def _make_result(facts_ingested, total_before_clustering,
-                     habits_detected, facts_clustered, new_habits,
-                     scene_cards=None):
-        return {
-            "facts_ingested": facts_ingested,
-            "total_before_clustering": total_before_clustering,
-            "habits_detected": habits_detected,
-            "facts_clustered": facts_clustered,
-            "facts_remaining": total_before_clustering - facts_clustered + habits_detected,
-            "new_habits": [
-                {"text": h.text, "id": h.id, **_get_habit_meta(h)}
-                for h in new_habits
-            ],
-            "scene_cards": [
-                c.summary for c in (scene_cards or [])
-            ],
-        }

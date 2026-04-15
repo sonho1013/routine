@@ -174,14 +174,14 @@ class ProactiveExecutor:
 # 信号名 → 正则提取模式
 _ACTION_PATTERNS = [
     # HVAC
-    (r"(?:air conditioning|AC|cabin).+?(\d+)\s*(?:degrees|°)", "hvac_temp_target", int),
-    (r"(?:AC|ac)\s+temperature.+?(\d+)\s*(?:degrees|°)", "hvac_temp_target", int),
+    (r"(?:air conditioning|AC|cabin).+?(\d+(?:\.\d+)?)\s*(?:degrees|°)", "hvac_temp_target", float),
+    (r"(?:AC|ac)\s+temperature.+?(\d+(?:\.\d+)?)\s*(?:degrees|°)", "hvac_temp_target", float),
     (r"turned (?:on|off) (?:cabin )?air conditioning", "hvac_power", lambda _: "toggle"),
     # 座椅加热
     (r"seat heating.+?level\s*(\d+)", "seat_heating", int),
     # 导航
     (r"navigation to\s+(.+?)(?:\s*$)", "nav_destination", str),
-    (r"(?:fastest|shortest|eco)\s+route", "nav_route_pref", str),
+    (r"(fastest|shortest|eco)\s+route", "nav_route_pref", str),
     # 媒体
     (r"(?:listening to|playing)\s+(?:podcast|music)\s+(.+?)(?:\s*$)", "media_source", str),
     (r"media volume.+?(\d+)\s*percent", "media_volume", int),
