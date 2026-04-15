@@ -82,17 +82,21 @@ class TestAC1_UserSelector:
 # ═══════════════════════════════════════════════════
 
 class TestAC2_ContextPanel:
-    """PRD S7 AC 2: 6 字段上下文输入 (Date/Temp/Weather/Battery/Passenger/Time)"""
+    """AC 2: Trigger 输入面板 — 对齐 mockup trigger 维度"""
 
     def test_scene_presets_defined(self):
         """场景预设已定义"""
         from simulator.components.context_panel import SCENE_PRESETS
         assert len(SCENE_PRESETS) >= 3  # 至少有 3 个场景 + Custom
 
-    def test_preset_has_six_fields(self):
-        """每个场景预设包含 6 个必需字段"""
+    def test_preset_has_trigger_fields(self):
+        """每个场景预设包含 trigger 必需字段"""
         from simulator.components.context_panel import SCENE_PRESETS
-        required_fields = {"date", "time", "weather", "outside_temp", "battery_soc", "passengers"}
+        required_fields = {
+            "date", "time", "location", "trip_role", "weather", "outside_temp",
+            "speed_kph", "gear", "wiper", "door_lock", "window_state",
+            "current_volume", "approach_unlock",
+        }
         for name, preset in SCENE_PRESETS.items():
             assert required_fields.issubset(preset.keys()), \
                 f"Preset '{name}' missing fields: {required_fields - preset.keys()}"
@@ -118,83 +122,70 @@ class TestAC2_ContextPanel:
         from simulator.components.context_panel import SCENE_PRESETS
         assert "Custom" in SCENE_PRESETS
 
+    def test_location_options_align_with_mockup(self):
+        """地点选项对齐 mockup place_id"""
+        from simulator.components.context_panel import LOCATION_OPTIONS
+        assert "home" in LOCATION_OPTIONS
+        assert "work" in LOCATION_OPTIONS
+        assert "office_gate_01" in LOCATION_OPTIONS
+
 
 # ═══════════════════════════════════════════════════
 # AC 3: 行为数据表格 — 5 大类，支持勾选
 # ═══════════════════════════════════════════════════
 
-class TestAC3_BehaviorTable:
-    """PRD S7 AC 3: 5 大类行为表格 (Comfort/Media/Driving Assist/Convenience/Vehicle Settings)"""
+class TestAC3_ActionPanel:
+    """AC 3: Action 面板 — 对齐 mockup action 列表 (trigger list xlsx)"""
 
-    def test_five_categories_defined(self):
-        """恰好 5 个类别"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        assert len(BEHAVIOR_CATEGORIES) == 5
+    def test_action_list_defined(self):
+        """ACTION_LIST 已定义且非空"""
+        from simulator.components.behavior_table import ACTION_LIST
+        assert isinstance(ACTION_LIST, list)
+        assert len(ACTION_LIST) >= 5
 
-    def test_required_categories(self):
-        """包含 PRD 要求的 5 个类别名"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        required = {"Comfort", "Media", "Driving Assist", "Convenience", "Vehicle Settings"}
-        assert set(BEHAVIOR_CATEGORIES.keys()) == required
+    def test_hvac_actions_present(self):
+        """包含 HVAC Start 和 HVAC Temperature Set"""
+        from simulator.components.behavior_table import ACTION_LIST
+        signal_names = [a[0] for a in ACTION_LIST]
+        assert "hvac_power" in signal_names, "Missing HVAC Start"
+        assert "hvac_temp_target" in signal_names, "Missing HVAC Temperature Set"
 
-    def test_comfort_has_ac_and_seat(self):
-        """Comfort 类别包含 AC 温度和座椅加热"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        signal_names = [s[0] for s in BEHAVIOR_CATEGORIES["Comfort"]]
-        assert "hvac_temp_target" in signal_names, "Missing AC temperature"
-        assert "seat_heating" in signal_names, "Missing seat heating"
+    def test_nav_actions_present(self):
+        """包含 Map Destination Set"""
+        from simulator.components.behavior_table import ACTION_LIST
+        signal_names = [a[0] for a in ACTION_LIST]
+        assert "nav_destination" in signal_names, "Missing Map Destination Set"
 
-    def test_media_has_source_and_volume(self):
-        """Media 类别包含媒体源和音量"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        signal_names = [s[0] for s in BEHAVIOR_CATEGORIES["Media"]]
-        assert "media_source" in signal_names
-        assert "media_volume" in signal_names
+    def test_media_action_present(self):
+        """包含 Volume Set"""
+        from simulator.components.behavior_table import ACTION_LIST
+        signal_names = [a[0] for a in ACTION_LIST]
+        assert "media_volume" in signal_names, "Missing Volume Set"
 
-    def test_driving_has_mode_and_acc(self):
-        """Driving Assist 包含驾驶模式和 ACC"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        signal_names = [s[0] for s in BEHAVIOR_CATEGORIES["Driving Assist"]]
-        assert "drive_mode" in signal_names
-        assert "acc_distance" in signal_names
+    def test_vehicle_actions_present(self):
+        """包含 Window Set 和 Approach Unlock Set"""
+        from simulator.components.behavior_table import ACTION_LIST
+        signal_names = [a[0] for a in ACTION_LIST]
+        assert "window_position" in signal_names, "Missing Window Set"
+        assert "keyless_entry" in signal_names, "Missing Approach Unlock Set"
 
-    def test_convenience_has_nav_and_keyless(self):
-        """Convenience 包含导航和无钥匙"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        signal_names = [s[0] for s in BEHAVIOR_CATEGORIES["Convenience"]]
-        assert "nav_destination" in signal_names
-        assert "keyless_entry" in signal_names
+    def test_each_action_has_required_fields(self):
+        """每个 action 定义包含 (name, label, default, type, options)"""
+        from simulator.components.behavior_table import ACTION_LIST
+        for action in ACTION_LIST:
+            assert len(action) == 5, f"{action[0]}: expected 5 fields, got {len(action)}"
+            name, label, default, vtype, opts = action
+            assert isinstance(name, str) and name
+            assert isinstance(label, str) and label
+            assert vtype in ("number", "select", "text", "toggle", "select_window"), \
+                f"{name}: unknown type '{vtype}'"
 
-    def test_vehicle_has_window_and_engine(self):
-        """Vehicle Settings 包含车窗和引擎"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        signal_names = [s[0] for s in BEHAVIOR_CATEGORIES["Vehicle Settings"]]
-        assert "window_position" in signal_names
-        assert "engine_status" in signal_names
-
-    def test_total_signals_count(self):
-        """总信号数 ≥ 14"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        total = sum(len(sigs) for sigs in BEHAVIOR_CATEGORIES.values())
-        assert total >= 14, f"Only {total} signals, expected ≥14"
-
-    def test_each_signal_has_required_fields(self):
-        """每个信号定义包含 (name, label, default, type, options)"""
-        from simulator.components.behavior_table import BEHAVIOR_CATEGORIES
-        for cat, signals in BEHAVIOR_CATEGORIES.items():
-            for sig in signals:
-                assert len(sig) == 5, f"{cat}/{sig[0]}: expected 5 fields, got {len(sig)}"
-                name, label, default, vtype, opts = sig
-                assert isinstance(name, str) and name
-                assert isinstance(label, str) and label
-                assert vtype in ("number", "select", "text", "toggle"), \
-                    f"{name}: unknown type '{vtype}'"
-
-    def test_category_icons_defined(self):
-        """每个类别有对应的图标"""
-        from simulator.components.behavior_table import CATEGORY_ICONS, BEHAVIOR_CATEGORIES
-        for cat in BEHAVIOR_CATEGORIES:
-            assert cat in CATEGORY_ICONS, f"Missing icon for category '{cat}'"
+    def test_window_state_mapping(self):
+        """Window 状态映射正确"""
+        from simulator.components.behavior_table import WINDOW_STATE_TO_PCT
+        assert WINDOW_STATE_TO_PCT["Closed"] == 0
+        assert WINDOW_STATE_TO_PCT["Half Open"] == 50
+        assert WINDOW_STATE_TO_PCT["Open"] == 100
 
 
 # ═══════════════════════════════════════════════════

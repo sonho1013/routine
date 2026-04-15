@@ -1,141 +1,145 @@
 """
-Behavior Data Table — 5 大类行为信号表
+Action Panel — 用户动作输入面板
 
-用户可勾选信号并设置参数值，模拟一次驾驶事件中的用户行为。
-类别: Comfort / Media / Driving Assist / Convenience / Vehicle Settings
+对齐 mockup 数据中的 action 列表 (trigger list xlsx):
+  - HVAC: HVAC Start / HVAC Temperature Set
+  - Navigation: Map Start / Map Destination Set / Map Route Set
+  - Media: Volume Set
+  - Vehicle: Window Set / Approach Unlock Set
+
+每个 action 可勾选启用并设置参数值，模拟一次驾驶事件中的用户操作。
 """
 import streamlit as st
 from typing import Dict, List, Tuple
 
 
-# ── 信号定义: (signal_name, display_label, default_value, value_type, options) ──
-# value_type: "number", "select", "toggle"
+# ── Action 定义: (signal_name, display_label, default_value, value_type, options) ──
+# signal_name: 内部信号名 (对齐 rules.yaml / unified_loader ACTION_TO_SIGNALS)
+# value_type: "number", "select", "toggle", "text"
 
-BEHAVIOR_CATEGORIES: Dict[str, List[Tuple]] = {
-    "Comfort": [
-        ("hvac_temp_target", "AC Temperature (°C)", 22, "number", {"min": 16, "max": 30, "step": 1}),
-        ("hvac_power", "AC Power", "on", "select", ["on", "off"]),
-        ("hvac_fan_speed", "Fan Speed", "auto", "select", ["auto", "low", "medium", "high"]),
-        ("seat_heating", "Seat Heating Level", 2, "number", {"min": 0, "max": 3, "step": 1}),
-    ],
-    "Media": [
-        ("media_source", "Media Source", "podcast", "select", ["podcast", "music", "radio", "off"]),
-        ("media_content_id", "Content ID", "Tech Daily", "text", None),
-        ("media_volume", "Volume (%)", 60, "number", {"min": 0, "max": 100, "step": 5}),
-    ],
-    "Driving Assist": [
-        ("drive_mode", "Drive Mode", "eco", "select", ["eco", "normal", "sport", "comfort"]),
-        ("acc_distance", "ACC Distance", "medium", "select", ["short", "medium", "long"]),
-    ],
-    "Convenience": [
-        ("nav_destination", "Navigation To", "work", "text", None),
-        ("nav_route_pref", "Route Preference", "fastest", "select", ["fastest", "shortest", "eco"]),
-        ("keyless_entry", "Keyless Entry", "enabled", "select", ["enabled", "disabled"]),
-    ],
-    "Vehicle Settings": [
-        ("window_position", "Window Position (%)", 0, "number", {"min": 0, "max": 100, "step": 5}),
-        ("engine_status", "Engine", "on", "select", ["on", "off"]),
-    ],
-}
+ACTION_LIST: List[Tuple] = [
+    # HVAC
+    ("hvac_power", "HVAC Start", "on", "toggle", None),
+    ("hvac_temp_target", "HVAC Temperature Set (°C)", 22, "number", {"min": 16, "max": 30, "step": 1}),
 
-# 类别颜色标记 (CSS class → emoji fallback for Streamlit)
-CATEGORY_ICONS = {
-    "Comfort": "🌡️",
-    "Media": "🎵",
-    "Driving Assist": "🚗",
-    "Convenience": "📍",
-    "Vehicle Settings": "⚙️",
+    # Navigation (Google Map)
+    ("nav_destination", "Map Destination Set", "work", "text", None),
+    ("nav_route_pref", "Map Route Preference", "fastest", "select", ["fastest", "shortest", "eco"]),
+
+    # Media
+    ("media_volume", "Volume Set (%)", 35, "number", {"min": 0, "max": 100, "step": 5}),
+
+    # Vehicle
+    ("window_position", "Window Set", 0, "select_window", ["Closed", "Half Open", "Open"]),
+    ("keyless_entry", "Approach Unlock Set", "enabled", "select", ["enabled", "disabled"]),
+]
+
+# Window state → percentage mapping
+WINDOW_STATE_TO_PCT = {
+    "Closed": 0,
+    "Half Open": 50,
+    "Open": 100,
 }
 
 
 def render_behavior_table(key_prefix: str = "beh") -> Dict[str, any]:
     """
-    渲染行为数据表格（5 大类，每类可勾选启用信号并设置值）。
+    Render action panel with checkboxes and value inputs.
 
     Returns:
-        dict: {signal_name: value, ...} 仅包含被勾选启用的信号
+        dict: {signal_name: value, ...} for enabled actions only
     """
-    st.markdown("**Behavior Signals**")
+    st.markdown("**Action**")
 
     selected_signals = {}
 
-    for cat_name, signals in BEHAVIOR_CATEGORIES.items():
-        icon = CATEGORY_ICONS.get(cat_name, "")
-        with st.expander(f"{icon} {cat_name}", expanded=True):
-            for sig_name, label, default, vtype, opts in signals:
-                # Three-column row: tiny checkbox, dedicated label column
-                # (ellipsis-clipped so it can never spill into the value
-                # widget), value widget. Old [1, 3] layout put the full
-                # label inside the narrow checkbox column, which wrapped
-                # and overlapped the next row on common screen widths.
-                col_check, col_label, col_value = st.columns([1, 5, 6])
+    for sig_name, label, default, vtype, opts in ACTION_LIST:
+        col_check, col_label, col_value = st.columns([1, 5, 6])
 
-                with col_check:
-                    enabled = st.checkbox(
-                        label,
-                        value=False,
-                        key=f"{key_prefix}_{sig_name}_en",
-                        label_visibility="collapsed",
-                    )
+        with col_check:
+            enabled = st.checkbox(
+                label,
+                value=False,
+                key=f"{key_prefix}_{sig_name}_en",
+                label_visibility="collapsed",
+            )
 
-                with col_label:
-                    label_color = "#E8EDF3" if enabled else "#8899AA"
-                    st.markdown(
-                        f"<div title='{label}' style='"
-                        f"padding-top:6px;"
-                        f"font-size:0.82rem;"
-                        f"color:{label_color};"
-                        f"white-space:nowrap;"
-                        f"overflow:hidden;"
-                        f"text-overflow:ellipsis;"
-                        f"'>{label}</div>",
-                        unsafe_allow_html=True,
-                    )
+        with col_label:
+            label_color = "#E8EDF3" if enabled else "#8899AA"
+            st.markdown(
+                f"<div title='{label}' style='"
+                f"padding-top:6px;"
+                f"font-size:0.82rem;"
+                f"color:{label_color};"
+                f"white-space:nowrap;"
+                f"overflow:hidden;"
+                f"text-overflow:ellipsis;"
+                f"'>{label}</div>",
+                unsafe_allow_html=True,
+            )
 
-                with col_value:
-                    if not enabled:
-                        st.text_input(
-                            " ",  # placeholder
-                            value=str(default),
-                            disabled=True,
-                            key=f"{key_prefix}_{sig_name}_val_disabled",
-                            label_visibility="collapsed",
-                        )
-                    elif vtype == "number":
-                        val = st.number_input(
-                            label,
-                            min_value=opts["min"],
-                            max_value=opts["max"],
-                            value=default,
-                            step=opts["step"],
-                            key=f"{key_prefix}_{sig_name}_val",
-                            label_visibility="collapsed",
-                        )
-                        selected_signals[sig_name] = val
-                    elif vtype == "select":
-                        val = st.selectbox(
-                            label,
-                            opts,
-                            index=opts.index(default) if default in opts else 0,
-                            key=f"{key_prefix}_{sig_name}_val",
-                            label_visibility="collapsed",
-                        )
-                        selected_signals[sig_name] = val
-                    elif vtype == "text":
-                        val = st.text_input(
-                            label,
-                            value=str(default),
-                            key=f"{key_prefix}_{sig_name}_val",
-                            label_visibility="collapsed",
-                        )
-                        selected_signals[sig_name] = val
+        with col_value:
+            if not enabled:
+                st.text_input(
+                    " ",
+                    value=str(default),
+                    disabled=True,
+                    key=f"{key_prefix}_{sig_name}_val_disabled",
+                    label_visibility="collapsed",
+                )
+            elif vtype == "toggle":
+                selected_signals[sig_name] = default
+                st.text_input(
+                    " ",
+                    value=str(default),
+                    disabled=True,
+                    key=f"{key_prefix}_{sig_name}_val",
+                    label_visibility="collapsed",
+                )
+            elif vtype == "number":
+                val = st.number_input(
+                    label,
+                    min_value=opts["min"],
+                    max_value=opts["max"],
+                    value=default,
+                    step=opts["step"],
+                    key=f"{key_prefix}_{sig_name}_val",
+                    label_visibility="collapsed",
+                )
+                selected_signals[sig_name] = val
+            elif vtype == "select":
+                val = st.selectbox(
+                    label,
+                    opts,
+                    index=opts.index(default) if default in opts else 0,
+                    key=f"{key_prefix}_{sig_name}_val",
+                    label_visibility="collapsed",
+                )
+                selected_signals[sig_name] = val
+            elif vtype == "select_window":
+                val = st.selectbox(
+                    label,
+                    opts,
+                    index=0,
+                    key=f"{key_prefix}_{sig_name}_val",
+                    label_visibility="collapsed",
+                )
+                selected_signals[sig_name] = WINDOW_STATE_TO_PCT[val]
+            elif vtype == "text":
+                val = st.text_input(
+                    label,
+                    value=str(default),
+                    key=f"{key_prefix}_{sig_name}_val",
+                    label_visibility="collapsed",
+                )
+                selected_signals[sig_name] = val
 
     return selected_signals
 
 
 def signals_summary(signals: Dict) -> str:
-    """生成已选信号的简短摘要"""
+    """Generate a short summary of selected action signals."""
     if not signals:
-        return "No signals selected"
+        return "No actions selected"
     parts = [f"{k}={v}" for k, v in signals.items()]
     return ", ".join(parts)

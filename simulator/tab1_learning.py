@@ -334,14 +334,26 @@ def _show_knowledge_graph(username: str):
 # ═══════════════════════════════════════════════════
 
 def _build_event(ctx_data: dict, signals: dict) -> dict:
-    """从 UI 输入构造信号事件 dict"""
+    """从 UI 输入构造信号事件 dict (trigger + action signals)"""
     date_str = ctx_data["date"]
     time_str = ctx_data["time"]
     ts = f"{date_str}T{time_str}"
 
-    signal_list = [
-        {"t": ts, "signal": "engine_status", "value": "on"},
-    ]
+    signal_list = []
+
+    # ── Trigger signals (vehicle state context) ──
+    if ctx_data.get("gps_latitude") is not None:
+        signal_list.append({"t": ts, "signal": "gps_latitude", "value": ctx_data["gps_latitude"]})
+        signal_list.append({"t": ts, "signal": "gps_longitude", "value": ctx_data["gps_longitude"]})
+
+    signal_list.append({"t": ts, "signal": "vehicle_speed", "value": ctx_data.get("speed_kph", 0.0)})
+    signal_list.append({"t": ts, "signal": "gear_position", "value": ctx_data.get("gear", "P")})
+
+    wiper = ctx_data.get("wiper", "off")
+    if wiper != "off":
+        signal_list.append({"t": ts, "signal": "wiper_state", "value": wiper})
+
+    # ── Action signals (user behaviors) ──
     for sig_name, value in signals.items():
         signal_list.append({
             "t": ts,
