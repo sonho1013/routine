@@ -18,7 +18,26 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from scenarios.mock_data_generator import generate_full_dataset
-from scripts.video_gen.config import MANIFEST_PATH, LLM_SYSTEM_PROMPT, STYLE_SUFFIX
+from scripts.video_gen.config import MANIFEST_PATH, LLM_SYSTEM_PROMPT, STYLE_SUFFIX, CINEMATIC_SIGNALS
+
+
+def filter_cinematic_actions(signals: list[dict]) -> list[dict]:
+    """Return only signals whose name is in CINEMATIC_SIGNALS.
+
+    For signals that repeat within the scene (e.g. hvac_temp_target set
+    twice), keep only the last occurrence — the final state is what gets
+    shown on screen.
+    """
+    last_by_name: dict[str, dict] = {}
+    order: list[str] = []
+    for sig in signals:
+        name = sig.get("signal", "")
+        if name not in CINEMATIC_SIGNALS:
+            continue
+        if name not in last_by_name:
+            order.append(name)
+        last_by_name[name] = sig
+    return [last_by_name[n] for n in order]
 
 
 # ── Signal-to-action mapping ──
