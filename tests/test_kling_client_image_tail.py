@@ -20,8 +20,7 @@ def test_image_to_video_sends_image_tail_when_provided():
             duration="5",
         )
 
-    _, kwargs = mpost.call_args
-    body = kwargs["body"] if "body" in kwargs else mpost.call_args.args[1]
+    body = mpost.call_args.args[1]
     assert body["image"] == "AAAA"
     assert body["image_tail"] == "BBBB"
 
