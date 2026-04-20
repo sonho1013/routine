@@ -142,6 +142,7 @@ class KlingClient:
         self,
         prompt: str,
         image_b64: str,
+        image_tail_b64: str | None = None,
         negative_prompt: str = "",
         model_name: str = "kling-v2-1-master",
         cfg_scale: float = 0.5,
@@ -149,7 +150,13 @@ class KlingClient:
         aspect_ratio: str = "16:9",
         duration: str = "5",
     ) -> str:
-        """Submit an I2V task, poll until done, return the first video URL."""
+        """Submit an I2V task, poll until done, return the first video URL.
+
+        If `image_tail_b64` is provided, Kling interpolates motion between
+        the two keyframes. The caller is responsible for choosing a model
+        that supports `image_tail` (e.g. kling-v1-6); this method does not
+        validate model capability.
+        """
         if len(prompt) > 2500:
             raise KlingError(
                 f"I2V prompt is {len(prompt)} chars; Kling limit is 2500"
@@ -168,6 +175,8 @@ class KlingClient:
             "aspect_ratio": aspect_ratio,
             "duration": duration,
         }
+        if image_tail_b64:
+            body["image_tail"] = image_tail_b64
         if negative_prompt:
             body["negative_prompt"] = negative_prompt
 

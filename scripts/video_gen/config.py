@@ -94,7 +94,7 @@ Output strictly as JSON (no markdown fences):
 
 # ── Kling Model Settings ──
 KLING_IMAGE_MODEL = "kling-v3"  # KlingImageGenModelName
-KLING_VIDEO_MODEL = "kling-v3"  # KlingVideoGenModelName
+KLING_VIDEO_MODEL = "kling-v1-6"  # I2V: must support image_tail
 KLING_VIDEO_MODE = "pro"
 KLING_VIDEO_DURATION = "5"  # seconds
 KLING_VIDEO_ASPECT = "16:9"
