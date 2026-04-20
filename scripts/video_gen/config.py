@@ -102,3 +102,32 @@ KLING_VIDEO_CFG = 0.5
 
 # OpenAI model for prompt generation
 OPENAI_MODEL = "gpt-4o"
+
+# ── Cinematic Signal Whitelist ──
+# Only signals listed here get their own storyboard shot. Priority is an
+# LLM ordering hint, not a hard constraint. See
+# docs/superpowers/specs/2026-04-20-video-shot-sequencing-design.md.
+CINEMATIC_SIGNALS: dict[str, dict] = {
+    "engine_status":    {"role_prefix": "action_engine",     "priority": 10},
+    "gear_position":    {"role_prefix": "action_gear",       "priority": 20},
+    "nav_destination":  {"role_prefix": "action_nav",        "priority": 30},
+    "nav_route_pref":   {"role_prefix": "action_route",      "priority": 31},
+    "hvac_temp_target": {"role_prefix": "action_hvac",       "priority": 40},
+    "media_content_id": {"role_prefix": "action_media",      "priority": 50},
+    "drive_mode":       {"role_prefix": "action_drive_mode", "priority": 60},
+    "wiper_state":      {"role_prefix": "action_wiper",      "priority": 70},
+    "window_position":  {"role_prefix": "action_window",     "priority": 71},
+    "door_status":      {"role_prefix": "action_door",       "priority": 80},
+    "keyless_entry":    {"role_prefix": "action_keyless",    "priority": 81},
+}
+
+# Character preamble reused on every T2I keyframe prompt to keep Mary consistent.
+# Kept ≤120 chars so the final T2I prompt (preamble + keyframe.prompt + STYLE_SUFFIX_REF)
+# fits under Kling's 500-char limit.
+MARY_CHARACTER_PREAMBLE = (
+    "Mary, a 30yo European woman, light brown hair casual updo, "
+    "light blue jacket, cream top, thin wool scarf."
+)
+assert len(MARY_CHARACTER_PREAMBLE) <= 120, (
+    f"MARY_CHARACTER_PREAMBLE is {len(MARY_CHARACTER_PREAMBLE)} chars; must be ≤120"
+)
