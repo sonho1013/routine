@@ -64,6 +64,35 @@ assert len(CHARACTER_REF_PROMPT) < 500, (
     f"Kling Image Gen limit is 500"
 )
 
+# Alias: MARY_REF_PROMPT is the preferred name going forward; the old
+# CHARACTER_REF_PROMPT name is kept so obsolete modules still import cleanly.
+MARY_REF_PROMPT = CHARACTER_REF_PROMPT
+
+CAR_EXTERIOR_REF_PROMPT = (
+    "Parisian street in soft morning light, a Renault electric car parked "
+    "by the curb. Three-quarter exterior view, silver Renault diamond "
+    "losange logo clearly visible on the front grille. Cream Haussmannian "
+    "facade in the background, empty sidewalk, no people. "
+    + STYLE_SUFFIX_REF
+)
+assert len(CAR_EXTERIOR_REF_PROMPT) < 500, (
+    f"CAR_EXTERIOR_REF_PROMPT is {len(CAR_EXTERIOR_REF_PROMPT)} chars; "
+    f"Kling Image Gen limit is 500"
+)
+
+CAR_INTERIOR_REF_PROMPT = (
+    "First-person POV from a Renault electric car's driver seat. Clean "
+    "modern dashboard with central touchscreen IVI, climate control "
+    "panel, gear shifter in P. Steering wheel in frame with the silver "
+    "Renault diamond losange logo on the hub. Empty seat, no person, "
+    "soft natural cabin light. "
+    + STYLE_SUFFIX_REF
+)
+assert len(CAR_INTERIOR_REF_PROMPT) < 500, (
+    f"CAR_INTERIOR_REF_PROMPT is {len(CAR_INTERIOR_REF_PROMPT)} chars; "
+    f"Kling Image Gen limit is 500"
+)
+
 # ── LLM Prompt Generation ──
 LLM_SYSTEM_PROMPT = """\
 You are a cinematic scene writer for French-style animated short films \
@@ -95,6 +124,7 @@ Output strictly as JSON (no markdown fences):
 # ── Kling Model Settings ──
 KLING_IMAGE_MODEL = "kling-v3"  # KlingImageGenModelName
 KLING_VIDEO_MODEL = "kling-v1-6"  # I2V: must support image_tail
+KLING_OMNI_MODEL = "kling-video-o1"   # OmniVideo multi-image storytelling
 KLING_VIDEO_MODE = "pro"
 KLING_VIDEO_DURATION = "5"  # seconds
 KLING_VIDEO_ASPECT = "16:9"
