@@ -68,17 +68,17 @@ def test_rejects_wrong_keyframe_count():
         load_storyboard(bad)
 
 
-def test_rejects_keyframe_prompt_over_280_chars():
+def test_rejects_keyframe_prompt_over_300_chars():
     bad = {"scene_id": "x", "scene_summary": "s",
            "keyframes": [
-               {"id": "kf0", "role": "r", "prompt": "x" * 281},
+               {"id": "kf0", "role": "r", "prompt": "x" * 301},
                {"id": "kf1", "role": "r", "prompt": "p"},
            ],
            "shots": [
                {"id": "s1", "from_kf": "kf0", "to_kf": "kf1",
                 "duration": "5", "narrative_role": "r", "motion_prompt": "m"}
            ]}
-    with pytest.raises(StoryboardValidationError, match="280"):
+    with pytest.raises(StoryboardValidationError, match="300"):
         load_storyboard(bad)
 
 

@@ -41,7 +41,7 @@ class Storyboard:
     shots: tuple[Shot, ...]
 
 
-_KF_PROMPT_LIMIT = 280
+_KF_PROMPT_LIMIT = 300
 _MOTION_PROMPT_LIMIT = 2400
 
 
@@ -56,7 +56,7 @@ def load_storyboard(data: dict) -> Storyboard:
       2. keyframe count == len(shots) + 1
       3. Every shot's from_kf / to_kf resolves to a known keyframe id
       4. Consecutive shots are continuous (shots[i].to_kf == shots[i+1].from_kf)
-      5. Prompt length limits (keyframe ≤ 280, motion_prompt ≤ 2400)
+      5. Prompt length limits (keyframe ≤ 300, motion_prompt ≤ 2400)
     """
     for key in ("scene_id", "scene_summary", "keyframes", "shots"):
         if key not in data:
@@ -176,7 +176,7 @@ def generate_storyboard(
     scene: dict,
     cinematic_actions: list[dict],
     model: str = "gpt-4o",
-    max_retries: int = 1,
+    max_retries: int = 3,
 ) -> Storyboard:
     """Call OpenAI to produce a validated Storyboard for the given scene.
 

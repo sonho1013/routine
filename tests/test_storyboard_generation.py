@@ -57,7 +57,7 @@ def test_retries_once_on_validation_error_then_succeeds():
     assert sb.scene_id == "day1_morning_commute"
 
 
-def test_raises_after_second_validation_failure():
+def test_raises_after_last_validation_failure():
     bad = json.dumps({"scene_id": "x", "scene_summary": "s",
                       "keyframes": [], "shots": []})
     with pytest.raises(StoryboardValidationError):
@@ -65,6 +65,7 @@ def test_raises_after_second_validation_failure():
             openai_client=_fake_openai([bad, bad]),
             scene={"id": "x", "llm_user_prompt": "hello"},
             cinematic_actions=[],
+            max_retries=1,
         )
 
 

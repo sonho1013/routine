@@ -156,7 +156,7 @@ Rules:
 - Match lighting/palette to the time of day given in the scene metadata.
 - Mention the Renault silver diamond losange logo when the steering wheel \
   or dashboard is visible.
-- Each keyframe.prompt ≤ 280 chars (hard limit; shorter is better).
+- Each keyframe.prompt ≤ 300 chars (hard limit; shorter is better).
 - Each shot.motion_prompt ≤ 2400 chars but target 2-4 sentences.
 - End every keyframe.prompt with: French animation style, watercolour textures, \
   soft pastel palette, ink linework.
