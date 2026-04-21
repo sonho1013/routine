@@ -96,11 +96,9 @@ def test_rejects_middle_beat_not_cabin_pov():
 
 
 def test_rejects_wrong_middle_beat_count():
-    # 4 actions → expect ceil(4/3)=2 POV beats, but we supply only 1
-    raw = _valid_storyboard([_pov("beat2", ["engine_status",
-                                            "gear_position",
-                                            "nav_destination",
-                                            "hvac_temp_target"])])
+    # 4 actions → expect ceil(4/3)=2 POV beats; supply 1 beat with 2 actions
+    # so rule 5 (per-beat bounds) passes cleanly and only rule 4 fires.
+    raw = _valid_storyboard([_pov("beat2", ["engine_status", "gear_position"])])
     with pytest.raises(StoryboardValidationError, match="POV beat count"):
         load_storyboard(raw, expected_actions=[
             "engine_status", "gear_position",
@@ -109,22 +107,22 @@ def test_rejects_wrong_middle_beat_count():
 
 
 def test_rejects_pov_beat_with_too_many_actions():
+    # Schema-only check (expected_actions=None) isolates rule 5 from rule 4.
     raw = _valid_storyboard([_pov("beat2", [
         "engine_status", "gear_position",
         "nav_destination", "hvac_temp_target",
     ])])
     with pytest.raises(StoryboardValidationError, match="at most 3"):
-        load_storyboard(raw, expected_actions=[
-            "engine_status", "gear_position",
-            "nav_destination", "hvac_temp_target",
-        ])
+        load_storyboard(raw, expected_actions=None)
 
 
 def test_rejects_empty_pov_beat():
+    # 1 action → expect 1 POV beat; supply 1 beat with 0 actions so rule 4
+    # passes (count matches) and only rule 5 fires on the per-beat bound.
     raw = _valid_storyboard([_pov("beat2", [])])
     with pytest.raises(StoryboardValidationError,
                        match="at least 1"):
-        load_storyboard(raw, expected_actions=[])
+        load_storyboard(raw, expected_actions=["engine_status"])
 
 
 def test_rejects_action_multiset_mismatch():

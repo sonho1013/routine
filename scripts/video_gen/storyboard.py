@@ -123,26 +123,9 @@ def load_storyboard(
         expected_count = math.ceil(len(expected_actions) / _POV_MAX_ACTIONS) \
             if expected_actions else 0
         if len(middle) != expected_count:
-            # Also surface per-beat violations in the same error so that
-            # tests checking "at most 3" or "at least 1" still match when
-            # the count is simultaneously wrong.
-            beat_detail = ""
-            for b in middle:
-                if len(b.actions) > _POV_MAX_ACTIONS:
-                    beat_detail = (
-                        f"; beat {b.id} has {len(b.actions)} actions "
-                        f"(at most {_POV_MAX_ACTIONS} allowed)"
-                    )
-                    break
-                if len(b.actions) < 1:
-                    beat_detail = (
-                        f"; beat {b.id} has 0 actions (at least 1 required)"
-                    )
-                    break
             raise StoryboardValidationError(
                 f"POV beat count mismatch: got {len(middle)}, "
                 f"expected {expected_count} for {len(expected_actions)} actions"
-                f"{beat_detail}"
             )
 
     # 5. per-beat action-count bounds
