@@ -103,8 +103,14 @@ class KlingClient:
         n: int = 1,
         image_fidelity: float = 0.5,
         human_fidelity: float = 0.45,
+        image_reference_b64: str | None = None,
+        reference_type: str = "subject",
     ) -> str:
-        """Submit a T2I task, poll until done, return the first image URL."""
+        """Submit a T2I task, poll until done, return the first image URL.
+
+        When `image_reference_b64` is provided, Kling uses it as a subject/style
+        anchor. `reference_type` is "subject" (lock face/identity) or "face".
+        """
         if len(prompt) > 500:
             raise KlingError(
                 f"T2I prompt is {len(prompt)} chars; Kling limit is 500"
@@ -124,6 +130,9 @@ class KlingClient:
         }
         if negative_prompt:
             body["negative_prompt"] = negative_prompt
+        if image_reference_b64:
+            body["image_reference"] = image_reference_b64
+            body["reference_type"] = reference_type
 
         log.info(f"  Kling T2I submit ({model_name}): {prompt[:60]}...")
         resp = self._post("/v1/images/generations", body)
