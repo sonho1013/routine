@@ -235,9 +235,6 @@ def main() -> None:
 
     if not KLING_ACCESS_KEY or not KLING_SECRET_KEY:
         sys.exit("KLING_ACCESS_KEY / KLING_SECRET_KEY not set")
-    if not OPENAI_API_KEY and not args.ref_only:
-        sys.exit("OPENAI_API_KEY not set (required unless --ref-only)")
-
     kling = KlingClient(KLING_ACCESS_KEY, KLING_SECRET_KEY, KLING_API_BASE)
 
     ensure_reference_image(kling, regen=args.regen_ref)
@@ -246,6 +243,9 @@ def main() -> None:
 
     if not args.scene or not args.stage:
         sys.exit("--scene and --stage are required (unless --ref-only)")
+
+    if args.stage in ("storyboard", "all") and not OPENAI_API_KEY:
+        sys.exit("OPENAI_API_KEY not set (required for --stage storyboard/all)")
 
     scene = load_scene(args.scene)
 

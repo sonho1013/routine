@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 from scripts.video_gen.pipeline import build_arg_parser
 
 
