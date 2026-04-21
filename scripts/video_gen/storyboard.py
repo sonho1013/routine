@@ -145,3 +145,79 @@ def dump_storyboard(sb: Storyboard) -> dict:
                    "motion_prompt": s.motion_prompt}
                   for s in sb.shots],
     }
+
+
+import logging
+
+log = logging.getLogger(__name__)
+
+
+def _strip_markdown_fences(raw: str) -> str:
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
+        if raw.endswith("```"):
+            raw = raw[: raw.rfind("```")]
+    return raw.strip()
+
+
+def _build_user_prompt(scene: dict, cinematic_actions: list[dict]) -> str:
+    lines = [scene["llm_user_prompt"], "", "Cinematic actions for this scene:"]
+    if not cinematic_actions:
+        lines.append("(none — produce a 2-shot storyboard: exterior, then POV)")
+    else:
+        for a in cinematic_actions:
+            lines.append(f"- {a['signal']}: {a.get('value', '')}")
+    return "\n".join(lines)
+
+
+def generate_storyboard(
+    openai_client,
+    scene: dict,
+    cinematic_actions: list[dict],
+    model: str = "gpt-4o",
+    max_retries: int = 1,
+) -> Storyboard:
+    """Call OpenAI to produce a validated Storyboard for the given scene.
+
+    On validation failure, retries up to max_retries times with the error
+    message appended to the user prompt. After the final retry, re-raises
+    StoryboardValidationError.
+    """
+    from scripts.video_gen.config import STORYBOARD_SYSTEM_PROMPT
+
+    user_prompt = _build_user_prompt(scene, cinematic_actions)
+    last_error: StoryboardValidationError | None = None
+
+    for attempt in range(max_retries + 1):
+        prompt = user_prompt
+        if last_error is not None:
+            prompt += (
+                f"\n\nYour previous response failed validation: {last_error}\n"
+                "Fix the issue and return a valid storyboard."
+            )
+
+        resp = openai_client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": STORYBOARD_SYSTEM_PROMPT},
+                {"role": "user",   "content": prompt},
+            ],
+            max_tokens=2500,
+        )
+        raw = _strip_markdown_fences(resp.choices[0].message.content)
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            last_error = StoryboardValidationError(f"LLM returned non-JSON: {e}")
+            log.warning(f"attempt {attempt}: {last_error}")
+            continue
+
+        try:
+            return load_storyboard(data)
+        except StoryboardValidationError as e:
+            last_error = e
+            log.warning(f"attempt {attempt}: storyboard invalid: {e}")
+
+    assert last_error is not None
+    raise last_error
