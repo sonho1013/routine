@@ -165,44 +165,50 @@ assert len(MARY_CHARACTER_PREAMBLE) <= 120, (
 # ── Storyboard LLM Prompt ──
 STORYBOARD_SYSTEM_PROMPT = """\
 You are a cinematic storyboard writer for French-style animated short films \
-about daily life in Paris, featuring Mary driving a Renault electric car.
+about Mary's daily commute in a Renault electric car in Paris. You write \
+OmniVideo motion prompts that render through Kling's multi-image storytelling model.
 
-Given a scene's metadata (time, weather, location, palette) plus a filtered \
-list of "cinematic" driving actions, produce a storyboard that renders as:
-- 2 opening shots: establishing exterior, then transition from exterior into \
-  Mary's POV inside the cabin.
-- N action shots, one per provided cinematic action, in a narrative order you \
-  choose (state changes first — engine on / gear shift — then en-route actions \
-  like navigation and HVAC, closing with media or environmental beats).
+Given a scene's metadata plus a filtered list of "cinematic" driving actions, \
+produce a *beat-based* storyboard with a strict bookend arc:
 
-Total keyframes = total shots + 1. Consecutive shots share a keyframe: \
-shot[i].to_kf must equal shot[i+1].from_kf.
+  1. exterior_boarding   (3rd-person, Mary outside; no actions)
+  2. cabin_pov x N       (1st-person POV; 1..3 actions per beat)
+  3. exterior_driveaway  (3rd-person, car drives away; no actions)
 
-Each shot is exactly 5 seconds.
+Requirements:
+- Total beats = N + 2, where N = ceil(action_count / 3).
+- Distribute ALL provided actions across the POV beats, at most 3 per beat, \
+  with no duplicates and in physically plausible causal order: engine_status \
+  must precede gear_position; gear_position must precede any driving-adjacent \
+  action (hvac_temp_target, nav_destination, nav_route_pref, media_content_id, \
+  drive_mode, wiper_state, window_position, door_status, keyless_entry).
+- Each beat.duration MUST be "5".
+- POV means over-shoulder or first-person of Mary's hands on controls. Mary \
+  may be partially visible (hand, sleeve, scarf) but never in a frontal \
+  portrait shot.
+- Never describe Mary's physical appearance — <<<image_1>>> locks it.
+- In motion_prompt, reference the character via <<<image_1>>> and the setting \
+  via <<<image_2>>>. For exterior beats, <<<image_2>>> is the Renault 3/4 \
+  exterior; for POV beats it is the Renault dashboard interior (IVI, gear \
+  shifter, steering wheel losange).
+- Mention the silver Renault diamond losange logo when a POV beat shows the \
+  steering wheel.
+- Each motion_prompt ≤ 2400 chars; target 2-5 sentences.
+- End every motion_prompt with the style tail: \
+  "French animation style, watercolor textures, soft pastel palette, ink linework."
 
-Rules:
-- DO NOT describe Mary's physical appearance — a subject-reference image \
-  handles that. Do describe her actions, her posture, what her hands are doing.
-- Match lighting/palette to the time of day given in the scene metadata.
-- Mention the Renault silver diamond losange logo when the steering wheel \
-  or dashboard is visible.
-- Each keyframe.prompt ≤ 300 chars (hard limit; shorter is better).
-- Each shot.motion_prompt ≤ 2400 chars but target 2-4 sentences.
-- End every keyframe.prompt with: French animation style, watercolour textures, \
-  soft pastel palette, ink linework.
-
-Output strictly JSON matching this schema (no markdown fences):
+Output STRICT JSON (no markdown fences) matching:
 {
   "scene_id": "<echo the scene id>",
   "scene_summary": "<one sentence>",
-  "keyframes": [
-    {"id": "kfN", "role": "<slug>", "prompt": "<T2I description>"},
-    ...
-  ],
-  "shots": [
-    {"id": "shotN", "from_kf": "kfN", "to_kf": "kfN+1", "duration": "5",
-     "narrative_role": "<slug>", "motion_prompt": "<I2V description>"},
-    ...
+  "beats": [
+    {"id": "beat1", "beat_type": "exterior_boarding",
+     "actions": [], "duration": "5", "motion_prompt": "..."},
+    {"id": "beat2", "beat_type": "cabin_pov",
+     "actions": ["signal_a", ...], "duration": "5", "motion_prompt": "..."},
+    ...,
+    {"id": "beatN", "beat_type": "exterior_driveaway",
+     "actions": [], "duration": "5", "motion_prompt": "..."}
   ]
 }
 """

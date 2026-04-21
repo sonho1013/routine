@@ -202,11 +202,6 @@ def dump_storyboard(sb: Storyboard) -> dict:
     }
 
 
-import logging
-
-log = logging.getLogger(__name__)
-
-
 def _strip_markdown_fences(raw: str) -> str:
     raw = raw.strip()
     if raw.startswith("```"):
@@ -217,12 +212,24 @@ def _strip_markdown_fences(raw: str) -> str:
 
 
 def _build_user_prompt(scene: dict, cinematic_actions: list[dict]) -> str:
-    lines = [scene["llm_user_prompt"], "", "Cinematic actions for this scene:"]
+    n_pov = math.ceil(len(cinematic_actions) / _POV_MAX_ACTIONS) \
+        if cinematic_actions else 0
+    total = n_pov + 2
+    lines = [
+        scene["llm_user_prompt"],
+        "",
+        f"Cinematic actions ({len(cinematic_actions)}):",
+    ]
     if not cinematic_actions:
-        lines.append("(none — produce a 2-shot storyboard: exterior, then POV)")
+        lines.append("(none — produce only the 2 exterior bookend beats)")
     else:
         for a in cinematic_actions:
-            lines.append(f"- {a['signal']}: {a.get('value', '')}")
+            lines.append(f"  - {a['signal']}: {a.get('value', '')}")
+    lines += [
+        "",
+        f"Produce {n_pov} cabin_pov beats between the two exterior bookends. "
+        f"Total beats: {total}.",
+    ]
     return "\n".join(lines)
 
 
@@ -233,7 +240,7 @@ def generate_storyboard(
     model: str = "gpt-4o",
     max_retries: int = 3,
 ) -> Storyboard:
-    """Call OpenAI to produce a validated Storyboard for the given scene.
+    """Call OpenAI to produce a validated beat-based Storyboard.
 
     On validation failure, retries up to max_retries times with the error
     message appended to the user prompt. After the final retry, re-raises
@@ -241,6 +248,7 @@ def generate_storyboard(
     """
     from scripts.video_gen.config import STORYBOARD_SYSTEM_PROMPT
 
+    expected_actions = [a["signal"] for a in cinematic_actions]
     user_prompt = _build_user_prompt(scene, cinematic_actions)
     last_error: StoryboardValidationError | None = None
 
@@ -249,7 +257,7 @@ def generate_storyboard(
         if last_error is not None:
             prompt += (
                 f"\n\nYour previous response failed validation: {last_error}\n"
-                "Fix the issue and return a valid storyboard."
+                "Fix the issue and return a valid beat-based storyboard."
             )
 
         resp = openai_client.chat.completions.create(
@@ -269,7 +277,7 @@ def generate_storyboard(
             continue
 
         try:
-            return load_storyboard(data)
+            return load_storyboard(data, expected_actions=expected_actions)
         except StoryboardValidationError as e:
             last_error = e
             log.warning(f"attempt {attempt}: storyboard invalid: {e}")
