@@ -81,11 +81,11 @@ assert len(CAR_EXTERIOR_REF_PROMPT) < 500, (
 )
 
 CAR_INTERIOR_REF_PROMPT = (
-    "First-person POV from a Renault electric car's driver seat. Clean "
-    "modern dashboard with central touchscreen IVI, climate control "
-    "panel, gear shifter in P. Steering wheel in frame with the silver "
-    "Renault diamond losange logo on the hub. Empty seat, no person, "
-    "soft natural cabin light. "
+    "First-person POV from a Renault driver seat. Central touchscreen "
+    "IVI glowing softly, showing a stylised nav map with a pastel route "
+    "line and rounded icon tiles for climate, media, drive-mode — no "
+    "text, no numbers. Steering wheel with the silver Renault losange "
+    "on the hub. Gear shifter in P. Empty seat, soft cabin light. "
     + STYLE_SUFFIX_REF
 )
 assert len(CAR_INTERIOR_REF_PROMPT) < 500, (
@@ -193,6 +193,14 @@ Requirements:
   shifter, steering wheel losange).
 - Mention the silver Renault diamond losange logo when a POV beat shows the \
   steering wheel.
+- When a POV beat shows the IVI touchscreen or dashboard display, describe \
+  the on-screen content as colored watercolor shapes, brushstroke route \
+  lines, and simple rounded icon tiles (e.g. a leaf for eco drive-mode, a \
+  musical note for media, a snowflake/sun for climate). NEVER write \
+  readable text, numbers, percentages, temperature values, speed values, \
+  track titles, or brand names onto the screen — watercolor animation \
+  cannot render small text legibly and attempting it produces garbled \
+  output. Suggest mood/meaning through color and icon only.
 - Each motion_prompt ≤ 2400 chars; target 2-5 sentences.
 - End every motion_prompt with the style tail: \
   "French animation style, watercolor textures, soft pastel palette, ink linework."
