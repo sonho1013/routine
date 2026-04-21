@@ -215,16 +215,23 @@ def _build_user_prompt(scene: dict, cinematic_actions: list[dict]) -> str:
     n_pov = math.ceil(len(cinematic_actions) / _POV_MAX_ACTIONS) \
         if cinematic_actions else 0
     total = n_pov + 2
-    lines = [
-        scene["llm_user_prompt"],
-        "",
-        f"Cinematic actions ({len(cinematic_actions)}):",
-    ]
+    lines = [scene["llm_user_prompt"], ""]
     if not cinematic_actions:
-        lines.append("(none — produce only the 2 exterior bookend beats)")
+        lines += [
+            "No cinematic actions for this scene.",
+            "(Produce only the 2 exterior bookend beats.)",
+        ]
     else:
+        signal_ids = [a["signal"] for a in cinematic_actions]
+        lines += [
+            f"Cinematic action signal_ids to place exactly once across the "
+            f"POV beats (use these exact strings in beat.actions[]):",
+            "  " + ", ".join(f'"{s}"' for s in signal_ids),
+            "",
+            "Observed values for context (do NOT put these in beat.actions):",
+        ]
         for a in cinematic_actions:
-            lines.append(f"  - {a['signal']}: {a.get('value', '')}")
+            lines.append(f"  - {a['signal']} = {a.get('value', '')}")
     lines += [
         "",
         f"Produce {n_pov} cabin_pov beats between the two exterior bookends. "
