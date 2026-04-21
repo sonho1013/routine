@@ -1,18 +1,20 @@
-"""
-Direct Kling Video Generation Pipeline — bypasses ComfyUI entirely.
+"""Multi-shot video generation pipeline.
 
-For each scene in scenes_manifest.json:
-  1. Ensure Mary reference image exists (cached, regenerate with --regen-ref)
-  2. Call OpenAI to expand structured scene data → cinematic video prompt
-  3. Submit to Kling I2V (image-to-video) using the cached reference
-  4. Poll until done, download the .mp4
+Two-stage workflow:
+  --stage storyboard   # LLM storyboard + T2I keyframes + contact sheet
+  --stage video        # I2V per shot + ffmpeg concat → per-scene mp4
+  --stage all          # both stages, no review gate (smoke test only)
 
-Usage:
-    python -m scripts.video_gen.pipeline                              # all 15 scenes
-    python -m scripts.video_gen.pipeline --ref-only                   # ref image only
-    python -m scripts.video_gen.pipeline --scene day1_morning_commute # one scene
-    python -m scripts.video_gen.pipeline --regen-ref                  # force re-gen ref
+Per-scene outputs live under:
+  output/videos/mary/dayN/<scene_type>/
+    storyboard.json
+    keyframes/{kf0..kfN}.png
+    keyframes/contact_sheet.png
+    shots/{shot1..shotN}.mp4
+    scene.mp4
 """
+from __future__ import annotations
+
 import argparse
 import json
 import logging
@@ -23,104 +25,179 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+from scripts.video_gen.concat import concat_shots
 from scripts.video_gen.config import (
     KLING_ACCESS_KEY,
-    KLING_SECRET_KEY,
     KLING_API_BASE,
+    KLING_IMAGE_MODEL,
+    KLING_SECRET_KEY,
+    MANIFEST_PATH,
     OPENAI_API_KEY,
     OPENAI_MODEL,
     OUTPUT_DIR,
-    MANIFEST_PATH,
-    LLM_SYSTEM_PROMPT,
-    CHARACTER_REF_PROMPT,
-    NEGATIVE_PROMPT,
-    KLING_IMAGE_MODEL,
-    KLING_VIDEO_MODEL,
-    KLING_VIDEO_MODE,
-    KLING_VIDEO_DURATION,
-    KLING_VIDEO_ASPECT,
-    KLING_VIDEO_CFG,
 )
-from scripts.video_gen.kling_client import KlingClient, KlingError, encode_image_b64
+from scripts.video_gen.contact_sheet import build_contact_sheet
+from scripts.video_gen.keyframes import generate_keyframes
+from scripts.video_gen.kling_client import KlingClient
+from scripts.video_gen.scene_extractor import filter_cinematic_actions
+from scripts.video_gen.shots import generate_shots
+from scripts.video_gen.storyboard import (
+    dump_storyboard,
+    generate_storyboard,
+    load_storyboard_file,
+)
 
 log = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-)
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 REF_IMAGE_PATH = os.path.join(OUTPUT_DIR, "mary", "reference.png")
 
-# Compact negative prompt for T2I (Kling limit: 200 chars)
-# Note: "logo" intentionally NOT in this list — we WANT the Renault losange logo.
-NEGATIVE_PROMPT_REF = (
-    "photorealistic, 3D render, CGI, anime, cartoon, low quality, "
-    "blurry, distorted face, deformed hands, text, watermark, "
-    "uncanny valley"
-)
-assert len(NEGATIVE_PROMPT_REF) < 200, (
-    f"NEGATIVE_PROMPT_REF is {len(NEGATIVE_PROMPT_REF)} chars; limit is 200"
-)
 
-
-# ═══════════════════════════════════════════════════
-# OpenAI client (lazy — only built when scenes are run, not for --ref-only)
-# ═══════════════════════════════════════════════════
+# ── OpenAI (lazy) ──
 
 def build_openai_client():
-    """Construct an OpenAI client, working around an env where ALL_PROXY=socks://...
-    is set (httpx ships without SOCKS support unless `httpx[socks]` is installed).
-    HTTP_PROXY/HTTPS_PROXY remain set so traffic still goes through the local proxy."""
-    # Strip socks proxy vars from env *for this process only* before httpx reads them
     for var in ("ALL_PROXY", "all_proxy"):
         os.environ.pop(var, None)
     from openai import OpenAI
     return OpenAI(api_key=OPENAI_API_KEY)
 
 
-# ═══════════════════════════════════════════════════
-# Scene prompt generation (OpenAI)
-# ═══════════════════════════════════════════════════
+# ── Scene manifest helpers ──
 
-def generate_scene_prompt(openai_client, user_prompt: str) -> str:
-    """Call OpenAI to expand structured scene data into a cinematic video prompt."""
-    resp = openai_client.chat.completions.create(
-        model=OPENAI_MODEL,
-        messages=[
-            {"role": "system", "content": LLM_SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-        max_tokens=600,
+def load_scene(scene_id: str) -> dict:
+    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+    for entry in manifest:
+        if entry["id"] == scene_id:
+            return entry
+    raise SystemExit(
+        f"scene '{scene_id}' not found. Available: {[e['id'] for e in manifest]}"
     )
-    raw = resp.choices[0].message.content.strip()
-    # Strip markdown fences if model added them despite instructions
-    if raw.startswith("```"):
-        raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
-        if raw.endswith("```"):
-            raw = raw[: raw.rfind("```")]
-        raw = raw.strip()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as e:
-        raise RuntimeError(f"OpenAI returned non-JSON: {raw[:200]}") from e
-    return data["prompt"]
 
 
-# ═══════════════════════════════════════════════════
-# Reference image (cached)
-# ═══════════════════════════════════════════════════
+def scene_output_dir(scene: dict) -> str:
+    """Per-scene directory: output/videos/mary/dayN/<scene_type>/"""
+    return os.path.join(OUTPUT_DIR, scene["output_path"])
+
+
+def load_raw_signals_for_scene(scene_id: str) -> list[dict]:
+    """Re-derive the raw signal list from the mock dataset.
+
+    Manifest entries only store pretty strings ('Sets AC to 22°C'), but
+    filter_cinematic_actions needs signal names. We re-run the generator
+    and match by scene id.
+    """
+    from scenarios.mock_data_generator import generate_full_dataset
+    data = generate_full_dataset()
+    for scene_type, events in data["scenes"].items():
+        if scene_type == "noise":
+            continue
+        for event in events:
+            eid = f"day{event['day']}_{scene_type}"
+            if eid == scene_id:
+                return event["signals"]
+    raise SystemExit(f"signals for scene '{scene_id}' not found in dataset")
+
+
+# ── Stage 1: storyboard + keyframes ──
+
+def run_storyboard_stage(
+    kling: KlingClient,
+    openai_client,
+    scene: dict,
+    regen_keyframe: str | None = None,
+    force: bool = False,
+) -> None:
+    out_dir = scene_output_dir(scene)
+    os.makedirs(out_dir, exist_ok=True)
+    kf_dir = os.path.join(out_dir, "keyframes")
+    sb_path = os.path.join(out_dir, "storyboard.json")
+
+    if regen_keyframe is None and (force or not os.path.exists(sb_path)):
+        log.info(f"=== {scene['id']} — generate storyboard ===")
+        raw_signals = load_raw_signals_for_scene(scene["id"])
+        cinematic = filter_cinematic_actions(raw_signals)
+        sb = generate_storyboard(
+            openai_client=openai_client,
+            scene=scene,
+            cinematic_actions=cinematic,
+            model=OPENAI_MODEL,
+        )
+        with open(sb_path, "w", encoding="utf-8") as f:
+            json.dump(dump_storyboard(sb), f, indent=2, ensure_ascii=False)
+        log.info(f"  storyboard → {sb_path}")
+    else:
+        log.info(f"=== {scene['id']} — storyboard cached: {sb_path} ===")
+        sb = load_storyboard_file(sb_path)
+
+    log.info(f"=== {scene['id']} — generate keyframes ({len(sb.keyframes)}) ===")
+    generate_keyframes(
+        kling=kling,
+        storyboard=sb,
+        out_dir=kf_dir,
+        ref_image_path=REF_IMAGE_PATH,
+        force=force,
+        only_kf_id=regen_keyframe,
+    )
+
+    sheet_path = build_contact_sheet(sb, kf_dir)
+    log.info(f"=== {scene['id']} — contact sheet: {sheet_path} ===")
+    log.info("Review the contact sheet. Re-roll any bad keyframe with:")
+    log.info(f"  --scene {scene['id']} --stage storyboard --regen-keyframe <kf_id>")
+
+
+# ── Stage 2: shots + concat ──
+
+def run_video_stage(
+    kling: KlingClient,
+    scene: dict,
+    force: bool = False,
+) -> None:
+    out_dir = scene_output_dir(scene)
+    kf_dir = os.path.join(out_dir, "keyframes")
+    shots_dir = os.path.join(out_dir, "shots")
+    sb_path = os.path.join(out_dir, "storyboard.json")
+    scene_mp4 = os.path.join(out_dir, "scene.mp4")
+
+    if not os.path.exists(sb_path):
+        raise SystemExit(
+            f"no storyboard at {sb_path} — run --stage storyboard first"
+        )
+
+    sb = load_storyboard_file(sb_path)
+
+    log.info(f"=== {scene['id']} — render shots ({len(sb.shots)}) ===")
+    shot_paths = generate_shots(
+        kling=kling,
+        storyboard=sb,
+        keyframes_dir=kf_dir,
+        shots_dir=shots_dir,
+        force=force,
+    )
+
+    log.info(f"=== {scene['id']} — concat → {scene_mp4} ===")
+    concat_shots(shot_paths=shot_paths, out_path=scene_mp4)
+    size_mb = os.path.getsize(scene_mp4) / (1024 * 1024)
+    log.info(f"=== {scene['id']} — done: {scene_mp4} ({size_mb:.2f} MB) ===")
+
+
+# ── Reference image ──
 
 def ensure_reference_image(kling: KlingClient, regen: bool = False) -> str:
-    """Generate Mary reference image if not cached. Returns local path."""
+    from scripts.video_gen.config import CHARACTER_REF_PROMPT
     if os.path.exists(REF_IMAGE_PATH) and not regen:
-        log.info(f"=== Reference image cached: {REF_IMAGE_PATH} ===")
+        log.info(f"=== reference image cached: {REF_IMAGE_PATH} ===")
         return REF_IMAGE_PATH
-
-    log.info("=== Generating Mary reference image ===")
-    log.info(f"  prompt length: {len(CHARACTER_REF_PROMPT)} chars")
+    log.info("=== generating Mary reference image ===")
+    ref_negative = (
+        "photorealistic, 3D render, CGI, anime, cartoon, low quality, "
+        "blurry, distorted face, deformed hands, text, watermark, "
+        "uncanny valley"
+    )
     url = kling.text_to_image(
         prompt=CHARACTER_REF_PROMPT,
-        negative_prompt=NEGATIVE_PROMPT_REF,
+        negative_prompt=ref_negative,
         model_name=KLING_IMAGE_MODEL,
         aspect_ratio="1:1",
         n=1,
@@ -131,150 +208,55 @@ def ensure_reference_image(kling: KlingClient, regen: bool = False) -> str:
     return REF_IMAGE_PATH
 
 
-# ═══════════════════════════════════════════════════
-# Single scene execution
-# ═══════════════════════════════════════════════════
+# ── CLI ──
 
-def run_scene(
-    kling: KlingClient,
-    openai_client,
-    ref_b64: str,
-    scene: dict,
-    force: bool = False,
-) -> bool:
-    """Generate one scene's video. Returns True if generated, False if skipped.
-
-    Skips (returns False) when the output .mp4 already exists, unless force=True.
-    Skipping happens BEFORE the OpenAI call, so resume-after-interrupt costs $0.
-    """
-    out_path = os.path.join(OUTPUT_DIR, scene["output_path"] + ".mp4")
-    if os.path.exists(out_path) and not force:
-        log.info(f"=== Scene: {scene['id']} — SKIP (already exists: {out_path}) ===")
-        return False
-
-    log.info(f"=== Scene: {scene['id']} ===")
-
-    # 1. Cinematic prompt via OpenAI
-    log.info("  → OpenAI scene prompt generation")
-    scene_prompt = generate_scene_prompt(openai_client, scene["llm_user_prompt"])
-    log.info(f"  prompt: {scene_prompt[:100]}...")
-
-    # Kling I2V prompt limit is 2500; the LLM is constrained to 2-3 sentences
-    # so this is mostly a safety net.
-    if len(scene_prompt) > 2500:
-        log.warning(f"  prompt too long ({len(scene_prompt)}), truncating to 2500")
-        scene_prompt = scene_prompt[:2500]
-
-    # 2. Submit I2V
-    video_url = kling.image_to_video(
-        prompt=scene_prompt,
-        image_b64=ref_b64,
-        negative_prompt=NEGATIVE_PROMPT,
-        model_name=KLING_VIDEO_MODEL,
-        cfg_scale=KLING_VIDEO_CFG,
-        mode=KLING_VIDEO_MODE,
-        aspect_ratio=KLING_VIDEO_ASPECT,
-        duration=KLING_VIDEO_DURATION,
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        description="Multi-shot Kling video generation pipeline"
     )
+    p.add_argument("--scene", type=str,
+                   help="Scene ID from the manifest, e.g. day1_morning_commute")
+    p.add_argument("--stage", type=str,
+                   choices=["storyboard", "video", "all"],
+                   help="Pipeline stage to run")
+    p.add_argument("--regen-keyframe", type=str, default=None,
+                   help="During --stage storyboard, re-roll only this keyframe ID")
+    p.add_argument("--force", action="store_true",
+                   help="Re-generate outputs even if they already exist")
+    p.add_argument("--ref-only", action="store_true",
+                   help="Only generate Mary reference portrait and exit")
+    p.add_argument("--regen-ref", action="store_true",
+                   help="Force regenerate cached Mary reference portrait")
+    return p
 
-    # 3. Download
-    kling.download(video_url, out_path)
-    return True
 
+def main() -> None:
+    args = build_arg_parser().parse_args()
 
-# ═══════════════════════════════════════════════════
-# Helpers
-# ═══════════════════════════════════════════════════
-
-def load_manifest() -> list[dict]:
-    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-# ═══════════════════════════════════════════════════
-# CLI
-# ═══════════════════════════════════════════════════
-
-def main():
-    parser = argparse.ArgumentParser(description="Direct Kling Video Generation Pipeline")
-    parser.add_argument("--ref-only", action="store_true",
-                        help="Generate Mary reference image only and exit")
-    parser.add_argument("--scene", type=str, default=None,
-                        help="Run a single scene by ID (e.g., day1_morning_commute)")
-    parser.add_argument("--regen-ref", action="store_true",
-                        help="Force regenerate the cached Mary reference image")
-    parser.add_argument("--force", action="store_true",
-                        help="Re-generate scenes even if their .mp4 already exists "
-                             "(default: skip existing — safe to resume after interrupt)")
-    args = parser.parse_args()
-
-    # Validate credentials early — fail-fast
     if not KLING_ACCESS_KEY or not KLING_SECRET_KEY:
-        log.error("KLING_ACCESS_KEY / KLING_SECRET_KEY not set in env or config.py")
-        sys.exit(1)
-    if not OPENAI_API_KEY:
-        log.error("OPENAI_API_KEY not set")
-        sys.exit(1)
-
-    log.info(f"Kling API base: {KLING_API_BASE}")
-    log.info(f"Output dir:     {OUTPUT_DIR}")
+        sys.exit("KLING_ACCESS_KEY / KLING_SECRET_KEY not set")
+    if not OPENAI_API_KEY and not args.ref_only:
+        sys.exit("OPENAI_API_KEY not set (required unless --ref-only)")
 
     kling = KlingClient(KLING_ACCESS_KEY, KLING_SECRET_KEY, KLING_API_BASE)
 
-    # Step A: ensure reference image (always needed for I2V)
-    ref_path = ensure_reference_image(kling, regen=args.regen_ref)
-
+    ensure_reference_image(kling, regen=args.regen_ref)
     if args.ref_only:
-        log.info("--ref-only set, exiting after reference image.")
         return
 
-    # OpenAI client only needed for scene runs (lazy init avoids socks-proxy issue
-    # blocking --ref-only path)
-    openai_client = build_openai_client()
+    if not args.scene or not args.stage:
+        sys.exit("--scene and --stage are required (unless --ref-only)")
 
-    # Encode reference image once, reuse across all scenes
-    log.info("Encoding reference image to base64...")
-    ref_b64 = encode_image_b64(ref_path)
-    log.info(f"  reference image base64 size: {len(ref_b64) // 1024} KB")
+    scene = load_scene(args.scene)
 
-    # Step B: scenes
-    manifest = load_manifest()
-    log.info(f"Loaded {len(manifest)} scenes from manifest")
+    if args.stage in ("storyboard", "all"):
+        openai_client = build_openai_client()
+        run_storyboard_stage(kling, openai_client, scene,
+                             regen_keyframe=args.regen_keyframe,
+                             force=args.force)
 
-    if args.scene:
-        scene = next((s for s in manifest if s["id"] == args.scene), None)
-        if not scene:
-            log.error(f"Scene '{args.scene}' not found.")
-            log.error(f"Available: {[s['id'] for s in manifest]}")
-            sys.exit(1)
-        try:
-            run_scene(kling, openai_client, ref_b64, scene, force=args.force)
-        except (KlingError, RuntimeError) as e:
-            log.error(f"FAILED: {scene['id']} — {e}")
-            sys.exit(1)
-        return
-
-    # Batch run (sequential)
-    ok, skipped, fail = 0, 0, 0
-    failed_ids = []
-    for i, scene in enumerate(manifest):
-        log.info(f"\n[{i + 1}/{len(manifest)}]")
-        try:
-            generated = run_scene(kling, openai_client, ref_b64, scene, force=args.force)
-            if generated:
-                ok += 1
-            else:
-                skipped += 1
-        except (KlingError, RuntimeError) as e:
-            log.error(f"  FAILED: {scene['id']} — {e}")
-            failed_ids.append(scene["id"])
-            fail += 1
-            continue
-
-    log.info(f"\n=== Done: {ok} generated, {skipped} skipped (already existed), {fail} failed ===")
-    if failed_ids:
-        log.info(f"Failed scenes: {failed_ids}")
-        log.info("Re-run individual failures with: --scene <id>")
+    if args.stage in ("video", "all"):
+        run_video_stage(kling, scene, force=args.force)
 
 
 if __name__ == "__main__":
