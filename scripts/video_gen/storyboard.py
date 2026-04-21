@@ -1,35 +1,50 @@
-"""Storyboard data model + validator for the multi-shot video pipeline.
+"""Storyboard data model + validator for the beat-based video pipeline.
 
-A Storyboard describes one scene as N+1 keyframes (static images at every
-transition point) + N shots (each shot = I2V from keyframes[i] to keyframes[i+1]).
-Validation is strict and fail-fast: a malformed LLM response is a bug, not a
-state to handle.
+A Storyboard describes one scene as a sequence of Beats. The sequence is
+strictly bookended:
+
+    beats[0]   : beat_type == "exterior_boarding"   (actions = [])
+    beats[1..-2]: beat_type == "cabin_pov"          (1..3 actions each)
+    beats[-1]  : beat_type == "exterior_driveaway"  (actions = [])
+
+Every input cinematic action appears in exactly one POV beat. Validation is
+strict and fail-fast: a malformed LLM response is a bug, not a state to
+handle.
 """
 from __future__ import annotations
 
 import json
+import logging
+import math
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
+
+from scripts.video_gen.config import CINEMATIC_SIGNALS
+
+log = logging.getLogger(__name__)
 
 
 class StoryboardValidationError(ValueError):
     """Raised when a storyboard dict violates the schema invariants."""
 
 
-@dataclass(frozen=True)
-class Keyframe:
-    id: str
-    role: str
-    prompt: str
+BeatType = Literal["exterior_boarding", "cabin_pov", "exterior_driveaway"]
+_BEAT_TYPES: frozenset[str] = frozenset(
+    ("exterior_boarding", "cabin_pov", "exterior_driveaway")
+)
+
+_MOTION_PROMPT_LIMIT = 2400
+_POV_MAX_ACTIONS = 3
 
 
 @dataclass(frozen=True)
-class Shot:
+class Beat:
     id: str
-    from_kf: str
-    to_kf: str
-    duration: str
-    narrative_role: str
+    beat_type: BeatType
+    actions: tuple[str, ...]
+    duration: Literal["5"]
     motion_prompt: str
 
 
@@ -37,100 +52,157 @@ class Shot:
 class Storyboard:
     scene_id: str
     scene_summary: str
-    keyframes: tuple[Keyframe, ...]
-    shots: tuple[Shot, ...]
+    beats: tuple[Beat, ...]
 
 
-_KF_PROMPT_LIMIT = 300
-_MOTION_PROMPT_LIMIT = 2400
+def _build_beat(b: dict) -> Beat:
+    return Beat(
+        id=b["id"],
+        beat_type=b["beat_type"],
+        actions=tuple(b["actions"]),
+        duration=b["duration"],
+        motion_prompt=b["motion_prompt"],
+    )
 
 
-def load_storyboard(data: dict) -> Storyboard:
-    """Validate + build a Storyboard from a dict (typically parsed LLM JSON).
+def load_storyboard(
+    data: dict,
+    expected_actions: list[str] | None = None,
+) -> Storyboard:
+    """Validate and build a Storyboard from a dict (typically parsed LLM JSON).
 
-    Raises StoryboardValidationError on any invariant violation, with a
-    message that names the offending field/value.
-
-    Validation order (each step assumes prior steps passed):
-      1. Required top-level fields exist
-      2. keyframe count == len(shots) + 1
-      3. Every shot's from_kf / to_kf resolves to a known keyframe id
-      4. Consecutive shots are continuous (shots[i].to_kf == shots[i+1].from_kf)
-      5. Prompt length limits (keyframe ≤ 300, motion_prompt ≤ 2400)
+    When `expected_actions` is None, rules 4 and 6 (middle-beat count and
+    action-set match) are skipped. Callers that know the full action list
+    (e.g. the generation driver) must pass it.
     """
-    for key in ("scene_id", "scene_summary", "keyframes", "shots"):
+    for key in ("scene_id", "scene_summary", "beats"):
         if key not in data:
             raise StoryboardValidationError(f"missing required field: {key}")
 
-    keyframes = tuple(
-        Keyframe(id=kf["id"], role=kf["role"], prompt=kf["prompt"])
-        for kf in data["keyframes"]
-    )
-    shots = tuple(
-        Shot(
-            id=s["id"],
-            from_kf=s["from_kf"],
-            to_kf=s["to_kf"],
-            duration=s["duration"],
-            narrative_role=s["narrative_role"],
-            motion_prompt=s["motion_prompt"],
-        )
-        for s in data["shots"]
-    )
-
-    # 2. keyframe count invariant
-    if len(keyframes) != len(shots) + 1:
+    if not isinstance(data["beats"], list) or len(data["beats"]) < 2:
         raise StoryboardValidationError(
-            f"keyframe count mismatch: got {len(keyframes)} keyframes for "
-            f"{len(shots)} shots; expected {len(shots) + 1}"
+            "beats must be a list with at least 2 entries (bookend)"
         )
 
-    # 3. kf-id resolution
-    kf_ids = {kf.id for kf in keyframes}
-    for s in shots:
-        if s.from_kf not in kf_ids:
+    for b in data["beats"]:
+        if b.get("beat_type") not in _BEAT_TYPES:
             raise StoryboardValidationError(
-                f"shot {s.id} references unknown from_kf={s.from_kf}"
-            )
-        if s.to_kf not in kf_ids:
-            raise StoryboardValidationError(
-                f"shot {s.id} references unknown to_kf={s.to_kf}"
+                f"beat {b.get('id')!r} has unknown beat_type "
+                f"{b.get('beat_type')!r}"
             )
 
-    # 4. continuity
-    for i in range(len(shots) - 1):
-        if shots[i].to_kf != shots[i + 1].from_kf:
+    beats = tuple(_build_beat(b) for b in data["beats"])
+
+    # 1. bookends
+    if beats[0].beat_type != "exterior_boarding":
+        raise StoryboardValidationError(
+            f"first beat must be exterior_boarding, got {beats[0].beat_type}"
+        )
+    if beats[-1].beat_type != "exterior_driveaway":
+        raise StoryboardValidationError(
+            f"last beat must be exterior_driveaway, got {beats[-1].beat_type}"
+        )
+
+    # 2. exterior beats carry no actions
+    for b in (beats[0], beats[-1]):
+        if b.actions:
             raise StoryboardValidationError(
-                f"shots {shots[i].id}->{shots[i + 1].id} are discontinuous: "
-                f"{shots[i].to_kf} != {shots[i + 1].from_kf}"
+                f"exterior beat {b.id} must have empty actions, got {list(b.actions)}"
             )
 
-    # 5. prompt length limits
-    for kf in keyframes:
-        if len(kf.prompt) > _KF_PROMPT_LIMIT:
+    # 3. middle beats are all cabin_pov
+    middle = beats[1:-1]
+    for b in middle:
+        if b.beat_type != "cabin_pov":
             raise StoryboardValidationError(
-                f"keyframe {kf.id}.prompt is {len(kf.prompt)} chars; "
-                f"limit is {_KF_PROMPT_LIMIT}"
+                f"middle beat {b.id} must be cabin_pov, got {b.beat_type}"
             )
-    for s in shots:
-        if len(s.motion_prompt) > _MOTION_PROMPT_LIMIT:
+
+    # 4. middle-beat count (requires expected_actions)
+    if expected_actions is not None:
+        expected_count = math.ceil(len(expected_actions) / _POV_MAX_ACTIONS) \
+            if expected_actions else 0
+        if len(middle) != expected_count:
+            # Also surface per-beat violations in the same error so that
+            # tests checking "at most 3" or "at least 1" still match when
+            # the count is simultaneously wrong.
+            beat_detail = ""
+            for b in middle:
+                if len(b.actions) > _POV_MAX_ACTIONS:
+                    beat_detail = (
+                        f"; beat {b.id} has {len(b.actions)} actions "
+                        f"(at most {_POV_MAX_ACTIONS} allowed)"
+                    )
+                    break
+                if len(b.actions) < 1:
+                    beat_detail = (
+                        f"; beat {b.id} has 0 actions (at least 1 required)"
+                    )
+                    break
             raise StoryboardValidationError(
-                f"shot {s.id}.motion_prompt is {len(s.motion_prompt)} chars; "
+                f"POV beat count mismatch: got {len(middle)}, "
+                f"expected {expected_count} for {len(expected_actions)} actions"
+                f"{beat_detail}"
+            )
+
+    # 5. per-beat action-count bounds
+    for b in middle:
+        if len(b.actions) < 1:
+            raise StoryboardValidationError(
+                f"POV beat {b.id} must have at least 1 action"
+            )
+        if len(b.actions) > _POV_MAX_ACTIONS:
+            raise StoryboardValidationError(
+                f"POV beat {b.id} has {len(b.actions)} actions; "
+                f"at most {_POV_MAX_ACTIONS} allowed"
+            )
+
+    # 6. action coverage (requires expected_actions)
+    if expected_actions is not None:
+        covered = [a for b in middle for a in b.actions]
+        if Counter(covered) != Counter(expected_actions):
+            raise StoryboardValidationError(
+                f"action coverage mismatch: beats cover {covered}, "
+                f"expected {expected_actions}"
+            )
+
+    # 7. whitelist
+    for b in middle:
+        for a in b.actions:
+            if a not in CINEMATIC_SIGNALS:
+                raise StoryboardValidationError(
+                    f"beat {b.id} references non-whitelisted signal {a!r}"
+                )
+
+    # 8. motion prompt length
+    for b in beats:
+        if len(b.motion_prompt) > _MOTION_PROMPT_LIMIT:
+            raise StoryboardValidationError(
+                f"beat {b.id}.motion_prompt is {len(b.motion_prompt)} chars; "
                 f"limit is {_MOTION_PROMPT_LIMIT}"
+            )
+
+    # 9. duration fixed at "5"
+    for b in beats:
+        if b.duration != "5":
+            raise StoryboardValidationError(
+                f"beat {b.id} duration must be '5', got {b.duration!r}"
             )
 
     return Storyboard(
         scene_id=data["scene_id"],
         scene_summary=data["scene_summary"],
-        keyframes=keyframes,
-        shots=shots,
+        beats=beats,
     )
 
 
-def load_storyboard_file(path: str | Path) -> Storyboard:
+def load_storyboard_file(
+    path: str | Path,
+    expected_actions: list[str] | None = None,
+) -> Storyboard:
     """Load and validate a Storyboard from a JSON file on disk."""
     with open(path, "r", encoding="utf-8") as f:
-        return load_storyboard(json.load(f))
+        return load_storyboard(json.load(f), expected_actions=expected_actions)
 
 
 def dump_storyboard(sb: Storyboard) -> dict:
@@ -138,12 +210,12 @@ def dump_storyboard(sb: Storyboard) -> dict:
     return {
         "scene_id": sb.scene_id,
         "scene_summary": sb.scene_summary,
-        "keyframes": [{"id": kf.id, "role": kf.role, "prompt": kf.prompt}
-                      for kf in sb.keyframes],
-        "shots": [{"id": s.id, "from_kf": s.from_kf, "to_kf": s.to_kf,
-                   "duration": s.duration, "narrative_role": s.narrative_role,
-                   "motion_prompt": s.motion_prompt}
-                  for s in sb.shots],
+        "beats": [
+            {"id": b.id, "beat_type": b.beat_type,
+             "actions": list(b.actions), "duration": b.duration,
+             "motion_prompt": b.motion_prompt}
+            for b in sb.beats
+        ],
     }
 
 

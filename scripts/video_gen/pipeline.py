@@ -36,11 +36,8 @@ from scripts.video_gen.config import (
     OPENAI_MODEL,
     OUTPUT_DIR,
 )
-from scripts.video_gen.contact_sheet import build_contact_sheet
-from scripts.video_gen.keyframes import generate_keyframes
 from scripts.video_gen.kling_client import KlingClient
 from scripts.video_gen.scene_extractor import filter_cinematic_actions
-from scripts.video_gen.shots import generate_shots
 from scripts.video_gen.storyboard import (
     dump_storyboard,
     generate_storyboard,
