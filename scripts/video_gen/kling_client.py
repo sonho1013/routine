@@ -200,6 +200,54 @@ class KlingClient:
             raise KlingError("I2V succeeded but returned no videos")
         return videos[0]["url"]
 
+    # ── OmniVideo (multi-image storytelling) ──
+
+    def omni_video(
+        self,
+        prompt: str,
+        image_list: list[str],
+        duration: str = "5",
+        mode: str = "pro",
+        aspect_ratio: str = "16:9",
+        model_name: str = "kling-video-o1",
+    ) -> str:
+        """Submit an OmniVideo multi-image task, poll until done, return
+        the first video URL.
+
+        `image_list` holds base64-encoded reference images in the order
+        the prompt binds them via <<<image_1>>>, <<<image_2>>>, ...
+        """
+        if not image_list:
+            raise KlingError("omni_video requires a non-empty image_list")
+        if len(prompt) > 2400:
+            raise KlingError(
+                f"OmniVideo prompt is {len(prompt)} chars; cap is 2400"
+            )
+        body = {
+            "model_name": model_name,
+            "mode": mode,
+            "duration": duration,
+            "aspect_ratio": aspect_ratio,
+            "prompt": prompt,
+            "image_list": [{"image_url": b64} for b64 in image_list],
+        }
+        log.info(
+            f"  Kling OmniVideo submit ({model_name}, {mode}, "
+            f"{duration}s, {len(image_list)} refs)"
+        )
+        resp = self._post("/v1/videos/omni-video", body)
+        task_id = resp["data"]["task_id"]
+        log.info(f"  OmniVideo task {task_id} submitted, polling...")
+
+        result = self._poll_task(
+            "/v1/videos/omni-video", task_id,
+            poll_interval=16, timeout=900,
+        )
+        videos = result["data"]["task_result"]["videos"]
+        if not videos:
+            raise KlingError("OmniVideo succeeded but returned no videos")
+        return videos[0]["url"]
+
     # ── Task polling ──
 
     def _poll_task(
