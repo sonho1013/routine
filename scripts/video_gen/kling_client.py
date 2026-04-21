@@ -131,8 +131,8 @@ class KlingClient:
         if negative_prompt:
             body["negative_prompt"] = negative_prompt
         if image_reference_b64:
-            body["image_reference"] = image_reference_b64
-            body["reference_type"] = reference_type
+            body["image"] = image_reference_b64
+            body["image_reference"] = reference_type
 
         log.info(f"  Kling T2I submit ({model_name}): {prompt[:60]}...")
         resp = self._post("/v1/images/generations", body)
