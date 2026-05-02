@@ -1,0 +1,5 @@
+# Renault demo OpenRouter model translation table.
+# Left = the model name our code asks for; right = OpenRouter's model id.
+gpt-4.1: openai/gpt-4-turbo
+gpt-4: openai/gpt-4-turbo
+text-embedding-ada-002: <not_supported>
