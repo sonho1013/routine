@@ -11,6 +11,7 @@ import streamlit as st
 from typing import List, Optional
 
 from engine.proactive_executor import parse_habit_actions
+from simulator.tab2_recommendation import _format_params_from_stats
 
 
 def _conf_badge(conf: float) -> str:
@@ -127,7 +128,15 @@ def render_knowledge_graph(
         scene = h.get("scene_name") or "—"
         context_str = _format_context(h)
         text = h.get("text", "")
-        params_str = _format_actions(text)
+        # Prefer aggregated raw_value_stats (numeric mean / categorical
+        # dominant_value) over regex-scanning habit.text — once GPT-4.1
+        # starts writing narrative habit descriptions the old regex misses.
+        params_str = _format_params_from_stats(
+            h.get("signal_name", ""),
+            h.get("raw_value_stats", {}),
+        )
+        if params_str == "—":
+            params_str = _format_actions(text)
         conf = h.get("confidence") or 0.0
         evidence = h.get("evidence_count", 0)
 

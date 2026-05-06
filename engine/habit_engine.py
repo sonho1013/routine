@@ -423,6 +423,7 @@ class HabitDemoEngine:
                 "text": h.text,
                 "signal_name": h.signal_name,
                 "signal_category": h.signal_category,
+                "raw_value_stats": h.raw_value_stats,
                 "scene_name": card.display_name if card else None,
                 "card_status": card.status if card else None,
                 "card_id": card.card_id if card else None,
