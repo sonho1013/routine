@@ -1,0 +1,47 @@
+{
+  "2e2f23577eb32f40a6cbe70ff217919e0ed86565c6c01d0628a75a4ab6adc3cb": {
+    "response": "sets cabin air conditioning to 22°C while parked at home on early workday mornings,1.0",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:30.881103+00:00"
+  },
+  "460b856e2ff4575865efe8575122587d4ab08349d33075dfc4967e65ba5aa2f0": {
+    "response": "starts navigation to work while parked at home in the early morning on workdays,1.0",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:32.150650+00:00"
+  },
+  "c3aad316521821dbde7c4335aa7ad90e2318b1ec1eed7c18e7e47604ba69d6d2": {
+    "response": "selects the fastest route preference while parked at home in the early morning on workdays,0.95",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:33.769170+00:00"
+  },
+  "64c9da4646c2704c91dc8963420a366d0f150e4411465284b6b6818259e7b626": {
+    "response": "lowers driver window fully while crawling at the office gate site entrance on workday mornings around 9am,1.0",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:35.728175+00:00"
+  },
+  "846a10b77f1c0dd0ba833402c560110dd68209688e23bb052b91090115ee9307": {
+    "response": "stops all media playback when parking at home in the evening on workdays,0.95",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:37.241456+00:00"
+  },
+  "cef5f69f9624d56c889e58dd283fcfbbdbd795c7072e6879d83af33c45bea4fa": {
+    "response": "disables keyless proximity entry when parked at home on weekday evenings,1.0",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:38.827374+00:00"
+  },
+  "9cd8f32b54d5a2a4e19524c2a8ba3c7f6836b41d973a428af0bf3ded5033be2b": {
+    "response": "Morning Workday Departure Routine",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:39.950026+00:00"
+  },
+  "ffb2c10addc6e3175e11e596c7a74539896675380f2262ecd1cf3b872113f0c7": {
+    "response": "Morning Window Down at Office Gate",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:40.750228+00:00"
+  },
+  "c9a1a4120ae9c16547cbd6d8a585d832e14f7cbad178097f05c02cb999fbb04e": {
+    "response": "Evening Home Arrival Routine",
+    "provider": "openai",
+    "cached_at": "2026-05-06T09:31:41.599984+00:00"
+  }
+}
