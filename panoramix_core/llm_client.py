@@ -1,44 +1,67 @@
-"""
-LLM 客户端 — 对齐 Panoramix core/llmclient.py 简化版
+"""LLM client — public façade preserving the original `.invoke(prompt) -> str` signature.
 
-接口: .invoke(prompt) -> str
-配置: OPENAI_API_KEY (env), HABIT_DETECTION_LLM_MODEL (config.py)
+Internals delegate to :class:`panoramix_core.llm_router.LLMRouter`, which walks
+OpenAI → OpenRouter → tunnel → cache and writes successes back to the cache.
 """
-import os
+from __future__ import annotations
+
 import logging
-from openai import OpenAI
-
-from panoramix_core.config import HABIT_DETECTION_LLM_MODEL
-
-
-def _fix_socks_proxy():
-    for var in ("ALL_PROXY", "HTTPS_PROXY", "HTTP_PROXY",
-                "all_proxy", "https_proxy", "http_proxy"):
-        val = os.environ.get(var, "")
-        if val.startswith("socks://"):
-            os.environ[var] = val.replace("socks://", "socks5://", 1)
+from panoramix_core.config import (
+    HABIT_DETECTION_LLM_MODEL,
+    OPENAI_BASE_URL,
+    OPENROUTER_API_KEY, OPENROUTER_BASE_URL,
+    TUNNEL_BASE_URL, TUNNEL_OPENAI_KEY,
+    OPENAI_TIMEOUT_CONNECT, OPENAI_TIMEOUT_READ,
+    OPENROUTER_TIMEOUT_CONNECT, OPENROUTER_TIMEOUT_READ,
+    TUNNEL_TIMEOUT_CONNECT, TUNNEL_TIMEOUT_READ,
+    LLM_CACHE_PATH, LLM_CACHE_READ_ONLY,
+    OPENROUTER_MODEL_MAP_PATH,
+)
+from panoramix_core.llm_cache import LLMCache
+from panoramix_core.llm_router import LLMRouter
+from panoramix_core.providers.openai_provider import OpenAIProvider
+from panoramix_core.providers.openrouter_provider import OpenRouterProvider
+from panoramix_core.providers.tunnel_provider import TunnelProvider
 
 log = logging.getLogger(__name__)
 
 
-class LLMClient:
-    """OpenAI Chat Completion 客户端，供 HabitsDetector 使用"""
+def _build_router() -> LLMRouter:
+    providers = []
+    providers.append(OpenAIProvider(
+        base_url=OPENAI_BASE_URL,
+        connect_timeout=OPENAI_TIMEOUT_CONNECT,
+        read_timeout=OPENAI_TIMEOUT_READ,
+    ))
+    if OPENROUTER_API_KEY:
+        providers.append(OpenRouterProvider(
+            api_key=OPENROUTER_API_KEY,
+            base_url=OPENROUTER_BASE_URL,
+            connect_timeout=OPENROUTER_TIMEOUT_CONNECT,
+            read_timeout=OPENROUTER_TIMEOUT_READ,
+            model_map_path=OPENROUTER_MODEL_MAP_PATH,
+        ))
+    if TUNNEL_BASE_URL and TUNNEL_OPENAI_KEY:
+        providers.append(TunnelProvider(
+            api_key=TUNNEL_OPENAI_KEY,
+            base_url=TUNNEL_BASE_URL,
+            connect_timeout=TUNNEL_TIMEOUT_CONNECT,
+            read_timeout=TUNNEL_TIMEOUT_READ,
+        ))
+    cache = LLMCache(LLM_CACHE_PATH, read_only=LLM_CACHE_READ_ONLY)
+    return LLMRouter(providers=providers, cache=cache)
 
-    def __init__(self, model: str = None, temperature: float = 0.2):
-        _fix_socks_proxy()
-        self.client = OpenAI()
+
+class LLMClient:
+    """Backwards-compatible façade for HabitsDetector and friends."""
+
+    def __init__(self, model: str | None = None, temperature: float = 0.2) -> None:
         self.model = model or HABIT_DETECTION_LLM_MODEL
         self.temperature = temperature
-        log.info(f"LLMClient initialized: model={self.model}")
+        self._router = _build_router()
+        log.info("LLMClient ready: model=%s providers=%s",
+                 self.model, [p.name for p in self._router.providers])
 
     def invoke(self, prompt: str) -> str:
-        """发送 prompt，返回纯文本响应"""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=self.temperature,
-            max_tokens=256,
-        )
-        result = response.choices[0].message.content.strip()
-        log.debug(f"LLM response: {result}")
-        return result
+        return self._router.invoke(prompt=prompt, model=self.model,
+                                   temperature=self.temperature)
