@@ -1,30 +1,46 @@
-"""
-Embedding 客户端 — 对齐 Panoramix core/azure_embedder.py
+"""Embedder — singleton façade preserving `.embed(text)` and `.embed_batch(texts)`.
 
-适配: 使用 OpenAI SDK 统一接口 (支持 OpenAI / Azure / 兼容 API)
-配置通过环境变量: OPENAI_API_KEY, OPENAI_API_BASE, EMBEDDING_MODEL
+Delegates to :class:`panoramix_core.embedding_router.EmbeddingRouter`, which
+walks OpenAI → tunnel → cache. (OpenRouter does not provide embeddings.)
 """
-import os
+from __future__ import annotations
+
 import logging
 from typing import List
-
 import numpy as np
-from openai import OpenAI
 
-from panoramix_core.config import EMBEDDING_MODEL
+from panoramix_core.config import (
+    EMBEDDING_MODEL,
+    OPENAI_BASE_URL,
+    TUNNEL_BASE_URL, TUNNEL_OPENAI_KEY,
+    OPENAI_TIMEOUT_CONNECT, OPENAI_TIMEOUT_READ,
+    TUNNEL_TIMEOUT_CONNECT, TUNNEL_TIMEOUT_READ,
+    EMBEDDING_CACHE_PATH, LLM_CACHE_READ_ONLY,
+)
+from panoramix_core.embedding_cache import EmbeddingCache
+from panoramix_core.embedding_router import EmbeddingRouter
+from panoramix_core.providers.openai_provider import OpenAIProvider
+from panoramix_core.providers.tunnel_provider import TunnelProvider
 
 
-def _fix_socks_proxy():
-    for var in ("ALL_PROXY", "HTTPS_PROXY", "HTTP_PROXY",
-                "all_proxy", "https_proxy", "http_proxy"):
-        val = os.environ.get(var, "")
-        if val.startswith("socks://"):
-            os.environ[var] = val.replace("socks://", "socks5://", 1)
+def _build_router() -> EmbeddingRouter:
+    providers = [OpenAIProvider(
+        base_url=OPENAI_BASE_URL,
+        connect_timeout=OPENAI_TIMEOUT_CONNECT,
+        read_timeout=OPENAI_TIMEOUT_READ,
+    )]
+    if TUNNEL_BASE_URL and TUNNEL_OPENAI_KEY:
+        providers.append(TunnelProvider(
+            api_key=TUNNEL_OPENAI_KEY,
+            base_url=TUNNEL_BASE_URL,
+            connect_timeout=TUNNEL_TIMEOUT_CONNECT,
+            read_timeout=TUNNEL_TIMEOUT_READ,
+        ))
+    cache = EmbeddingCache(EMBEDDING_CACHE_PATH, read_only=LLM_CACHE_READ_ONLY)
+    return EmbeddingRouter(providers=providers, cache=cache)
 
 
 class Embedder:
-    """OpenAI-compatible embedding 客户端 (单例)"""
-
     _instance = None
 
     def __new__(cls):
@@ -36,18 +52,13 @@ class Embedder:
     def __init__(self):
         if self._initialized:
             return
-        _fix_socks_proxy()
-        self.client = OpenAI()
         self.model = EMBEDDING_MODEL
+        self._router = _build_router()
         self._initialized = True
-        logging.info(f"Embedder initialized: model={self.model}")
+        logging.info("Embedder initialized: model=%s", self.model)
 
     def embed(self, text: str) -> List[float]:
-        """单条文本 → embedding 向量"""
-        response = self.client.embeddings.create(input=[text], model=self.model)
-        return response.data[0].embedding
+        return self._router.embed(text=text, model=self.model)
 
     def embed_batch(self, texts: List[str]) -> np.ndarray:
-        """批量文本 → embedding 矩阵 (N × dim)"""
-        response = self.client.embeddings.create(input=texts, model=self.model)
-        return np.array([item.embedding for item in response.data])
+        return np.array(self._router.embed_batch(texts=texts, model=self.model))
