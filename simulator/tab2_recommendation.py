@@ -25,14 +25,6 @@ log = logging.getLogger(__name__)
 USERS = ["Mary", "Tom", "Alice", "David", "Lena"]
 
 
-@st.cache_resource(show_spinner=False)
-def _get_llm_client():
-    """Per-session singleton LLMClient — drives GPT-4.1 calls in the
-    proactive recommendation flow via the OpenAI/OpenRouter/tunnel/cache chain."""
-    from panoramix_core.llm_client import LLMClient
-    return LLMClient()
-
-
 def render():
     """Tab 2 entry point"""
 
@@ -93,7 +85,11 @@ def render():
 def _load_status(username: str):
     try:
         from engine.habit_engine import HabitDemoEngine
-        engine = HabitDemoEngine(username=username.lower(), llm_client=_get_llm_client())
+        # Tab 2 is display + SQLite-only: _load_status reads habit_memory.db;
+        # accept/dismiss are pure UPDATE statements. Drift detection runs in
+        # Tab 1's ingest_signal_batch, not here. No LLM needed — pass None so
+        # we don't eagerly construct an OpenAI client we never use.
+        engine = HabitDemoEngine(username=username.lower(), llm_client=None)
         status = engine.get_status()
         engine.close()
         return status
@@ -371,7 +367,11 @@ def _format_actions(habit_text: str) -> str:
 def _handle_accept(username: str, card_id: str, display_name: str):
     try:
         from engine.habit_engine import HabitDemoEngine
-        engine = HabitDemoEngine(username=username.lower(), llm_client=_get_llm_client())
+        # Tab 2 is display + SQLite-only: _load_status reads habit_memory.db;
+        # accept/dismiss are pure UPDATE statements. Drift detection runs in
+        # Tab 1's ingest_signal_batch, not here. No LLM needed — pass None so
+        # we don't eagerly construct an OpenAI client we never use.
+        engine = HabitDemoEngine(username=username.lower(), llm_client=None)
         engine.scene_card_store.accept(card_id)
         engine.close()
         st.success(f"Scene card '{display_name}' accepted!")
@@ -383,7 +383,11 @@ def _handle_accept(username: str, card_id: str, display_name: str):
 def _handle_dismiss(username: str, card_id: str, display_name: str, status: str):
     try:
         from engine.habit_engine import HabitDemoEngine
-        engine = HabitDemoEngine(username=username.lower(), llm_client=_get_llm_client())
+        # Tab 2 is display + SQLite-only: _load_status reads habit_memory.db;
+        # accept/dismiss are pure UPDATE statements. Drift detection runs in
+        # Tab 1's ingest_signal_batch, not here. No LLM needed — pass None so
+        # we don't eagerly construct an OpenAI client we never use.
+        engine = HabitDemoEngine(username=username.lower(), llm_client=None)
         if status == "recommendation":
             engine.scene_card_store.reject_recommendation(card_id)
         else:
