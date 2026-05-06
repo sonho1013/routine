@@ -189,7 +189,13 @@ def _build_snapshot_habits_html(snapshot_habits: list) -> str:
         stats = h.get("raw_value_stats", {})
         count = stats.get("count", 0)
 
-        params_str = _format_actions(text)
+        # Prefer the aggregated raw_value_stats (numeric mean / categorical
+        # dominant_value) attached at cluster time — they are the source of
+        # truth for the control parameter. Fall back to regex-over-habit-text
+        # for legacy habits whose stats shape is unknown.
+        params_str = _format_params_from_stats(signal, stats)
+        if params_str == "—":
+            params_str = _format_actions(text)
         badge = _conf_badge(conf)
 
         params_block = ""
@@ -260,6 +266,64 @@ def _conf_badge(conf: float) -> str:
         f'font-size:0.75rem;font-weight:600;color:{color};background:{bg};">'
         f'{conf:.2f}</span>'
     )
+
+
+# signal_name → human label shown on the Control Params chip
+_SIGNAL_LABEL = {
+    "hvac_temp_target": "AC",
+    "hvac_power": "AC Power",
+    "seat_heating": "Seat Heat",
+    "nav_destination": "Nav",
+    "nav_route_pref": "Route",
+    "media_source": "Media",
+    "media_content_id": "Content",
+    "media_volume": "Vol",
+    "media_off": "Media",
+    "drive_mode": "Mode",
+    "acc_distance": "ACC",
+    "window_position": "Window",
+    "driver_window_position": "Driver Window",
+    "keyless_entry": "Keyless",
+    "engine_status": "Engine",
+}
+
+# signal_name → unit suffix
+_SIGNAL_UNIT = {
+    "hvac_temp_target": "°C",
+    "media_volume": "%",
+    "window_position": "%",
+    "driver_window_position": "%",
+}
+
+
+def _format_params_from_stats(signal: str, stats: dict) -> str:
+    """Render control params from the habit's aggregated raw_value_stats.
+
+    Numeric stats use the mean (rounded sensibly); categorical stats use the
+    dominant_value. Returns "—" when the signal is unknown or stats are empty.
+    """
+    if not signal or not stats:
+        return "—"
+    label = _SIGNAL_LABEL.get(signal, signal)
+    unit = _SIGNAL_UNIT.get(signal, "")
+    stype = stats.get("type")
+    if stype == "numeric":
+        mean = stats.get("mean")
+        if mean is None:
+            return "—"
+        # Integer-like (volume, window %) render without decimal;
+        # others (temperature) render one decimal.
+        if unit in ("%",) or float(mean).is_integer():
+            value = f"{int(round(mean))}"
+        else:
+            value = f"{mean:.1f}"
+        return f"{label}={value}{unit}"
+    if stype == "categorical":
+        dv = stats.get("dominant_value")
+        if not dv:
+            return "—"
+        return f"{label}={dv}"
+    return "—"
 
 
 def _format_actions(habit_text: str) -> str:
