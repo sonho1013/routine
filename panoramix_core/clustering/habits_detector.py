@@ -108,17 +108,17 @@ class HabitsDetector:
 
                 fact_texts = [item["fact"].text for item in cluster_items]
 
-                habit_text = self._get_habit_reword(fact_texts)
+                # 从聚类成员提取主导上下文（先算，给 reword 用）
+                cluster_ctx = _dominant_context(
+                    [item["fact"].context for item in cluster_items]
+                )
+
+                habit_text = self._get_habit_reword(fact_texts, context=cluster_ctx)
                 if not habit_text:
                     logging.warning(
                         f"HabitsDetector: could not reword cluster: {fact_texts}"
                     )
                     continue
-
-                # 从聚类成员提取主导上下文
-                cluster_ctx = _dominant_context(
-                    [item["fact"].context for item in cluster_items]
-                )
 
                 # 聚类置信度 → json_metadata
                 cc = cluster.get("confidence")
@@ -197,16 +197,21 @@ class HabitsDetector:
 
         return result
 
-    def reword_cluster(self, fact_texts: List[str]) -> str:
+    def reword_cluster(
+        self,
+        fact_texts: List[str],
+        context: Optional[StructuredContext] = None,
+    ) -> str:
         """
-        对一个 cluster 的 PREF 文本调 GPT reword。
+        对一个 cluster 的 PREF 文本调 GPT reword，结合该聚类的 StructuredContext
+        生成包含场景信息（时间/地点/车辆状态/POI 类型等）的习惯描述。
 
         沿用 _get_habit_reword 的 confidence 阈值与拒答处理；
         失败或 LLM=None 时降级到 fact_texts[0]。
         """
         if not fact_texts:
             return ""
-        out = self._get_habit_reword(fact_texts)
+        out = self._get_habit_reword(fact_texts, context=context)
         return out or fact_texts[0]
 
     def reword_scene(self, habit_texts: List[str]) -> str:
@@ -324,14 +329,21 @@ class HabitsDetector:
 
     # ── LLM Reword (对齐 Panoramix) ──
 
-    def _get_habit_reword(self, fact_texts: List[str]) -> Optional[str]:
-        """将集群中的 fact texts 通过 LLM 合并为单条习惯描述"""
+    def _get_habit_reword(
+        self,
+        fact_texts: List[str],
+        context: Optional[StructuredContext] = None,
+    ) -> Optional[str]:
+        """将集群中的 fact texts + 场景上下文通过 LLM 合并为单条习惯描述"""
         if self.llm is None:
             logging.warning("No LLM client — returning first fact text as habit")
             return fact_texts[0] if fact_texts else None
 
         joined = "\n".join(f"- {text}" for text in fact_texts)
-        prompt = self.prompt_template.format(facts=joined)
+        prompt = self.prompt_template.format(
+            facts=joined,
+            context=_format_context_for_prompt(context),
+        )
 
         try:
             raw = self.llm.invoke(prompt)
@@ -361,35 +373,119 @@ class HabitsDetector:
             return None
 
 
+# ── Context formatter for prompt ──
+
+
+def _format_context_for_prompt(ctx: Optional[StructuredContext]) -> str:
+    """Render a StructuredContext as a human-readable block for the LLM.
+
+    Skips fields that are None / "unknown" / empty so the LLM does not see
+    noise. Returns "(no useful context provided)" when nothing meaningful
+    survives the filter — matches the EX-3 example in the prompt.
+    """
+    if ctx is None:
+        return "(no useful context provided)"
+
+    rendered: List[str] = []
+
+    def _add(label: str, value):
+        if value is None:
+            return
+        if isinstance(value, str) and value.strip().lower() in ("", "unknown"):
+            return
+        rendered.append(f"{label}: {value}")
+
+    _add("time_bucket", getattr(ctx, "time_bucket", None))
+    hour = getattr(ctx, "hour", None)
+    if isinstance(hour, int) and 0 <= hour <= 23:
+        rendered.append(f"hour: {hour}")
+    weekday = getattr(ctx, "weekday", None)
+    if weekday is True:
+        rendered.append("weekday: workday")
+    elif weekday is False:
+        rendered.append("weekday: weekend")
+    _add("vehicle_state", getattr(ctx, "vehicle_state", None))
+    _add("geofence", getattr(ctx, "geofence", None))
+    _add("poi_type", getattr(ctx, "poi_type", None))
+    _add("wiper_state", getattr(ctx, "wiper_state", None))
+    _add("temp_bucket", getattr(ctx, "temp_bucket", None))
+    _add("door_lock", getattr(ctx, "door_lock", None))
+    _add("window_state", getattr(ctx, "window_state", None))
+    _add("approach_unlock", getattr(ctx, "approach_unlock", None))
+
+    if not rendered:
+        return "(no useful context provided)"
+    return "; ".join(rendered)
+
+
 # ── Context Distance 函数 (模块级，可单独测试) ──
 
 def context_distance(ctx_a: StructuredContext, ctx_b: StructuredContext) -> float:
     """
     计算两个 StructuredContext 之间的归一化距离 [0, 1]
 
-    维度权重：
-    - time_bucket: 0.35 (有序距离 / max_steps)
-    - vehicle_state: 0.30 (精确匹配 0/1)
-    - geofence: 0.25 (精确匹配 0/1)
-    - weekday: 0.10 (精确匹配 0/1)
+    与 trigger list 2.xlsx 对齐，10 维权重（合计 1.00）：
+    - time_bucket:     0.22 (有序距离)
+    - vehicle_state:   0.16 (speed/gear/ignition 复合态)
+    - geofence:        0.13 (GPS 匹配)
+    - wiper_state:     0.10 (核心的天气前置条件)
+    - poi_type:        0.09 (site_entrance / home / ...)
+    - weekday:         0.07
+    - temp_bucket:     0.06
+    - window_state:    0.06
+    - approach_unlock: 0.06
+    - door_lock:       0.05
 
     未知值 ("unknown" / None / -1) 视为中性 → 贡献 0.5
     """
-    dims = []
-
-    # time_bucket: 有序距离
-    dims.append((0.35, _time_bucket_distance(ctx_a.time_bucket, ctx_b.time_bucket)))
-
-    # vehicle_state: 精确匹配
-    dims.append((0.30, _categorical_distance(ctx_a.vehicle_state, ctx_b.vehicle_state)))
-
-    # geofence: 精确匹配
-    dims.append((0.25, _categorical_distance(ctx_a.geofence, ctx_b.geofence)))
-
-    # weekday: 精确匹配
-    dims.append((0.10, _weekday_distance(ctx_a.weekday, ctx_b.weekday)))
+    dims = [
+        (0.22, _time_bucket_distance(ctx_a.time_bucket, ctx_b.time_bucket)),
+        (0.16, _categorical_distance(ctx_a.vehicle_state, ctx_b.vehicle_state)),
+        (0.13, _categorical_distance(ctx_a.geofence, ctx_b.geofence)),
+        (0.10, _wiper_distance(ctx_a.wiper_state, ctx_b.wiper_state)),
+        (0.09, _categorical_distance(ctx_a.poi_type, ctx_b.poi_type)),
+        (0.07, _weekday_distance(ctx_a.weekday, ctx_b.weekday)),
+        (0.06, _temp_distance(ctx_a.temp_bucket, ctx_b.temp_bucket)),
+        (0.06, _categorical_distance(ctx_a.window_state, ctx_b.window_state)),
+        (0.06, _categorical_distance(ctx_a.approach_unlock, ctx_b.approach_unlock)),
+        (0.05, _categorical_distance(ctx_a.door_lock, ctx_b.door_lock)),
+    ]
 
     return sum(w * d for w, d in dims)
+
+
+# 雨刮：有序距离（off < low < medium < high < max），unknown → 0.5
+_WIPER_ORDER = ["off", "low", "medium", "high", "max"]
+
+
+def _wiper_distance(a: str, b: str) -> float:
+    if a in ("unknown", None) or b in ("unknown", None):
+        return 0.5
+    if a == b:
+        return 0.0
+    try:
+        ia = _WIPER_ORDER.index(a)
+        ib = _WIPER_ORDER.index(b)
+        return abs(ia - ib) / (len(_WIPER_ORDER) - 1)
+    except ValueError:
+        return 0.5
+
+
+# 温度桶：有序距离（cold < mild < warm < hot），unknown → 0.5
+_TEMP_ORDER = ["cold", "mild", "warm", "hot"]
+
+
+def _temp_distance(a: str, b: str) -> float:
+    if a in ("unknown", None) or b in ("unknown", None):
+        return 0.5
+    if a == b:
+        return 0.0
+    try:
+        ia = _TEMP_ORDER.index(a)
+        ib = _TEMP_ORDER.index(b)
+        return abs(ia - ib) / (len(_TEMP_ORDER) - 1)
+    except ValueError:
+        return 0.5
 
 
 def _time_bucket_distance(a: str, b: str) -> float:
@@ -421,17 +517,26 @@ def _weekday_distance(a: Optional[bool], b: Optional[bool]) -> float:
 
 
 def _dominant_context(contexts: List[StructuredContext]) -> StructuredContext:
-    """从聚类成员的上下文列表中提取主导上下文（各维度众数）"""
+    """从聚类成员的上下文列表中提取主导上下文（各维度众数）。
+
+    每一维都独立取众数；Optional 字段忽略 None，其余忽略 "unknown"。
+    """
     from collections import Counter
 
     n = len(contexts)
     if n == 0:
         return StructuredContext()
 
-    tb = Counter(c.time_bucket for c in contexts).most_common(1)[0][0]
+    def _mode_nonempty(values, empty_marker):
+        filtered = [v for v in values if v is not None and v != empty_marker]
+        if not filtered:
+            return empty_marker if empty_marker is not None else None
+        return Counter(filtered).most_common(1)[0][0]
+
+    tb = _mode_nonempty([c.time_bucket for c in contexts], "unknown")
     hr_values = [c.hour for c in contexts if c.hour >= 0]
     hr = round(sum(hr_values) / len(hr_values)) if hr_values else -1
-    vs = Counter(c.vehicle_state for c in contexts).most_common(1)[0][0]
+    vs = _mode_nonempty([c.vehicle_state for c in contexts], "unknown")
 
     weekdays = [c.weekday for c in contexts if c.weekday is not None]
     wd = Counter(weekdays).most_common(1)[0][0] if weekdays else None
@@ -439,7 +544,22 @@ def _dominant_context(contexts: List[StructuredContext]) -> StructuredContext:
     geos = [c.geofence for c in contexts if c.geofence is not None]
     geo = Counter(geos).most_common(1)[0][0] if geos else None
 
+    pois = [c.poi_type for c in contexts if c.poi_type is not None]
+    poi = Counter(pois).most_common(1)[0][0] if pois else None
+
+    wp = _mode_nonempty([c.wiper_state for c in contexts], "unknown")
+    tp = _mode_nonempty([c.temp_bucket for c in contexts], "unknown")
+    win = _mode_nonempty([c.window_state for c in contexts], "unknown")
+
+    dls = [c.door_lock for c in contexts if c.door_lock is not None]
+    dl = Counter(dls).most_common(1)[0][0] if dls else None
+
+    aus = [c.approach_unlock for c in contexts if c.approach_unlock is not None]
+    au = Counter(aus).most_common(1)[0][0] if aus else None
+
     return StructuredContext(
         time_bucket=tb, hour=hr, weekday=wd,
-        vehicle_state=vs, geofence=geo,
+        vehicle_state=vs, geofence=geo, poi_type=poi,
+        wiper_state=wp, temp_bucket=tp, window_state=win,
+        door_lock=dl, approach_unlock=au,
     )

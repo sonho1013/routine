@@ -1,15 +1,42 @@
-You are given a list of similar or closely related facts about the user.
+You are given a list of similar or closely related facts about the user, plus
+the structured driving context shared by all of those facts.
 These facts are assumed to be repetitive and could be considered as a habit.
-Your goal is to reword all these facts into a SINGLE one fact describing the habit.
-Use ONLY stated information, no assumptions.
-Output a signe habit text and a confidence score of the habit detection from 0.0 (not confident at all) to 1.0 (really sure).
-If you are not confident at all, cannot make a decision or think there is no real habit in the list of facts, output "NO_HABIT",0.0.
-If you can reword all the facts into a single habit, output <habit_text>,<confidence_score>
 
-# INPUT format:
-- text fact 1
-- text fact 2
-...
+Your goal is to reword all these facts into a SINGLE habit description that
+EXPLICITLY incorporates the relevant context (when, where, what state of the
+car), so the habit is unambiguous about the situation in which it applies.
+
+# CONTEXT GUIDANCE
+
+Use the structured context fields below to anchor the habit description in:
+- time of day (time_bucket / hour)
+- workday vs weekend (weekday)
+- location (geofence and poi_type — these distinguish e.g. "office gate
+  parking lot" from "shopping mall parking lot" even though both are
+  parking_garage)
+- vehicle state (parked / engine_started / driving / crawling)
+- weather/comfort state (wiper_state, temp_bucket)
+- security/access state (door_lock, approach_unlock, window_state)
+
+If a context field is "unknown" or null, ignore it — do NOT mention it.
+If a context field IS set, weave it naturally into the habit text.
+
+GOOD habit names mention the WHEN and WHERE concretely:
+  ✓ "rolls down driver window when arriving at the office gate parking lot"
+  ✓ "switches to silent drive mode on the evening commute home"
+  ✓ "engages climate to 23°C while parked at home in the morning"
+
+BAD habit names are generic and lose the situation:
+  ✗ "Always Roll Down Driver Window"           (no place, no time)
+  ✗ "Silent Secure Drive Mode"                 (no time of day, no destination)
+  ✗ "Climate Control Adjustment"               (no when, no where)
+
+Use ONLY stated information, no assumptions.
+Output a habit text and a confidence score from 0.0 (not confident at all) to
+1.0 (really sure).
+If you are not confident at all, cannot make a decision or think there is no
+real habit in the list of facts, output "NO_HABIT",0.0.
+Otherwise output <habit_text>,<confidence_score>
 
 # OUTPUT FORMAT (1 line CSV):
 habit_text,confidence_score
@@ -17,26 +44,47 @@ habit_text,confidence_score
 # EXAMPLES:
 
 ## EX-1
+### CONTEXT
+time_bucket: morning; weekday: workday; geofence: home; poi_type: home;
+vehicle_state: engine_started
 ### INPUT FACTS
-- request podcast about art shows on 2025-03-12
-- listen to Le Bruit de l'Art podcast episode on Art Brut on 2025-04-02
-- request to play podcast about Art Brut on 2025-04-26
-- listen to Visual Arts podcast on 2025-05-14
-- listen to The Week In Art podcast on 2025-05-21
+- request podcast about art shows
+- listen to Le Bruit de l'Art podcast episode on Art Brut
+- request to play podcast about Art Brut
+- listen to Visual Arts podcast
+- listen to The Week In Art podcast
 ### OUTPUT HABIT
-listen to podcasts about art,0.9
+listens to art podcasts on the morning commute starting from home,0.9
 
 ## EX-2
+### CONTEXT
+time_bucket: evening; weekday: workday; geofence: office_gate_01;
+poi_type: site_entrance; vehicle_state: crawling; window_state: open
 ### INPUT FACTS
-- meeting with Pierre Martin about new kite product on 2025-03-10
-- schedule virtual meeting with Pierre to discuss progress on kite product at 15:00 on 2025-03-19
-- have meeting with Pierre Martin at Station F office about new kite project at 10:30 on 2025-03-21
-- focus on email from Pierre about kite project on 2025-03-24
-- meeting with Pierre about kite project on 2025-05-12
+- driver window opened
+- driver window opened
+- driver window opened
 ### OUTPUT HABIT
-work with Pierre Martin on kite project,0.8
+rolls down driver window while approaching the office gate on weekday evenings,0.85
 
-# INPUT FACTS:
+## EX-3 (no useful context — context is mostly unknown)
+### CONTEXT
+(no useful context provided)
+### INPUT FACTS
+- meeting with Pierre Martin about new kite product
+- schedule virtual meeting with Pierre to discuss progress on kite product
+- have meeting with Pierre Martin at Station F office about new kite project
+- focus on email from Pierre about kite project
+- meeting with Pierre about kite project
+### OUTPUT HABIT
+works with Pierre Martin on the kite project,0.8
+
+# CONTEXT
+{context}
+
+# INPUT FACTS
 {facts}
 
-Now, reword the facts as a single habit and ouput as 1 line CSV without column names on the first row, just data:
+Now, reword the facts as a single habit (using the CONTEXT above to make the
+habit situation-specific) and output as 1 line CSV without column names on the
+first row, just data:

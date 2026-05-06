@@ -11,6 +11,7 @@ HabitDemoEngine — 端到端管线编排
     status = engine.get_status()
     engine.close()
 """
+import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -29,7 +30,7 @@ from engine.habit_lifecycle import (
 from engine.drift_detection import compute_raw_value_stats
 from engine.signal_rules.engine import SignalRuleEngine
 from panoramix_core.models.fact import Fact, StructuredContext
-from panoramix_core.models.fact_enums import FactType
+from panoramix_core.models.fact_enums import FactType, FactDurability, FactSources
 from panoramix_core.models.habit import Habit
 from panoramix_core.models.scene_card import SceneCard as SceneCardModel
 from panoramix_core.store.fact_store_chroma import FactStoreChroma
@@ -154,7 +155,8 @@ class HabitDemoEngine:
             ctx = cluster_facts[0].context
 
             text = self.habits_detector.reword_cluster(
-                [f.text for f in cluster_facts]
+                [f.text for f in cluster_facts],
+                context=ctx,
             )
             stats["habit_text"] = text
 
@@ -178,6 +180,12 @@ class HabitDemoEngine:
                 context_vehicle_state=ctx.vehicle_state,
                 context_geofence=ctx.geofence,
                 context_weekday=int(ctx.weekday) if ctx.weekday is not None else None,
+                context_poi_type=ctx.poi_type,
+                context_wiper_state=ctx.wiper_state,
+                context_temp_bucket=ctx.temp_bucket,
+                context_window_state=ctx.window_state,
+                context_door_lock=ctx.door_lock,
+                context_approach_unlock=ctx.approach_unlock,
                 raw_value_stats=stats,
                 member_fact_ids=[f.id for f in cluster_facts],
             )
@@ -294,13 +302,17 @@ class HabitDemoEngine:
             f"new={stats_out['new_pending']}"
         )
 
+        facts_remaining = len(items) - len(clustered_ids) + len(new_habits)
         return {
             "batch_id": real_batch_id,
             "facts_ingested": len(pref_facts),
             "clusters_found": len(cluster_results),
             "habits_count": len(new_habits),
+            "habits_detected": len(new_habits),
             "facts_clustered": len(clustered_ids),
+            "facts_remaining": facts_remaining,
             "total_in_chroma": len(items),
+            "total_before_clustering": len(items),
             "classification": stats_out,
             "new_habits": [
                 {"id": h.habit_id, "text": h.text, "signal": h.signal_name}
@@ -332,6 +344,12 @@ class HabitDemoEngine:
                 "geofence": habits[0].context_geofence,
                 "weekday": bool(habits[0].context_weekday)
                     if habits[0].context_weekday is not None else None,
+                "poi_type": habits[0].context_poi_type,
+                "wiper_state": habits[0].context_wiper_state,
+                "temp_bucket": habits[0].context_temp_bucket,
+                "window_state": habits[0].context_window_state,
+                "door_lock": habits[0].context_door_lock,
+                "approach_unlock": habits[0].context_approach_unlock,
             },
             "habit_ids": [h.habit_id for h in habits],
         }
@@ -387,9 +405,17 @@ class HabitDemoEngine:
         for card in scene_cards:
             card_by_key[card.structural_key] = card
 
+        # Also load retired cards to filter out rejected habits
+        retired_keys: set = set()
+        for card in self.scene_card_store.get_by_status("retired"):
+            retired_keys.add(card.structural_key)
+
         # Build habit dicts for KG display
         habit_dicts = []
         for h in sqlite_habits:
+            # Skip habits whose scene card has been retired (rejected)
+            if h.structural_key in retired_keys and h.structural_key not in card_by_key:
+                continue
             card = card_by_key.get(h.structural_key)
             confidence = _get_clustering_confidence(h.raw_value_stats)
             habit_dicts.append({
@@ -402,12 +428,19 @@ class HabitDemoEngine:
                 "card_id": card.card_id if card else None,
                 "accepted": card.status == "accepted" if card else False,
                 "confidence": confidence,
+                "clustering_confidence": confidence,
                 "evidence_count": len(h.member_fact_ids),
                 "context": {
                     "time_bucket": h.context_time_bucket,
                     "vehicle_state": h.context_vehicle_state,
                     "geofence": h.context_geofence,
                     "weekday": bool(h.context_weekday) if h.context_weekday is not None else None,
+                    "poi_type": h.context_poi_type,
+                    "wiper_state": h.context_wiper_state,
+                    "temp_bucket": h.context_temp_bucket,
+                    "window_state": h.context_window_state,
+                    "door_lock": h.context_door_lock,
+                    "approach_unlock": h.context_approach_unlock,
                 },
             })
 
@@ -439,7 +472,9 @@ class HabitDemoEngine:
         return {
             "username": self.username,
             "pref_facts": pref_count,
-            "habits_count": len(sqlite_habits),
+            "habits_count": len(habit_dicts),
+            "habit_facts": len(habit_dicts),
+            "total_facts": pref_count + len(habit_dicts),
             "scene_cards_count": len(scene_cards),
             "batch_id": self.habit_store.get_latest_batch_id(),
             "habits": habit_dicts,
@@ -451,10 +486,51 @@ class HabitDemoEngine:
         return self.fact_store.get_facts(self.username)
 
     def get_habits(self) -> List[Fact]:
-        """仅获取 HABIT 类型 facts"""
-        return self.fact_store.get_facts(
-            self.username, types=[FactType.HABIT]
-        )
+        """获取 habits (从 SQLite HabitStore 读取，转为 Fact 对象)
+
+        过滤掉 card 状态为 retired 的 habits。
+        """
+        sqlite_habits = self.habit_store.get_latest_batch_habits()
+
+        # Build scene card lookup — include retired to detect and filter
+        scene_cards = []
+        for status in ("pending", "accepted", "recommendation", "retired"):
+            scene_cards.extend(self.scene_card_store.get_by_status(status))
+        card_by_key = {c.structural_key: c for c in scene_cards}
+
+        facts = []
+        for h in sqlite_habits:
+            card = card_by_key.get(h.structural_key)
+            # Skip habits whose card has been retired (rejected)
+            if card and card.status == "retired":
+                continue
+            ctx = StructuredContext(
+                time_bucket=h.context_time_bucket,
+                hour=-1,
+                weekday=bool(h.context_weekday) if h.context_weekday is not None else None,
+                vehicle_state=h.context_vehicle_state,
+                geofence=h.context_geofence,
+                poi_type=h.context_poi_type,
+                wiper_state=h.context_wiper_state or "unknown",
+                temp_bucket=h.context_temp_bucket or "unknown",
+                window_state=h.context_window_state or "unknown",
+                door_lock=h.context_door_lock,
+                approach_unlock=h.context_approach_unlock,
+            )
+            is_accepted = card.status == "accepted" if card else False
+            fact = Fact(
+                id=h.habit_id,
+                text=h.text,
+                type=FactType.HABIT,
+                durability=FactDurability.LONG_TERM,
+                time_stamp=datetime.now(),
+                source=FactSources.SIGNAL,
+                accepted=is_accepted,
+                context=ctx,
+                json_metadata=json.dumps(h.raw_value_stats) if h.raw_value_stats else None,
+            )
+            facts.append(fact)
+        return facts
 
     def get_recommendation(
         self, current_context: StructuredContext, top_k: int = 0,
@@ -469,31 +545,70 @@ class HabitDemoEngine:
         Returns:
             RecommendationResult: 推荐动作列表
         """
-        return self.executor.recommend(current_context, self.username, top_k=top_k)
+        habits = self.get_habits()
+        return self.executor.recommend(
+            current_context, self.username, top_k=top_k, habits=habits,
+        )
 
     def accept_habit(self, habit_id: str) -> bool:
-        """接受一个习惯（标记 accepted=True 并重新存储）"""
-        habits = self.get_habits()
-        for h in habits:
-            if h.id == habit_id:
-                h.accepted = True
-                self.fact_store.delete_facts(self.username, [habit_id])
-                self.fact_store.store_facts(self.username, [h])
-                log.info(f"Habit accepted: {h.text}")
-                return True
-        log.warning(f"Habit not found: {habit_id}")
-        return False
+        """接受包含此 habit 的场景卡 (pending/recommendation → accepted)"""
+        card_id = self._find_card_for_habit(habit_id)
+        if not card_id:
+            log.warning(f"No scene card found for habit: {habit_id}")
+            return False
+        try:
+            self.scene_card_store.accept(card_id)
+            log.info(f"Accepted scene card {card_id} (via habit {habit_id})")
+            return True
+        except Exception as e:
+            log.warning(f"Failed to accept card {card_id}: {e}")
+            return False
 
     def reject_habit(self, habit_id: str) -> bool:
-        """拒绝一个习惯（从存储中删除）"""
-        habits = self.get_habits()
-        for h in habits:
-            if h.id == habit_id:
-                self.fact_store.delete_facts(self.username, [habit_id])
-                log.info(f"Habit rejected and deleted: {h.text}")
-                return True
-        log.warning(f"Habit not found: {habit_id}")
-        return False
+        """拒绝/删除包含此 habit 的场景卡"""
+        card_id = self._find_card_for_habit(habit_id)
+        if not card_id:
+            log.warning(f"No scene card found for habit: {habit_id}")
+            return False
+        try:
+            # Dispatch to the correct status transition
+            card = self._get_card_by_id(card_id)
+            if card and card.status == "recommendation":
+                self.scene_card_store.reject_recommendation(card_id)
+            elif card and card.status == "accepted":
+                self.scene_card_store.retire(card_id)
+            elif card and card.status == "pending":
+                self.scene_card_store.dismiss_pending(card_id)
+            else:
+                log.warning(f"Cannot reject card {card_id} with status {card.status if card else 'unknown'}")
+                return False
+            log.info(f"Rejected/retired scene card {card_id} (via habit {habit_id})")
+            return True
+        except Exception as e:
+            log.warning(f"Failed to reject card {card_id}: {e}")
+            return False
+
+    def _get_card_by_id(self, card_id: str):
+        """按 card_id 查找场景卡"""
+        for status in ("pending", "accepted", "recommendation", "retired"):
+            cards = self.scene_card_store.get_by_status(status)
+            for card in cards:
+                if card.card_id == card_id:
+                    return card
+        return None
+
+    def _find_card_for_habit(self, habit_id: str) -> Optional[str]:
+        """查找包含指定 habit_id 的场景卡"""
+        sqlite_habits = self.habit_store.get_latest_batch_habits()
+        for h in sqlite_habits:
+            if h.habit_id == habit_id:
+                # Find scene card by structural_key
+                for status in ("pending", "accepted", "recommendation"):
+                    cards = self.scene_card_store.get_by_status(status)
+                    for card in cards:
+                        if card.structural_key == h.structural_key:
+                            return card.card_id
+        return None
 
     # ═══════════════════════════════════════════════════
     # 生命周期
