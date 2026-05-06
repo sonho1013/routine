@@ -7,6 +7,20 @@ their Authorization header against TUNNEL_SHARED_SECRET.
 from __future__ import annotations
 
 import os
+
+
+def _fix_socks_proxy() -> None:
+    """Translate `socks://` env vars to `socks5://` (httpx does not accept the
+    bare `socks://` scheme that some local proxies still emit)."""
+    for var in ("ALL_PROXY", "HTTPS_PROXY", "HTTP_PROXY",
+                "all_proxy", "https_proxy", "http_proxy"):
+        val = os.environ.get(var, "")
+        if val.startswith("socks://"):
+            os.environ[var] = val.replace("socks://", "socks5://", 1)
+
+
+_fix_socks_proxy()  # MUST run before httpx is imported / AsyncClient is built
+
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -16,7 +30,7 @@ TUNNEL_SHARED_SECRET = os.environ["TUNNEL_SHARED_SECRET"]
 OPENAI_BASE_URL = os.environ.get("OPENAI_UPSTREAM", "https://api.openai.com/v1")
 
 app = FastAPI(title="habit-memory-demo home proxy")
-client = httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0), trust_env=False)
+client = httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0))
 
 
 def _check_auth(authorization: str | None) -> None:
