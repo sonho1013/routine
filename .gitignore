@@ -29,3 +29,6 @@ tests/EMBEDDING_VALIDATION_REPORT.md
 .vscode/
 .idea/
 *.swp
+
+# Offline pip install wheels (rebuilt by scripts/download_wheels.sh)
+wheels/
