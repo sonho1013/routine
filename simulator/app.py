@@ -69,6 +69,14 @@ st.html("""
 </div>
 """)
 
+# ── Demo emergency switch ──
+from panoramix_core.demo_mode import set_force_cache_runtime
+from simulator.components.cache_status import render_cache_status_footer
+
+_qp = st.query_params
+_force = _qp.get("cache_only") == "1"
+set_force_cache_runtime(_force)
+
 # ── Tabs ──
 tab1, tab2 = st.tabs([
     "📊 User Profile Generator",
@@ -82,3 +90,5 @@ with tab1:
 with tab2:
     from simulator import tab2_recommendation
     tab2_recommendation.render()
+
+render_cache_status_footer()
