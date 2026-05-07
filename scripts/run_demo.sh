@@ -4,6 +4,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 # shellcheck source=/dev/null
 source .venv/bin/activate
+# Load .env so OPENAI_API_KEY etc. reach the streamlit subprocess.
+# Without `set -a` exports stay shell-local and Python sees nothing.
+# shellcheck source=/dev/null
+[ -f .env ] && set -a && source .env && set +a
 
 PORT=8501
 if lsof -iTCP:$PORT -sTCP:LISTEN >/dev/null 2>&1; then
