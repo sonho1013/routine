@@ -70,6 +70,8 @@ class HabitStore:
                 signal_category, signal_name, structural_key,
                 context_time_bucket, context_vehicle_state,
                 context_geofence, context_weekday,
+                context_poi_type, context_wiper_state, context_temp_bucket,
+                context_window_state, context_door_lock, context_approach_unlock,
                 raw_value_stats_json, member_fact_ids_json,
                 scene_card_id, created_at
             ) VALUES (
@@ -77,6 +79,8 @@ class HabitStore:
                 :signal_category, :signal_name, :structural_key,
                 :context_time_bucket, :context_vehicle_state,
                 :context_geofence, :context_weekday,
+                :context_poi_type, :context_wiper_state, :context_temp_bucket,
+                :context_window_state, :context_door_lock, :context_approach_unlock,
                 :raw_value_stats_json, :member_fact_ids_json,
                 :scene_card_id, :created_at
             )

@@ -84,22 +84,10 @@ class TestAC1_UserSelector:
 class TestAC2_ContextPanel:
     """AC 2: Trigger 输入面板 — 对齐 mockup trigger 维度"""
 
-    def test_scene_presets_defined(self):
-        """场景预设已定义"""
-        from simulator.components.context_panel import SCENE_PRESETS
-        assert len(SCENE_PRESETS) >= 3  # 至少有 3 个场景 + Custom
-
-    def test_preset_has_trigger_fields(self):
-        """每个场景预设包含 trigger 必需字段"""
-        from simulator.components.context_panel import SCENE_PRESETS
-        required_fields = {
-            "date", "time", "location", "trip_role", "weather", "outside_temp",
-            "speed_kph", "gear", "wiper", "door_lock", "window_state",
-            "current_volume", "approach_unlock",
-        }
-        for name, preset in SCENE_PRESETS.items():
-            assert required_fields.issubset(preset.keys()), \
-                f"Preset '{name}' missing fields: {required_fields - preset.keys()}"
+    def test_no_scene_preset_in_panel(self):
+        """场景由下游场景卡聚类得出，Trigger 面板不再暴露 SCENE_PRESETS。"""
+        import simulator.components.context_panel as cp
+        assert not hasattr(cp, "SCENE_PRESETS")
 
     def test_weather_options(self):
         """天气选项已定义"""
@@ -116,11 +104,6 @@ class TestAC2_ContextPanel:
         params = list(sig.parameters.keys())
         assert "readonly" in params
         assert "key_prefix" in params
-
-    def test_custom_preset_exists(self):
-        """Custom 预设存在，用于手动模式"""
-        from simulator.components.context_panel import SCENE_PRESETS
-        assert "Custom" in SCENE_PRESETS
 
     def test_location_options_align_with_mockup(self):
         """地点选项对齐 mockup place_id"""

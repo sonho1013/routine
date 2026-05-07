@@ -25,11 +25,12 @@ def _bookend_driveaway():
     }
 
 
-def _pov(bid: str, actions: list[str]):
+def _pov(bid: str, actions: list[str], keyframe_prompt: str = "Dashboard with controls highlighted."):
     return {
         "id": bid, "beat_type": "cabin_pov",
         "actions": actions, "duration": "5",
         "motion_prompt": "POV of Mary's hands operating controls.",
+        "keyframe_prompt": keyframe_prompt,
     }
 
 
@@ -43,10 +44,9 @@ def _valid_storyboard(pov_beats: list[dict]) -> dict:
 
 def test_valid_three_beat_storyboard_parses():
     raw = _valid_storyboard([_pov("beat2", ["engine_status",
-                                            "gear_position",
-                                            "nav_destination"])])
+                                            "gear_position"])])
     sb = load_storyboard(raw, expected_actions=[
-        "engine_status", "gear_position", "nav_destination",
+        "engine_status", "gear_position",
     ])
     assert isinstance(sb, Storyboard)
     assert len(sb.beats) == 3
@@ -96,7 +96,7 @@ def test_rejects_middle_beat_not_cabin_pov():
 
 
 def test_rejects_wrong_middle_beat_count():
-    # 4 actions → expect ceil(4/3)=2 POV beats; supply 1 beat with 2 actions
+    # 4 actions → expect ceil(4/2)=2 POV beats; supply 1 beat with 2 actions
     # so rule 5 (per-beat bounds) passes cleanly and only rule 4 fires.
     raw = _valid_storyboard([_pov("beat2", ["engine_status", "gear_position"])])
     with pytest.raises(StoryboardValidationError, match="POV beat count"):
@@ -109,10 +109,9 @@ def test_rejects_wrong_middle_beat_count():
 def test_rejects_pov_beat_with_too_many_actions():
     # Schema-only check (expected_actions=None) isolates rule 5 from rule 4.
     raw = _valid_storyboard([_pov("beat2", [
-        "engine_status", "gear_position",
-        "nav_destination", "hvac_temp_target",
+        "engine_status", "gear_position", "nav_destination",
     ])])
-    with pytest.raises(StoryboardValidationError, match="at most 3"):
+    with pytest.raises(StoryboardValidationError, match="at most 2"):
         load_storyboard(raw, expected_actions=None)
 
 
@@ -126,10 +125,13 @@ def test_rejects_empty_pov_beat():
 
 
 def test_rejects_action_multiset_mismatch():
-    raw = _valid_storyboard([_pov("beat2", ["engine_status",
-                                            "engine_status",
-                                            "gear_position"])])
-    with pytest.raises(StoryboardValidationError, match="action"):
+    # 3 actions expected → ceil(3/2)=2 POV beats. Supply 2 POV beats with
+    # per-beat counts ≤2 so rules 4 and 5 pass; only rule 6 (multiset) fires.
+    raw = _valid_storyboard([
+        _pov("beat2", ["engine_status", "engine_status"]),
+        _pov("beat3", ["gear_position"]),
+    ])
+    with pytest.raises(StoryboardValidationError, match="coverage mismatch"):
         load_storyboard(raw, expected_actions=[
             "engine_status", "gear_position", "nav_destination",
         ])
@@ -152,6 +154,26 @@ def test_rejects_duration_other_than_5():
     raw = _valid_storyboard([_pov("beat2", ["engine_status"])])
     raw["beats"][1]["duration"] = "10"
     with pytest.raises(StoryboardValidationError, match="duration"):
+        load_storyboard(raw, expected_actions=["engine_status"])
+
+
+def test_rejects_pov_beat_without_keyframe_prompt():
+    raw = _valid_storyboard([_pov("beat2", ["engine_status"], keyframe_prompt="")])
+    with pytest.raises(StoryboardValidationError, match="keyframe_prompt"):
+        load_storyboard(raw, expected_actions=["engine_status"])
+
+
+def test_rejects_keyframe_prompt_over_limit():
+    raw = _valid_storyboard([_pov("beat2", ["engine_status"],
+                                  keyframe_prompt="x" * 341)])
+    with pytest.raises(StoryboardValidationError, match="340"):
+        load_storyboard(raw, expected_actions=["engine_status"])
+
+
+def test_rejects_exterior_beat_with_keyframe_prompt():
+    raw = _valid_storyboard([_pov("beat2", ["engine_status"])])
+    raw["beats"][0]["keyframe_prompt"] = "should not be here"
+    with pytest.raises(StoryboardValidationError, match="exterior.*keyframe"):
         load_storyboard(raw, expected_actions=["engine_status"])
 
 

@@ -7,7 +7,10 @@ Trigger Input Panel — 触发条件输入面板
   - 车辆状态: Speed / Gear / Wiper / Door Lock / Window / Volume / Approach Unlock
 
 Tab 1: 可编辑触发条件输入
-Tab 2: 只读展示 + 场景预设
+Tab 2: 只读展示
+
+注：场景（scene）由 pipeline 的场景卡聚类总结得出，这里不做任何场景预设或
+场景标签注入，避免"场景语义"从输入侧泄漏回去。
 """
 import streamlit as st
 from datetime import datetime, time
@@ -34,68 +37,21 @@ WINDOW_STATE_OPTIONS = ["Closed", "Half Open", "Open"]
 APPROACH_UNLOCK_OPTIONS = ["enabled", "disabled"]
 
 
-# ── 场景预设 — 对齐 mockup 典型场景 ──
-SCENE_PRESETS = {
-    "Morning Commute": {
-        "date": datetime(2026, 3, 30).date(),
-        "time": time(8, 43),
-        "location": "home",
-        "trip_role": "origin",
-        "weather": "Sunny",
-        "outside_temp": 20.0,
-        "speed_kph": 0.0,
-        "gear": "P",
-        "wiper": "off",
-        "door_lock": "unlocked",
-        "window_state": "Closed",
-        "current_volume": 35,
-        "approach_unlock": "enabled",
-    },
-    "Office Gate Entry": {
-        "date": datetime(2026, 3, 30).date(),
-        "time": time(9, 6),
-        "location": "office_gate_01",
-        "trip_role": "waypoint",
-        "weather": "Sunny",
-        "outside_temp": 20.0,
-        "speed_kph": 3.0,
-        "gear": "D",
-        "wiper": "off",
-        "door_lock": "locked",
-        "window_state": "Closed",
-        "current_volume": 35,
-        "approach_unlock": "enabled",
-    },
-    "Arriving Home": {
-        "date": datetime(2026, 3, 30).date(),
-        "time": time(18, 37),
-        "location": "home",
-        "trip_role": "destination",
-        "weather": "Sunny",
-        "outside_temp": 18.0,
-        "speed_kph": 0.0,
-        "gear": "P",
-        "wiper": "off",
-        "door_lock": "locked",
-        "window_state": "Closed",
-        "current_volume": 35,
-        "approach_unlock": "enabled",
-    },
-    "Custom": {
-        "date": datetime.today().date(),
-        "time": time(12, 0),
-        "location": "home",
-        "trip_role": "origin",
-        "weather": "Sunny",
-        "outside_temp": 22.0,
-        "speed_kph": 0.0,
-        "gear": "P",
-        "wiper": "off",
-        "door_lock": "unlocked",
-        "window_state": "Closed",
-        "current_volume": 35,
-        "approach_unlock": "enabled",
-    },
+# ── 默认 trigger 初始值（场景无关的扁平 defaults） ──
+_DEFAULT_CONTEXT = {
+    "date": datetime.today().date(),
+    "time": time(12, 0),
+    "location": "home",
+    "trip_role": "origin",
+    "weather": "Sunny",
+    "outside_temp": 22.0,
+    "speed_kph": 0.0,
+    "gear": "P",
+    "wiper": "off",
+    "door_lock": "unlocked",
+    "window_state": "Closed",
+    "current_volume": 35,
+    "approach_unlock": "enabled",
 }
 
 
@@ -108,13 +64,8 @@ def render_context_panel(readonly: bool = False, key_prefix: str = "ctx") -> dic
     """
     st.markdown("**Trigger**")
 
-    # Scene preset selector
-    preset_name = st.selectbox(
-        "Scene Preset",
-        list(SCENE_PRESETS.keys()),
-        key=f"{key_prefix}_preset",
-    )
-    preset = SCENE_PRESETS[preset_name]
+    # 场景由下游场景卡总结得出，这里不再使用场景预设，全部字段用扁平默认值
+    preset = _DEFAULT_CONTEXT
 
     # ── Row 1: Date / Time ──
     c1, c2 = st.columns(2)
@@ -268,5 +219,4 @@ def render_context_panel(readonly: bool = False, key_prefix: str = "ctx") -> dic
         "approach_unlock": approach_unlock,
         "gps_latitude": lat,
         "gps_longitude": lng,
-        "preset": preset_name,
     }

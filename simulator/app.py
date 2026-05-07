@@ -10,6 +10,7 @@ Tab 2: Smart Habit Recommender (推理阶段)
   - 上下文匹配 → ProactiveExecutor → 推荐卡片 → Accept/Reject
 """
 import os
+import shutil
 import sys
 import streamlit as st
 
@@ -17,6 +18,33 @@ import streamlit as st
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+
+def _bootstrap_storage_from_fixtures():
+    # On Streamlit Cloud the container starts with storage/ absent — fixtures/
+    # is the only seeded state. Mirror what scripts/setup.sh does locally.
+    fixtures = os.path.join(PROJECT_ROOT, "fixtures")
+    storage = os.path.join(PROJECT_ROOT, "storage")
+    if not os.path.isdir(fixtures):
+        return
+    os.makedirs(storage, exist_ok=True)
+    pairs = [
+        ("habit_memory.db", "habit_memory.db"),
+        ("llm_cache.json", "llm_cache.json"),
+        ("embedding_cache.json", "embedding_cache.json"),
+    ]
+    for src_name, dst_name in pairs:
+        src = os.path.join(fixtures, src_name)
+        dst = os.path.join(storage, dst_name)
+        if os.path.exists(src) and not os.path.exists(dst):
+            shutil.copy2(src, dst)
+    chroma_src = os.path.join(fixtures, "chroma_memories")
+    chroma_dst = os.path.join(storage, "memories")
+    if os.path.isdir(chroma_src) and not os.path.isdir(chroma_dst):
+        shutil.copytree(chroma_src, chroma_dst)
+
+
+_bootstrap_storage_from_fixtures()
 
 
 # ── Page config ──

@@ -25,7 +25,8 @@
       "Sets AC to 22°C"
     ],
     "output_path": "mary/day1/morning_commute",
-    "llm_user_prompt": "Scene: Morning Commute\nDay: 1 (Monday)\nTime: 08:15\nWeather: sunny, 10.2°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Media: podcast\n- Navigates to work\n- Seat heating level 2\n- Drive mode: eco\n- Route preference: fastest\n- Playing 'Tech Daily'\n- Volume at 58%\n- Fan speed: auto\n- ACC distance: medium\n- Sets AC to 22°C"
+    "llm_user_prompt": "Scene: Morning Commute\nDay: 1 (Monday)\nTime: 08:15\nWeather: sunny, 10.2°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Media: podcast\n- Navigates to work\n- Seat heating level 2\n- Drive mode: eco\n- Route preference: fastest\n- Playing 'Tech Daily'\n- Volume at 58%\n- Fan speed: auto\n- ACC distance: medium\n- Sets AC to 22°C",
+    "direction": "departure"
   },
   {
     "id": "day2_morning_commute",
@@ -53,7 +54,8 @@
       "Route preference: fastest"
     ],
     "output_path": "mary/day2/morning_commute",
-    "llm_user_prompt": "Scene: Morning Commute\nDay: 2 (Tuesday)\nTime: 07:37\nWeather: cloudy, 7.8°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Media: podcast\n- ACC distance: medium\n- Drive mode: eco\n- Seat heating level 2\n- Volume at 66%\n- Sets AC to 23°C\n- Playing 'Morning Brew'\n- Navigates to work\n- Fan speed: auto\n- Route preference: fastest"
+    "llm_user_prompt": "Scene: Morning Commute\nDay: 2 (Tuesday)\nTime: 07:37\nWeather: cloudy, 7.8°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Media: podcast\n- ACC distance: medium\n- Drive mode: eco\n- Seat heating level 2\n- Volume at 66%\n- Sets AC to 23°C\n- Playing 'Morning Brew'\n- Navigates to work\n- Fan speed: auto\n- Route preference: fastest",
+    "direction": "departure"
   },
   {
     "id": "day3_morning_commute",
@@ -81,7 +83,8 @@
       "Route preference: fastest"
     ],
     "output_path": "mary/day3/morning_commute",
-    "llm_user_prompt": "Scene: Morning Commute\nDay: 3 (Wednesday)\nTime: 08:00\nWeather: rainy, 3.6°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Sets AC to 24°C\n- Fan speed: auto\n- Volume at 61%\n- Drive mode: eco\n- Playing 'Lo-fi Focus'\n- ACC distance: short\n- Media: music\n- Navigates to work\n- Seat heating level 2\n- Route preference: fastest"
+    "llm_user_prompt": "Scene: Morning Commute\nDay: 3 (Wednesday)\nTime: 08:00\nWeather: rainy, 3.6°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Sets AC to 24°C\n- Fan speed: auto\n- Volume at 61%\n- Drive mode: eco\n- Playing 'Lo-fi Focus'\n- ACC distance: short\n- Media: music\n- Navigates to work\n- Seat heating level 2\n- Route preference: fastest",
+    "direction": "departure"
   },
   {
     "id": "day4_morning_commute",
@@ -109,7 +112,8 @@
       "Drive mode: eco"
     ],
     "output_path": "mary/day4/morning_commute",
-    "llm_user_prompt": "Scene: Morning Commute\nDay: 4 (Thursday)\nTime: 08:18\nWeather: sunny, 15.5°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Route preference: fastest\n- Navigates to work\n- Sets AC to 21°C\n- Volume at 58%\n- ACC distance: short\n- Media: podcast\n- Playing 'Morning Brew'\n- Fan speed: auto\n- Seat heating level 0\n- Drive mode: eco"
+    "llm_user_prompt": "Scene: Morning Commute\nDay: 4 (Thursday)\nTime: 08:18\nWeather: sunny, 15.5°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Route preference: fastest\n- Navigates to work\n- Sets AC to 21°C\n- Volume at 58%\n- ACC distance: short\n- Media: podcast\n- Playing 'Morning Brew'\n- Fan speed: auto\n- Seat heating level 0\n- Drive mode: eco",
+    "direction": "departure"
   },
   {
     "id": "day5_morning_commute",
@@ -137,7 +141,8 @@
       "Volume at 61%"
     ],
     "output_path": "mary/day5/morning_commute",
-    "llm_user_prompt": "Scene: Morning Commute\nDay: 5 (Friday)\nTime: 08:10\nWeather: cloudy, 5.4°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Seat heating level 2\n- Navigates to work\n- Route preference: fastest\n- Playing 'Tech Daily'\n- Media: podcast\n- Fan speed: auto\n- Sets AC to 22°C\n- ACC distance: short\n- Drive mode: eco\n- Volume at 61%"
+    "llm_user_prompt": "Scene: Morning Commute\nDay: 5 (Friday)\nTime: 08:10\nWeather: cloudy, 5.4°C\nLocation: Departing from home, residential Paris street\nColor palette hint: warm amber, soft peach, pale blue sky — fresh, hopeful mood\nActions performed:\n- Engine: on\n- Door: closed\n- Gear: D\n- Seat heating level 2\n- Navigates to work\n- Route preference: fastest\n- Playing 'Tech Daily'\n- Media: podcast\n- Fan speed: auto\n- Sets AC to 22°C\n- ACC distance: short\n- Drive mode: eco\n- Volume at 61%",
+    "direction": "departure"
   },
   {
     "id": "day1_arriving_home",
@@ -161,7 +166,8 @@
       "Door: open"
     ],
     "output_path": "mary/day1/arriving_home",
-    "llm_user_prompt": "Scene: Arriving Home\nDay: 1 (Monday)\nTime: 18:15\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 10 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open"
+    "llm_user_prompt": "Scene: Arriving Home\nDay: 1 (Monday)\nTime: 18:15\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 10 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open",
+    "direction": "arrival"
   },
   {
     "id": "day2_arriving_home",
@@ -185,7 +191,8 @@
       "Door: open"
     ],
     "output_path": "mary/day2/arriving_home",
-    "llm_user_prompt": "Scene: Arriving Home\nDay: 2 (Tuesday)\nTime: 18:16\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 15 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open"
+    "llm_user_prompt": "Scene: Arriving Home\nDay: 2 (Tuesday)\nTime: 18:16\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 15 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open",
+    "direction": "arrival"
   },
   {
     "id": "day3_arriving_home",
@@ -209,7 +216,8 @@
       "Door: open"
     ],
     "output_path": "mary/day3/arriving_home",
-    "llm_user_prompt": "Scene: Arriving Home\nDay: 3 (Wednesday)\nTime: 18:14\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 14 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open"
+    "llm_user_prompt": "Scene: Arriving Home\nDay: 3 (Wednesday)\nTime: 18:14\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 14 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open",
+    "direction": "arrival"
   },
   {
     "id": "day4_arriving_home",
@@ -233,7 +241,8 @@
       "Door: open"
     ],
     "output_path": "mary/day4/arriving_home",
-    "llm_user_prompt": "Scene: Arriving Home\nDay: 4 (Thursday)\nTime: 18:34\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 17 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open"
+    "llm_user_prompt": "Scene: Arriving Home\nDay: 4 (Thursday)\nTime: 18:34\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 17 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open",
+    "direction": "arrival"
   },
   {
     "id": "day5_arriving_home",
@@ -257,7 +266,8 @@
       "Door: open"
     ],
     "output_path": "mary/day5/arriving_home",
-    "llm_user_prompt": "Scene: Arriving Home\nDay: 5 (Friday)\nTime: 18:24\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 13 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open"
+    "llm_user_prompt": "Scene: Arriving Home\nDay: 5 (Friday)\nTime: 18:24\nWeather: \nLocation: Arriving at home, Parisian apartment neighborhood\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 13 km/h\n- Gear: P\n- Media: off\n- Volume at 0%\n- AC power: off\n- Window position: 0%\n- Keyless entry: disabled\n- Engine: off\n- Door: open",
+    "direction": "arrival"
   },
   {
     "id": "day1_toll_parking_entry",
@@ -268,14 +278,15 @@
     "time": "16:45",
     "weather": "sunny",
     "temp_c": "",
-    "location": "Approaching Toll A6",
+    "location": "Approaching office parking gate",
     "actions": [
       "Speed: 2.1 km/h",
       "Wipers: off",
       "Window position: 73%"
     ],
     "output_path": "mary/day1/toll_parking_entry",
-    "llm_user_prompt": "Scene: Toll Parking Entry\nDay: 1 ()\nTime: 16:45\nWeather: sunny\nLocation: Approaching Toll A6\nColor palette hint: golden ochre, dusty rose, warm gray — settled, calm mood\nActions performed:\n- Speed: 2.1 km/h\n- Wipers: off\n- Window position: 73%"
+    "llm_user_prompt": "Scene: Parking Gate Entry\nDay: 1\nTime: 16:45\nWeather: sunny\nLocation: Approaching the office underground parking gate, a boom barrier with a card reader on a post at driver-window height\nColor palette hint: golden ochre, dusty rose, warm gray — settled, calm mood\nNarrative: Mary is driving slowly towards the parking barrier. She opens her window, reaches out to tap her badge on the card reader, the barrier lifts, and she drives through.\nActions performed:\n- Speed: 2.1 km/h\n- Wipers: off\n- Window position: 73%",
+    "direction": "approach"
   },
   {
     "id": "day2_toll_parking_entry",
@@ -286,14 +297,15 @@
     "time": "17:25",
     "weather": "sunny",
     "temp_c": "",
-    "location": "Approaching Toll A6",
+    "location": "Approaching office parking gate",
     "actions": [
       "Speed: 1.7 km/h",
       "Wipers: off",
       "Window position: 80%"
     ],
     "output_path": "mary/day2/toll_parking_entry",
-    "llm_user_prompt": "Scene: Toll Parking Entry\nDay: 2 ()\nTime: 17:25\nWeather: sunny\nLocation: Approaching Toll A6\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 1.7 km/h\n- Wipers: off\n- Window position: 80%"
+    "llm_user_prompt": "Scene: Parking Gate Entry\nDay: 2\nTime: 17:25\nWeather: sunny\nLocation: Approaching the office underground parking gate, a boom barrier with a card reader on a post at driver-window height\nColor palette hint: golden ochre, dusty rose, warm gray — settled, calm mood\nNarrative: Mary is driving slowly towards the parking barrier. She opens her window, reaches out to tap her badge on the card reader, the barrier lifts, and she drives through.\nActions performed:\n- Speed: 1.7 km/h\n- Wipers: off\n- Window position: 80%",
+    "direction": "approach"
   },
   {
     "id": "day3_toll_parking_entry",
@@ -304,14 +316,15 @@
     "time": "12:04",
     "weather": "cloudy",
     "temp_c": "",
-    "location": "Approaching Toll A6",
+    "location": "Approaching office parking gate",
     "actions": [
       "Speed: 2.9 km/h",
       "Wipers: low",
       "Window position: 78%"
     ],
     "output_path": "mary/day3/toll_parking_entry",
-    "llm_user_prompt": "Scene: Toll Parking Entry\nDay: 3 ()\nTime: 12:04\nWeather: cloudy\nLocation: Approaching Toll A6\nColor palette hint: bright cream, muted teal, sage green — active, clear mood\nActions performed:\n- Speed: 2.9 km/h\n- Wipers: low\n- Window position: 78%"
+    "llm_user_prompt": "Scene: Parking Gate Entry\nDay: 3\nTime: 12:04\nWeather: cloudy\nLocation: Approaching the office underground parking gate, a boom barrier with a card reader on a post at driver-window height\nColor palette hint: golden ochre, dusty rose, warm gray — settled, calm mood\nNarrative: Mary is driving slowly towards the parking barrier. She opens her window, reaches out to tap her badge on the card reader, the barrier lifts, and she drives through.\nActions performed:\n- Speed: 2.9 km/h\n- Wipers: low\n- Window position: 78%",
+    "direction": "approach"
   },
   {
     "id": "day4_toll_parking_entry",
@@ -322,14 +335,15 @@
     "time": "17:21",
     "weather": "sunny",
     "temp_c": "",
-    "location": "Approaching Toll A6",
+    "location": "Approaching office parking gate",
     "actions": [
       "Speed: 3.7 km/h",
       "Wipers: off",
       "Window position: 70%"
     ],
     "output_path": "mary/day4/toll_parking_entry",
-    "llm_user_prompt": "Scene: Toll Parking Entry\nDay: 4 ()\nTime: 17:21\nWeather: sunny\nLocation: Approaching Toll A6\nColor palette hint: deep indigo, warm orange glow, violet — intimate, transitional mood\nActions performed:\n- Speed: 3.7 km/h\n- Wipers: off\n- Window position: 70%"
+    "llm_user_prompt": "Scene: Parking Gate Entry\nDay: 4\nTime: 17:21\nWeather: sunny\nLocation: Approaching the office underground parking gate, a boom barrier with a card reader on a post at driver-window height\nColor palette hint: golden ochre, dusty rose, warm gray — settled, calm mood\nNarrative: Mary is driving slowly towards the parking barrier. She opens her window, reaches out to tap her badge on the card reader, the barrier lifts, and she drives through.\nActions performed:\n- Speed: 3.7 km/h\n- Wipers: off\n- Window position: 70%",
+    "direction": "approach"
   },
   {
     "id": "day5_toll_parking_entry",
@@ -340,13 +354,14 @@
     "time": "11:56",
     "weather": "sunny",
     "temp_c": "",
-    "location": "Approaching Toll A6",
+    "location": "Approaching office parking gate",
     "actions": [
       "Speed: 2.2 km/h",
       "Wipers: off",
       "Window position: 82%"
     ],
     "output_path": "mary/day5/toll_parking_entry",
-    "llm_user_prompt": "Scene: Toll Parking Entry\nDay: 5 ()\nTime: 11:56\nWeather: sunny\nLocation: Approaching Toll A6\nColor palette hint: bright cream, muted teal, sage green — active, clear mood\nActions performed:\n- Speed: 2.2 km/h\n- Wipers: off\n- Window position: 82%"
+    "llm_user_prompt": "Scene: Parking Gate Entry\nDay: 5\nTime: 11:56\nWeather: sunny\nLocation: Approaching the office underground parking gate, a boom barrier with a card reader on a post at driver-window height\nColor palette hint: golden ochre, dusty rose, warm gray — settled, calm mood\nNarrative: Mary is driving slowly towards the parking barrier. She opens her window, reaches out to tap her badge on the card reader, the barrier lifts, and she drives through.\nActions performed:\n- Speed: 2.2 km/h\n- Wipers: off\n- Window position: 82%",
+    "direction": "approach"
   }
 ]

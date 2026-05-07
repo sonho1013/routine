@@ -18,6 +18,7 @@ from scripts.video_gen.config import (
     CAR_INTERIOR_REF_PROMPT,
     KLING_IMAGE_MODEL,
     MARY_REF_PROMPT,
+    PARKING_GATE_REF_PROMPT,
 )
 
 log = logging.getLogger(__name__)
@@ -29,9 +30,10 @@ _REF_NEGATIVE = (
 assert len(_REF_NEGATIVE) < 200
 
 _REFS = (
-    ("mary_ref",          MARY_REF_PROMPT,          "1:1"),
-    ("car_exterior_ref",  CAR_EXTERIOR_REF_PROMPT,  "16:9"),
-    ("car_interior_ref",  CAR_INTERIOR_REF_PROMPT,  "16:9"),
+    ("mary_ref",           MARY_REF_PROMPT,           "1:1"),
+    ("car_exterior_ref",   CAR_EXTERIOR_REF_PROMPT,   "16:9"),
+    ("car_interior_ref",   CAR_INTERIOR_REF_PROMPT,   "16:9"),
+    ("parking_gate_ref",   PARKING_GATE_REF_PROMPT,   "16:9"),
 )
 
 

@@ -49,6 +49,12 @@ CREATE TABLE IF NOT EXISTS habits (
     context_vehicle_state TEXT NOT NULL,
     context_geofence TEXT,
     context_weekday INTEGER,
+    context_poi_type TEXT,
+    context_wiper_state TEXT,
+    context_temp_bucket TEXT,
+    context_window_state TEXT,
+    context_door_lock TEXT,
+    context_approach_unlock TEXT,
 
     raw_value_stats_json TEXT NOT NULL,
     member_fact_ids_json TEXT NOT NULL,

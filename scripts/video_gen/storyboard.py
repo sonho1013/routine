@@ -4,7 +4,7 @@ A Storyboard describes one scene as a sequence of Beats. The sequence is
 strictly bookended:
 
     beats[0]   : beat_type == "exterior_boarding"   (actions = [])
-    beats[1..-2]: beat_type == "cabin_pov"          (1..3 actions each)
+    beats[1..-2]: beat_type == "cabin_pov"          (1..2 actions each)
     beats[-1]  : beat_type == "exterior_driveaway"  (actions = [])
 
 Every input cinematic action appears in exactly one POV beat. Validation is
@@ -36,8 +36,10 @@ _BEAT_TYPES: frozenset[str] = frozenset(
 )
 
 _MOTION_PROMPT_LIMIT = 2400
-_POV_MAX_ACTIONS = 3
+_POV_MAX_ACTIONS = 2
 
+
+_KEYFRAME_PROMPT_LIMIT = 340
 
 @dataclass(frozen=True)
 class Beat:
@@ -46,6 +48,7 @@ class Beat:
     actions: tuple[str, ...]
     duration: Literal["5"]
     motion_prompt: str
+    keyframe_prompt: str = ""
 
 
 @dataclass(frozen=True)
@@ -62,6 +65,7 @@ def _build_beat(b: dict) -> Beat:
         actions=tuple(b["actions"]),
         duration=b["duration"],
         motion_prompt=b["motion_prompt"],
+        keyframe_prompt=b.get("keyframe_prompt", ""),
     )
 
 
@@ -172,6 +176,23 @@ def load_storyboard(
                 f"beat {b.id} duration must be '5', got {b.duration!r}"
             )
 
+    # 10. keyframe_prompt: required for cabin_pov, forbidden for exterior
+    for b in middle:
+        if not b.keyframe_prompt:
+            raise StoryboardValidationError(
+                f"POV beat {b.id} must have a non-empty keyframe_prompt"
+            )
+        if len(b.keyframe_prompt) > _KEYFRAME_PROMPT_LIMIT:
+            raise StoryboardValidationError(
+                f"beat {b.id}.keyframe_prompt is {len(b.keyframe_prompt)} "
+                f"chars; limit is {_KEYFRAME_PROMPT_LIMIT}"
+            )
+    for b in (beats[0], beats[-1]):
+        if b.keyframe_prompt:
+            raise StoryboardValidationError(
+                f"exterior beat {b.id} must not have keyframe_prompt"
+            )
+
     return Storyboard(
         scene_id=data["scene_id"],
         scene_summary=data["scene_summary"],
@@ -190,15 +211,18 @@ def load_storyboard_file(
 
 def dump_storyboard(sb: Storyboard) -> dict:
     """Serialize a Storyboard back to a plain dict (inverse of load_storyboard)."""
+    beats_out = []
+    for b in sb.beats:
+        d = {"id": b.id, "beat_type": b.beat_type,
+             "actions": list(b.actions), "duration": b.duration,
+             "motion_prompt": b.motion_prompt}
+        if b.keyframe_prompt:
+            d["keyframe_prompt"] = b.keyframe_prompt
+        beats_out.append(d)
     return {
         "scene_id": sb.scene_id,
         "scene_summary": sb.scene_summary,
-        "beats": [
-            {"id": b.id, "beat_type": b.beat_type,
-             "actions": list(b.actions), "duration": b.duration,
-             "motion_prompt": b.motion_prompt}
-            for b in sb.beats
-        ],
+        "beats": beats_out,
     }
 
 
@@ -215,7 +239,8 @@ def _build_user_prompt(scene: dict, cinematic_actions: list[dict]) -> str:
     n_pov = math.ceil(len(cinematic_actions) / _POV_MAX_ACTIONS) \
         if cinematic_actions else 0
     total = n_pov + 2
-    lines = [scene["llm_user_prompt"], ""]
+    direction = scene.get("direction", "departure")
+    lines = [scene["llm_user_prompt"], "", f"Direction: {direction}", ""]
     if not cinematic_actions:
         lines += [
             "No cinematic actions for this scene.",

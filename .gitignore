@@ -32,3 +32,21 @@ tests/EMBEDDING_VALIDATION_REPORT.md
 
 # Offline pip install wheels (rebuilt by scripts/download_wheels.sh)
 wheels/
+
+# Video rendering intermediates — simulator only loads scene.mp4
+output/videos/*/day*/*/beats/
+output/videos/refs/
+
+# Backups / locks / scratch
+*.backup.docx
+.~lock.*#
+.claude/scheduled_tasks.lock
+
+# Streamlit Cloud secrets (template only is committed)
+.streamlit/secrets.toml
+
+# Patent paper artifacts — kept local, never pushed to public repo
+*.docx
+patent_QA_summary.md
+output/fig1_system_architecture.png
+output/fig2_process_flow.png

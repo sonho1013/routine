@@ -65,7 +65,7 @@ def build_openai_client():
     for var in ("ALL_PROXY", "all_proxy"):
         os.environ.pop(var, None)
     from openai import OpenAI
-    return OpenAI(api_key=OPENAI_API_KEY)
+    return OpenAI(api_key=OPENAI_API_KEY, timeout=120.0)
 
 
 # ── Scene manifest helpers ──

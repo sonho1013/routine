@@ -225,8 +225,8 @@ def generate_toll_entry(event_index: int, base_date: datetime) -> Dict:
     h, m = _time_jitter(random.choice([9, 12, 15, 17]), 0, jitter_min=30)
     start_time = date.replace(hour=h, minute=m, second=0)
 
-    # 随机选择 POI
-    poi_name = random.choice(["toll_A6", "parking_mall", "toll_A6", "toll_A6"])
+    # 随机选择 POI (对齐 GEOFENCES 中的实际 key)
+    poi_name = random.choice(["office_gate_01", "mall", "office_gate_01", "office_gate_01"])
     poi = GEOFENCES[poi_name]
 
     # 天气

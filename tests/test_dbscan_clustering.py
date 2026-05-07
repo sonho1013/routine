@@ -79,17 +79,22 @@ from panoramix_core.models.fact_enums import FactType, FactDurability, FactSourc
 # ═══════════════════════════════════════════════════
 
 def _ctx(time_bucket="early_morning", vehicle_state="engine_started",
-         geofence=None, weekday=True, hour=8):
+         geofence=None, weekday=True, hour=8,
+         poi_type="home", wiper_state="off", temp_bucket="mild",
+         window_state="closed", door_lock="locked", approach_unlock="enabled"):
     return StructuredContext(
         time_bucket=time_bucket, hour=hour, weekday=weekday,
         vehicle_state=vehicle_state, geofence=geofence,
+        poi_type=poi_type, wiper_state=wiper_state, temp_bucket=temp_bucket,
+        window_state=window_state, door_lock=door_lock,
+        approach_unlock=approach_unlock,
     )
 
 
 def _fact_with_emb(text, embedding, time_bucket="early_morning",
                    vehicle_state="engine_started", geofence=None,
                    weekday=True, hour=8, fact_type=FactType.PREF,
-                   durability=FactDurability.LONG_TERM, day=0):
+                   durability=FactDurability.LONG_TERM, day=0, **ctx_kwargs):
     """构造 {"fact": Fact, "embedding": list} 结构"""
     f = Fact(
         text=text,
@@ -97,7 +102,8 @@ def _fact_with_emb(text, embedding, time_bucket="early_morning",
         durability=durability,
         time_stamp=datetime(2025, 10, 6 + day, hour, 15),
         source=FactSources.SIGNAL,
-        context=_ctx(time_bucket, vehicle_state, geofence, weekday, hour),
+        context=_ctx(time_bucket, vehicle_state, geofence, weekday, hour,
+                     **ctx_kwargs),
     )
     return {"fact": f, "embedding": embedding}
 
@@ -201,42 +207,46 @@ class TestContextDistance:
         assert context_distance(ctx, ctx) == 0.0
 
     def test_identical_with_unknown(self):
-        """geofence=None → unknown 贡献 0.5 → 0.25*0.5 = 0.125"""
+        """geofence=None → unknown 贡献 0.5 → 0.13*0.5 = 0.065"""
         ctx = _ctx()
-        assert context_distance(ctx, ctx) == pytest.approx(0.125, abs=0.001)
+        assert context_distance(ctx, ctx) == pytest.approx(0.065, abs=0.001)
 
     def test_completely_different(self):
         a = _ctx(time_bucket="early_morning", vehicle_state="engine_started",
-                 geofence="home", weekday=True)
+                 geofence="home", weekday=True,
+                 poi_type="home", wiper_state="off", temp_bucket="cold",
+                 window_state="closed", door_lock="locked",
+                 approach_unlock="enabled")
         b = _ctx(time_bucket="night", vehicle_state="parked",
-                 geofence="workplace", weekday=False)
+                 geofence="workplace", weekday=False,
+                 poi_type="park", wiper_state="max", temp_bucket="hot",
+                 window_state="open", door_lock="unlocked",
+                 approach_unlock="disabled")
         d = context_distance(a, b)
-        # time_bucket: 0.35 * 1.0 = 0.35
-        # vehicle_state: 0.30 * 1.0 = 0.30
-        # geofence: 0.25 * 1.0 = 0.25
-        # weekday: 0.10 * 1.0 = 0.10
+        # 所有 10 维全部 1.0，权重之和 = 1.0
         assert d == pytest.approx(1.0)
 
     def test_only_time_differs(self):
         a = _ctx(time_bucket="early_morning")
         b = _ctx(time_bucket="evening")
         d = context_distance(a, b)
-        # time_bucket: 0.35 * (4/5) = 0.28, rest=0 (same) except geofence unknown
-        # geofence: both None → 0.25 * 0.5 = 0.125
-        # weekday: both True → 0.0
-        expected = 0.35 * (4/5) + 0.25 * 0.5  # 0.28 + 0.125 = 0.405
+        # time_bucket: 0.22 * (4/5) = 0.176
+        # geofence: both None → 0.13 * 0.5 = 0.065
+        # 其余均已知且相同 → 0
+        expected = 0.22 * (4/5) + 0.13 * 0.5  # 0.176 + 0.065 = 0.241
         assert d == pytest.approx(expected, abs=0.01)
 
     def test_only_vehicle_differs(self):
         a = _ctx(vehicle_state="engine_started", geofence="home")
         b = _ctx(vehicle_state="parked", geofence="home")
         d = context_distance(a, b)
-        # vehicle: 0.30 * 1.0 = 0.30, rest same
-        assert d == pytest.approx(0.30, abs=0.01)
+        # vehicle: 0.16 * 1.0 = 0.16, 其余同
+        assert d == pytest.approx(0.16, abs=0.01)
 
     def test_weights_sum_to_one(self):
-        """维度权重之和 = 1.0"""
-        assert 0.35 + 0.30 + 0.25 + 0.10 == pytest.approx(1.0)
+        """10 维权重之和 = 1.0（trigger list 2.xlsx 对齐后）"""
+        weights = [0.22, 0.16, 0.13, 0.10, 0.09, 0.07, 0.06, 0.06, 0.06, 0.05]
+        assert sum(weights) == pytest.approx(1.0)
 
     def test_range_zero_to_one(self):
         """context_distance 输出范围 [0, 1]"""
@@ -363,7 +373,8 @@ class TestGetFactClusters:
             _fact_with_emb(
                 "set AC to 22", _similar_emb(base, seed=i),
                 time_bucket="early_morning", vehicle_state="engine_started",
-                weekday=True, day=i
+                geofence="home", weekday=True, day=i,
+                poi_type="home", wiper_state="off",
             )
             for i in range(5)
         ]
@@ -371,7 +382,8 @@ class TestGetFactClusters:
             _fact_with_emb(
                 "set AC to 22", _similar_emb(base, seed=i + 100),
                 time_bucket="evening", vehicle_state="parked",
-                weekday=True, hour=18, day=i
+                geofence="workplace", weekday=True, hour=18, day=i,
+                poi_type="work", wiper_state="high",
             )
             for i in range(5)
         ]

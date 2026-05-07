@@ -24,12 +24,26 @@ SHORT_TERM_TTL_DAYS = 30
 
 
 class StructuredContext(BaseModel):
-    """结构化上下文维度 — 参与 hybrid DBSCAN 距离计算"""
-    time_bucket: str = "unknown"        # early_morning / midday / afternoon / evening / night
+    """结构化上下文维度 — 参与 hybrid DBSCAN 距离计算。
+
+    与 trigger list 2.xlsx 对齐: speed/gear/power → vehicle_state；GPS → geofence；
+    POI name → poi_type；其余 (wiper_speed / out_temp / door_lock /
+    window_position / approach_unlock_state) 各自独立一维。
+    """
+    # 时空
+    time_bucket: str = "unknown"        # early_morning / morning / midday / afternoon / evening / night
     hour: int = -1                      # 0-23
     weekday: Optional[bool] = None      # True=工作日, False=周末
+    # 车辆运动 / 位置
     vehicle_state: str = "unknown"      # engine_started / parked / crawling
-    geofence: Optional[str] = None      # home / workplace / toll_A6 / ...
+    geofence: Optional[str] = None      # home / workplace / office_gate_01 / park / mall
+    poi_type: Optional[str] = None      # home / work / site_entrance / park / mall / custom
+    # 环境 / 车况前置条件
+    wiper_state: str = "unknown"        # off / low / medium / high / max
+    temp_bucket: str = "unknown"        # cold (<10) / mild (10-22) / warm (22-28) / hot (>=28)
+    door_lock: Optional[str] = None     # locked / unlocked
+    window_state: str = "unknown"       # closed / partial / open
+    approach_unlock: Optional[str] = None  # enabled / disabled
 
 
 class Fact(BaseModel):
@@ -114,11 +128,20 @@ class Fact(BaseModel):
             "ctx_time_bucket": self.context.time_bucket,
             "ctx_hour": self.context.hour,
             "ctx_vehicle_state": self.context.vehicle_state,
+            "ctx_wiper_state": self.context.wiper_state,
+            "ctx_temp_bucket": self.context.temp_bucket,
+            "ctx_window_state": self.context.window_state,
         }
         if self.context.weekday is not None:
             meta["ctx_weekday"] = self.context.weekday
         if self.context.geofence is not None:
             meta["ctx_geofence"] = self.context.geofence
+        if self.context.poi_type is not None:
+            meta["ctx_poi_type"] = self.context.poi_type
+        if self.context.door_lock is not None:
+            meta["ctx_door_lock"] = self.context.door_lock
+        if self.context.approach_unlock is not None:
+            meta["ctx_approach_unlock"] = self.context.approach_unlock
         if self.source:
             meta["source"] = self.source.value
         if self.json_metadata:
@@ -149,6 +172,12 @@ class Fact(BaseModel):
             weekday=metadata.get("ctx_weekday"),
             vehicle_state=metadata.get("ctx_vehicle_state", "unknown"),
             geofence=metadata.get("ctx_geofence"),
+            poi_type=metadata.get("ctx_poi_type"),
+            wiper_state=metadata.get("ctx_wiper_state", "unknown"),
+            temp_bucket=metadata.get("ctx_temp_bucket", "unknown"),
+            door_lock=metadata.get("ctx_door_lock"),
+            window_state=metadata.get("ctx_window_state", "unknown"),
+            approach_unlock=metadata.get("ctx_approach_unlock"),
         )
 
         return cls(

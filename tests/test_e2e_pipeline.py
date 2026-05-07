@@ -39,6 +39,8 @@ from panoramix_core.clustering.habits_detector import HabitsDetector, context_di
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 log = logging.getLogger(__name__)
 
+import pytest
+
 TEST_USER = "test_e2e"
 DATA_FILE = os.path.join(os.path.dirname(__file__), "step3_hybrid_dbscan_result.json")
 
@@ -77,22 +79,38 @@ def load_mockup_facts():
     return facts, expected_clusters
 
 
-def test_step1_store_facts(store, facts):
-    """Step 1: 将 Facts 存入 ChromaDB"""
-    log.info(f"═══ Step 1: Storing {len(facts)} facts into ChromaDB ═══")
+# ── Pytest fixtures ──
+
+@pytest.fixture(scope="module")
+def e2e_facts():
+    """加载 mockup facts 和 expected clusters"""
+    return load_mockup_facts()
+
+
+@pytest.fixture(scope="module")
+def e2e_store(e2e_facts):
+    """创建 FactStoreChroma，存入 facts，返回 (store, facts, expected_clusters)"""
+    facts, expected_clusters = e2e_facts
+    store = FactStoreChroma(TEST_USER)
     store.store_facts(TEST_USER, facts)
+    yield store, facts, expected_clusters
+    store.close()
 
-    # 验证写入数量
+
+# ── Tests ──
+
+def test_step1_store_facts(e2e_store):
+    """Step 1: 将 Facts 存入 ChromaDB"""
+    store, facts, _ = e2e_store
     stored = store.get_facts(TEST_USER)
-    log.info(f"  Stored: {len(facts)}, Retrieved: {len(stored)}")
     assert len(stored) == len(facts), f"Count mismatch: stored {len(facts)}, got {len(stored)}"
-    log.info("  ✓ Step 1 PASSED — all facts stored and retrievable")
-    return stored
 
 
-def test_step2_verify_metadata(stored_facts, original_facts):
+def test_step2_verify_metadata(e2e_store, e2e_facts):
     """Step 2: 验证 metadata 往返完整性 (text, type, context fields)"""
-    log.info(f"═══ Step 2: Verifying metadata roundtrip ({len(stored_facts)} facts) ═══")
+    store, _, _ = e2e_store
+    original_facts, _ = e2e_facts
+    stored_facts = store.get_facts(TEST_USER)
 
     original_by_id = {f.id: f for f in original_facts}
     errors = []
@@ -100,118 +118,82 @@ def test_step2_verify_metadata(stored_facts, original_facts):
     for sf in stored_facts:
         orig = original_by_id.get(sf.id)
         if orig is None:
-            errors.append(f"  ✗ Unknown fact ID: {sf.id}")
+            errors.append(f"  Unknown fact ID: {sf.id}")
             continue
 
-        # 验证 text
         if sf.text != orig.text:
-            errors.append(f"  ✗ Text mismatch for {sf.id}: '{sf.text}' vs '{orig.text}'")
+            errors.append(f"  Text mismatch for {sf.id}: '{sf.text}' vs '{orig.text}'")
 
-        # 验证 type
         if sf.type != orig.type:
-            errors.append(f"  ✗ Type mismatch for {sf.id}: {sf.type} vs {orig.type}")
+            errors.append(f"  Type mismatch for {sf.id}: {sf.type} vs {orig.type}")
 
-        # 验证 context (structured metadata)
         for field in ["time_bucket", "vehicle_state", "geofence", "weekday", "hour"]:
             stored_val = getattr(sf.context, field)
             orig_val = getattr(orig.context, field)
             if stored_val != orig_val:
                 errors.append(
-                    f"  ✗ Context.{field} mismatch for {sf.id}: {stored_val} vs {orig_val}"
+                    f"  Context.{field} mismatch for {sf.id}: {stored_val} vs {orig_val}"
                 )
 
     if errors:
-        for e in errors[:10]:
-            log.error(e)
-        raise AssertionError(f"Metadata roundtrip failed with {len(errors)} errors")
-
-    log.info("  ✓ Step 2 PASSED — all metadata fields roundtrip correctly")
+        raise AssertionError(f"Metadata roundtrip failed with {len(errors)} errors:\n" + "\n".join(errors[:10]))
 
 
-def test_step3_get_facts_with_embeddings(store):
+def test_step3_get_facts_with_embeddings(e2e_store):
     """Step 3: 获取 facts + embeddings，验证 embedding 维度"""
-    log.info("═══ Step 3: Retrieving facts with embeddings ═══")
+    store, _, _ = e2e_store
     items = store.get_facts_with_embeddings(TEST_USER)
-    log.info(f"  Retrieved {len(items)} facts with embeddings")
 
     assert len(items) > 0, "No facts with embeddings returned"
 
-    # 检查 embedding 维度
     dims = set()
     for item in items:
         emb = item["embedding"]
         assert emb is not None, f"Null embedding for fact {item['fact'].id}"
         dims.add(len(emb))
 
-    log.info(f"  Embedding dimensions: {dims}")
     assert len(dims) == 1, f"Inconsistent embedding dimensions: {dims}"
     dim = dims.pop()
-    assert dim > 0, f"Zero-dimensional embeddings"
-    log.info(f"  ✓ Step 3 PASSED — {len(items)} embeddings, dim={dim}")
-    return items
+    assert dim > 0, "Zero-dimensional embeddings"
 
 
-def test_step4_hybrid_dbscan(items, expected_clusters):
+def test_step4_hybrid_dbscan(e2e_store):
     """Step 4: 运行 HabitsDetector hybrid DBSCAN，对比预期聚类"""
-    log.info("═══ Step 4: Running Hybrid DBSCAN clustering ═══")
-    log.info(f"  Config: HYBRID_ALPHA={HYBRID_ALPHA}, EPS={DBSCAN_EPS}, MIN_SAMPLES={DBSCAN_MIN_SAMPLES}")
+    store, _, expected_clusters = e2e_store
+    items = store.get_facts_with_embeddings(TEST_USER)
 
-    # 不传 LLM client — 仅测试聚类，不测 reword
     detector = HabitsDetector(llm_client=None)
     new_habits, ids_to_delete = detector.detect_habits(items)
 
-    log.info(f"  Habits detected: {len(new_habits)}")
-    log.info(f"  Facts to delete: {len(ids_to_delete)}")
+    assert len(new_habits) > 0, "No habits detected"
 
-    for h in new_habits:
-        log.info(f"    Habit: '{h.text}'")
-
-    # 对比聚类纯度 (用 _scene_label)
-    # 构建 fact_id → expected info 映射
-    expected_by_id = {e["fact_id"]: e for e in expected_clusters}
-
-    # 统计: 被聚类的 fact 中，同一 cluster 内的 scene_label 是否一致
     clustered_facts = [item for item in items if item["fact"].id in ids_to_delete]
-    log.info(f"  Clustered facts: {len(clustered_facts)} / {len(items)} total")
-    log.info(f"  Noise (not clustered): {len(items) - len(clustered_facts)}")
-
-    log.info("  ✓ Step 4 PASSED — Hybrid DBSCAN completed successfully")
-    return new_habits, ids_to_delete
+    assert len(clustered_facts) > 0, "No facts were clustered"
 
 
-def test_step5_delete_and_store_habits(store, new_habits, ids_to_delete):
+def test_step5_delete_and_store_habits(e2e_store):
     """Step 5: 删除原始 facts，存入合成 habits — 完整 lifecycle"""
-    log.info("═══ Step 5: Delete originals + store habits (lifecycle test) ═══")
+    store, _, _ = e2e_store
+    items = store.get_facts_with_embeddings(TEST_USER)
+
+    detector = HabitsDetector(llm_client=None)
+    new_habits, ids_to_delete = detector.detect_habits(items)
 
     count_before = len(store.get_facts(TEST_USER))
-    log.info(f"  Facts before: {count_before}")
 
-    # 删除聚类过的 facts
     if ids_to_delete:
         store.delete_facts(TEST_USER, ids_to_delete)
-        log.info(f"  Deleted: {len(ids_to_delete)} clustered facts")
-
-    # 存入新 habits
     if new_habits:
         store.store_facts(TEST_USER, new_habits)
-        log.info(f"  Stored: {len(new_habits)} new habit facts")
 
     remaining = store.get_facts(TEST_USER)
-    log.info(f"  Facts after: {len(remaining)}")
-
-    # 验证: 剩余 = 原始 - 删除 + 新增
     expected_count = count_before - len(ids_to_delete) + len(new_habits)
     assert len(remaining) == expected_count, (
         f"Count mismatch: expected {expected_count}, got {len(remaining)}"
     )
 
-    # 检查 habit facts 存在
     habit_facts = [f for f in remaining if f.type == FactType.HABIT]
-    log.info(f"  HABIT type facts in store: {len(habit_facts)}")
-    for hf in habit_facts:
-        log.info(f"    - {hf.text}")
-
-    log.info("  ✓ Step 5 PASSED — full lifecycle (delete + store habits) works")
+    assert len(habit_facts) > 0, "No HABIT type facts in store after lifecycle"
 
 
 def main():

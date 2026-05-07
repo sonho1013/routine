@@ -227,7 +227,96 @@ class SignalRuleEngine:
                 sig_map.get("gps_latitude"),
                 sig_map.get("gps_longitude"),
             ),
+            poi_type=self._normalize_poi_type(sig_map.get("poi_type")),
+            wiper_state=self._normalize_wiper(sig_map.get("wiper_state")),
+            temp_bucket=self._classify_temp_bucket(sig_map.get("outside_temp_c")),
+            door_lock=self._normalize_door_lock(sig_map.get("door_lock_state")),
+            window_state=self._classify_window_state(
+                sig_map.get("window_state_snapshot")
+            ),
+            approach_unlock=self._normalize_approach_unlock(
+                sig_map.get("approach_unlock_state")
+            ),
         )
+
+    # ── 新增 6 个 trigger 维度的归一化 / 分桶 helpers ──
+
+    @staticmethod
+    def _normalize_wiper(value) -> str:
+        """接受字符串 (off/low/medium/high/max) 或整型 0-4。"""
+        if value is None:
+            return "unknown"
+        if isinstance(value, (int, float)):
+            return {0: "off", 1: "low", 2: "medium", 3: "high", 4: "max"}.get(
+                int(value), "unknown"
+            )
+        v = str(value).strip().lower()
+        return v if v in {"off", "low", "medium", "high", "max"} else "unknown"
+
+    @staticmethod
+    def _classify_temp_bucket(celsius) -> str:
+        """<10 cold, 10-22 mild, 22-28 warm, >=28 hot。"""
+        if celsius is None:
+            return "unknown"
+        try:
+            c = float(celsius)
+        except (TypeError, ValueError):
+            return "unknown"
+        if c < 10:
+            return "cold"
+        if c < 22:
+            return "mild"
+        if c < 28:
+            return "warm"
+        return "hot"
+
+    @staticmethod
+    def _normalize_door_lock(value) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return "locked" if value else "unlocked"
+        v = str(value).strip().lower()
+        return v if v in {"locked", "unlocked"} else None
+
+    @staticmethod
+    def _classify_window_state(value) -> str:
+        """接受 str (CLOSED/HALF/OPEN/closed/...) 或百分比数值。"""
+        if value is None:
+            return "unknown"
+        if isinstance(value, (int, float)):
+            v = float(value)
+            if v <= 0:
+                return "closed"
+            if v < 80:
+                return "partial"
+            return "open"
+        s = str(value).strip().lower()
+        if s in {"closed", "close"}:
+            return "closed"
+        if s in {"half", "half open", "partial"}:
+            return "partial"
+        if s in {"open", "full", "full open"}:
+            return "open"
+        return "unknown"
+
+    @staticmethod
+    def _normalize_approach_unlock(value) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return "enabled" if value else "disabled"
+        v = str(value).strip().lower()
+        return v if v in {"enabled", "disabled"} else None
+
+    @staticmethod
+    def _normalize_poi_type(value) -> Optional[str]:
+        if value is None:
+            return None
+        v = str(value).strip().lower()
+        # 允许的 POI 类型：与 place_semantic.place_type 对齐
+        allowed = {"home", "work", "site_entrance", "park", "mall", "custom"}
+        return v if v in allowed else None
 
     def _classify_time_bucket(self, signals_list: list) -> str:
         """Map first signal's hour to a named time bucket."""

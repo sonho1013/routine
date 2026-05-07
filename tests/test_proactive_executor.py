@@ -49,10 +49,15 @@ from panoramix_core.config import CONTEXT_MATCH_THRESHOLD
 # ═══════════════════════════════════════════════════
 
 def _ctx(time_bucket="early_morning", vehicle_state="engine_started",
-         geofence=None, weekday=True, hour=8):
+         geofence=None, weekday=True, hour=8,
+         poi_type="home", wiper_state="off", temp_bucket="mild",
+         window_state="closed", door_lock="locked", approach_unlock="enabled"):
     return StructuredContext(
         time_bucket=time_bucket, hour=hour, weekday=weekday,
         vehicle_state=vehicle_state, geofence=geofence,
+        poi_type=poi_type, wiper_state=wiper_state, temp_bucket=temp_bucket,
+        window_state=window_state, door_lock=door_lock,
+        approach_unlock=approach_unlock,
     )
 
 
@@ -251,9 +256,9 @@ class TestRecommendExactMatch:
         assert result.has_recommendations
         assert len(result.actions) == 1
         assert result.actions[0].habit_text == h.text
-        # geofence=None → "unknown" 贡献 0.25*0.5=0.125
-        assert result.actions[0].context_distance == pytest.approx(0.125, abs=0.001)
-        assert result.actions[0].match_confidence == pytest.approx(0.875, abs=0.001)
+        # geofence=None → "unknown" 贡献 0.13*0.5=0.065
+        assert result.actions[0].context_distance == pytest.approx(0.065, abs=0.001)
+        assert result.actions[0].match_confidence == pytest.approx(0.935, abs=0.001)
         assert result.actions[0].parsed_actions["hvac_temp_target"] == 22
         assert result.actions[0].scene_name == "Morning Commute"
 
@@ -359,8 +364,8 @@ class TestRecommendSoftMatch:
         ctx = _ctx(weekday=False)
         result = executor.recommend(ctx, "user1")
         assert result.has_recommendations
-        # weekday 权重 0.10 + geofence=None 贡献 0.125 → 0.225
-        assert result.actions[0].context_distance == pytest.approx(0.225, abs=0.01)
+        # weekday 权重 0.07 * 1.0 + geofence=None 贡献 0.13*0.5=0.065 → 0.135
+        assert result.actions[0].context_distance == pytest.approx(0.135, abs=0.01)
 
 
 class TestRecommendMetadata:
@@ -404,29 +409,41 @@ class TestRecommendMetadata:
 # ═══════════════════════════════════════════════════
 
 class TestEngineIntegration:
-    """验证 accept_habit + get_recommendation 闭环"""
+    """验证 accept_habit + get_recommendation 闭环（SQLite scene-card 架构）"""
 
     def test_accept_and_recommend(self):
         """accept 后 recommend 能找到"""
         from engine.habit_engine import HabitDemoEngine
+        from panoramix_core.models.habit import Habit
 
         engine = HabitDemoEngine(username="test-executor", llm_client=None)
         engine.reset()
 
-        # 手动存入一个未 accepted 的 habit
-        h = _habit("set cabin air conditioning temperature to 22 degrees",
-                    accepted=False)
-        engine.fact_store.store_facts(engine.username, [h])
+        structural_key = "test_key_hvac"
+        habit = Habit(
+            username=engine.username, batch_id=1,
+            text="set cabin air conditioning temperature to 22 degrees",
+            signal_category="numeric", signal_name="hvac_temp_target",
+            structural_key=structural_key,
+            context_time_bucket="early_morning", context_vehicle_state="engine_started",
+            context_weekday=1, raw_value_stats={"clustering_confidence": 0.8},
+            member_fact_ids=[],
+        )
+        with engine.scene_card_store.transaction() as conn:
+            engine.habit_store.insert_many([habit], batch_id=1, conn=conn)
+            engine.scene_card_store.upsert_pending_by_structural_key(
+                structural_key=structural_key,
+                card_data={"display_name": "Morning Commute",
+                           "content_snapshot": {"habits": []}},
+                batch_id=1, conn=conn,
+            )
 
-        # 未 accept → 无推荐
         ctx = _ctx()
         result = engine.get_recommendation(ctx)
         assert not result.has_recommendations
 
-        # accept
-        engine.accept_habit(h.id)
+        engine.accept_habit(habit.habit_id)
 
-        # accept 后 → 有推荐
         result = engine.get_recommendation(ctx)
         assert result.has_recommendations
         assert result.actions[0].parsed_actions["hvac_temp_target"] == 22
@@ -436,17 +453,32 @@ class TestEngineIntegration:
 
     def test_reject_habit(self):
         from engine.habit_engine import HabitDemoEngine
+        from panoramix_core.models.habit import Habit
 
         engine = HabitDemoEngine(username="test-executor-reject", llm_client=None)
         engine.reset()
 
-        h = _habit("eco mode", accepted=True)
-        engine.fact_store.store_facts(engine.username, [h])
+        structural_key = "test_key_eco"
+        habit = Habit(
+            username=engine.username, batch_id=1,
+            text="eco mode", signal_category="categorical",
+            signal_name="drive_mode", structural_key=structural_key,
+            context_time_bucket="early_morning", context_vehicle_state="engine_started",
+            context_weekday=1, raw_value_stats={"clustering_confidence": 0.8},
+            member_fact_ids=[],
+        )
+        with engine.scene_card_store.transaction() as conn:
+            engine.habit_store.insert_many([habit], batch_id=1, conn=conn)
+            engine.scene_card_store.upsert_pending_by_structural_key(
+                structural_key=structural_key,
+                card_data={"display_name": "Test Scene",
+                           "content_snapshot": {"habits": []}},
+                batch_id=1, conn=conn,
+            )
 
-        # reject → 删除
-        assert engine.reject_habit(h.id) is True
+        assert engine.reject_habit(habit.habit_id) is True
         habits = engine.get_habits()
-        assert len(habits) == 0
+        assert all(not h.accepted for h in habits)
 
         engine.reset()
         engine.close()

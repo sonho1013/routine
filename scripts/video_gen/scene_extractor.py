@@ -21,18 +21,28 @@ from scenarios.mock_data_generator import generate_full_dataset
 from scripts.video_gen.config import MANIFEST_PATH, LLM_SYSTEM_PROMPT, STYLE_SUFFIX, CINEMATIC_SIGNALS
 
 
+_NOOP_VALUES: dict[str, set] = {
+    "wiper_state": {"off"},
+    "window_position": {"0"},
+}
+
+
 def filter_cinematic_actions(signals: list[dict]) -> list[dict]:
     """Return only signals whose name is in CINEMATIC_SIGNALS.
 
     For signals that repeat within the scene (e.g. hvac_temp_target set
     twice), keep only the last occurrence — the final state is what gets
-    shown on screen.
+    shown on screen. Signals whose value is a default/no-op state (e.g.
+    wiper_state=off on a sunny day) are excluded.
     """
     last_by_name: dict[str, dict] = {}
     order: list[str] = []
     for sig in signals:
         name = sig.get("signal", "")
         if name not in CINEMATIC_SIGNALS:
+            continue
+        value = str(sig.get("value", "")).strip().lower()
+        if value in _NOOP_VALUES.get(name, set()):
             continue
         if name not in last_by_name:
             order.append(name)

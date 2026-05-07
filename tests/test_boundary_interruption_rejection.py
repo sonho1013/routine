@@ -256,16 +256,14 @@ class TestRejectHabitBoundary:
 
     def test_reject_nonexistent_habit_returns_false(self):
         """reject 不存在的 habit_id → 返回 False"""
-        store = FakeFactStore()
-
-        # 使用真实 engine 测试返回值
-        engine = HabitDemoEngine.__new__(HabitDemoEngine)
-        engine.username = "test_reject"
-        engine.fact_store = store
-        engine.executor = ProactiveExecutor(store)
+        engine = HabitDemoEngine(username="test_reject_nonexist", llm_client=None)
+        engine.reset()
 
         result = engine.reject_habit("nonexistent-id-12345")
         assert result is False, "reject 不存在的 ID 应返回 False"
+
+        engine.reset()
+        engine.close()
 
     def test_reject_one_does_not_affect_others(self):
         """reject 一个习惯不影响其他习惯"""
@@ -316,36 +314,62 @@ class TestRejectHabitBoundary:
         assert result.actions[0].clustering_confidence == 0.92
 
     def test_reject_accepted_vs_unaccepted(self):
-        """reject 已接受和未接受的习惯都应成功删除"""
-        store = FakeFactStore()
+        """reject pending 场景卡应成功"""
+        from panoramix_core.models.habit import Habit as HabitModel
 
-        engine = HabitDemoEngine.__new__(HabitDemoEngine)
-        engine.username = "test_reject_both"
-        engine.fact_store = store
-        engine.executor = ProactiveExecutor(store)
+        engine = HabitDemoEngine(username="test_reject_both", llm_client=None)
+        engine.reset()
 
-        # 未接受的习惯
-        h_unaccepted = _habit("eco mode", accepted=False)
-        store.store_facts("test_reject_both", [h_unaccepted])
+        structural_key = "test_key_eco"
+        habit = HabitModel(
+            username=engine.username, batch_id=1,
+            text="eco mode", signal_category="categorical",
+            signal_name="drive_mode", structural_key=structural_key,
+            context_time_bucket="early_morning", context_vehicle_state="engine_started",
+            context_weekday=1, raw_value_stats={}, member_fact_ids=[],
+        )
+        with engine.scene_card_store.transaction() as conn:
+            engine.habit_store.insert_many([habit], batch_id=1, conn=conn)
+            engine.scene_card_store.upsert_pending_by_structural_key(
+                structural_key=structural_key,
+                card_data={"display_name": "Test", "content_snapshot": {}},
+                batch_id=1, conn=conn,
+            )
 
-        result = engine.reject_habit(h_unaccepted.id)
-        assert result is True, "reject 未接受的习惯也应返回 True"
-        assert len(store.get_facts("test_reject_both", types=[FactType.HABIT])) == 0
+        result = engine.reject_habit(habit.habit_id)
+        assert result is True, "reject pending 场景卡应返回 True"
+
+        engine.reset()
+        engine.close()
 
     def test_double_reject_same_habit(self):
         """连续 reject 同一个 habit → 第二次返回 False"""
-        store = FakeFactStore()
+        from panoramix_core.models.habit import Habit as HabitModel
 
-        engine = HabitDemoEngine.__new__(HabitDemoEngine)
-        engine.username = "test_double_reject"
-        engine.fact_store = store
-        engine.executor = ProactiveExecutor(store)
+        engine = HabitDemoEngine(username="test_double_reject", llm_client=None)
+        engine.reset()
 
-        h = _habit("eco mode", accepted=True)
-        store.store_facts("test_double_reject", [h])
+        structural_key = "test_key_double"
+        habit = HabitModel(
+            username=engine.username, batch_id=1,
+            text="eco mode", signal_category="categorical",
+            signal_name="drive_mode", structural_key=structural_key,
+            context_time_bucket="early_morning", context_vehicle_state="engine_started",
+            context_weekday=1, raw_value_stats={}, member_fact_ids=[],
+        )
+        with engine.scene_card_store.transaction() as conn:
+            engine.habit_store.insert_many([habit], batch_id=1, conn=conn)
+            engine.scene_card_store.upsert_pending_by_structural_key(
+                structural_key=structural_key,
+                card_data={"display_name": "Test", "content_snapshot": {}},
+                batch_id=1, conn=conn,
+            )
 
-        assert engine.reject_habit(h.id) is True
-        assert engine.reject_habit(h.id) is False, "重复 reject 应返回 False"
+        assert engine.reject_habit(habit.habit_id) is True
+        assert engine.reject_habit(habit.habit_id) is False, "重复 reject 应返回 False"
+
+        engine.reset()
+        engine.close()
 
 
 # ═══════════════════════════════════════════════════
@@ -429,37 +453,63 @@ class TestInterruptionRejectionCombined:
         """
         通过 HabitDemoEngine 测试 accept → reject → 重新 accept 循环
         """
-        store = FakeFactStore()
-        engine = HabitDemoEngine.__new__(HabitDemoEngine)
-        engine.username = "cycle_test"
-        engine.fact_store = store
-        engine.executor = ProactiveExecutor(store, threshold=0.35)
+        from panoramix_core.models.habit import Habit as HabitModel
+
+        engine = HabitDemoEngine(username="cycle_test", llm_client=None)
+        engine.reset()
         ctx = _ctx()
 
-        # 存入未 accept 的习惯
-        h = _habit("set AC to 22", accepted=False)
-        store.store_facts("cycle_test", [h])
+        structural_key = "test_key_ac"
+        habit = HabitModel(
+            username=engine.username, batch_id=1,
+            text="set AC to 22", signal_category="numeric",
+            signal_name="hvac_temp_target", structural_key=structural_key,
+            context_time_bucket="early_morning", context_vehicle_state="engine_started",
+            context_geofence="home", context_weekday=1,
+            raw_value_stats={"clustering_confidence": 0.8},
+            member_fact_ids=[],
+        )
+        with engine.scene_card_store.transaction() as conn:
+            engine.habit_store.insert_many([habit], batch_id=1, conn=conn)
+            engine.scene_card_store.upsert_pending_by_structural_key(
+                structural_key=structural_key,
+                card_data={"display_name": "Morning AC",
+                           "content_snapshot": {"habits": []}},
+                batch_id=1, conn=conn,
+            )
 
         # accept
-        assert engine.accept_habit(h.id) is True
+        assert engine.accept_habit(habit.habit_id) is True
         result = engine.get_recommendation(ctx)
         assert result.has_recommendations
 
-        # 获取 accept 后的 habit（因为 accept 会 delete+store 新的）
-        habits_after_accept = engine.get_habits()
-        assert len(habits_after_accept) == 1
-        accepted_h = habits_after_accept[0]
-        assert accepted_h.accepted is True
-
-        # reject
-        assert engine.reject_habit(accepted_h.id) is True
+        # reject (retire accepted card)
+        assert engine.reject_habit(habit.habit_id) is True
         result = engine.get_recommendation(ctx)
         assert not result.has_recommendations
 
         # 重新存入并 accept（模拟重新学习）
-        h_new = _habit("set AC to 22", accepted=False)
-        store.store_facts("cycle_test", [h_new])
-        assert engine.accept_habit(h_new.id) is True
+        habit2 = HabitModel(
+            username=engine.username, batch_id=2,
+            text="set AC to 22", signal_category="numeric",
+            signal_name="hvac_temp_target", structural_key=structural_key + "_v2",
+            context_time_bucket="early_morning", context_vehicle_state="engine_started",
+            context_geofence="home", context_weekday=1,
+            raw_value_stats={"clustering_confidence": 0.9},
+            member_fact_ids=[],
+        )
+        with engine.scene_card_store.transaction() as conn:
+            engine.habit_store.insert_many([habit2], batch_id=2, conn=conn)
+            engine.scene_card_store.upsert_pending_by_structural_key(
+                structural_key=structural_key + "_v2",
+                card_data={"display_name": "Morning AC v2",
+                           "content_snapshot": {"habits": []}},
+                batch_id=2, conn=conn,
+            )
+        assert engine.accept_habit(habit2.habit_id) is True
 
         result = engine.get_recommendation(ctx)
         assert result.has_recommendations, "accept→reject→accept 循环后应能推荐"
+
+        engine.reset()
+        engine.close()

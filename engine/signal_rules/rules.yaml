@@ -97,9 +97,18 @@ signals:
       "off": "shut down the vehicle engine"
     drift_metric: dominant_value_change
 
-# ── Table 4 上下文信号（映射到 StructuredContext，不产生 Fact.text）──
+# ── 上下文信号（映射到 StructuredContext，不产生 Fact.text）──
+# 与 trigger list 2.xlsx 对齐：speed / gear / GPS / POI / wiper / out_temp /
+# door_lock / window_position / approach_unlock_state 都作为前置条件参与
+# DBSCAN 聚类距离，而非单独产生 Fact。
 context_signals:
   - gps_latitude
   - gps_longitude
   - gear_position
   - vehicle_speed
+  - wiper_state
+  - outside_temp_c
+  - door_lock_state
+  - window_state_snapshot
+  - approach_unlock_state
+  - poi_type

@@ -488,7 +488,7 @@ class TestPhase6Lifecycle:
     """验证 reject + 清理等生命周期操作"""
 
     def test_reject_habit(self, engine):
-        """reject 删除 habit"""
+        """reject retires the scene card containing the habit"""
         habits = engine.get_habits()
         if not habits:
             pytest.skip("No habits to reject")
@@ -500,7 +500,8 @@ class TestPhase6Lifecycle:
         assert ok is True
 
         remaining = engine.get_habits()
-        assert len(remaining) == count_before - 1
+        assert len(remaining) < count_before, "Reject should reduce habit count"
+        assert target.id not in {h.id for h in remaining}
 
     def test_reject_nonexistent(self, engine):
         """reject 不存在的 habit 返回 False"""

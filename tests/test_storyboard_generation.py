@@ -34,6 +34,7 @@ def _beat_json(pov_actions: list[list[str]]) -> str:
             "id": f"beat{i}", "beat_type": "cabin_pov",
             "actions": acts, "duration": "5",
             "motion_prompt": "POV of Mary's hands on the controls.",
+            "keyframe_prompt": "Dashboard with controls highlighted.",
         })
     beats.append({
         "id": f"beat{len(pov_actions) + 2}",
@@ -54,13 +55,11 @@ SCENE = {"id": "day1_morning_commute", "llm_user_prompt": "Morning commute."}
 def test_generates_valid_storyboard_on_first_try():
     sb = generate_storyboard(
         openai_client=_fake_openai([_beat_json([["engine_status",
-                                                 "gear_position",
-                                                 "nav_destination"]])]),
+                                                 "gear_position"]])]),
         scene=SCENE,
         cinematic_actions=[
             {"signal": "engine_status", "value": "on"},
             {"signal": "gear_position", "value": "D"},
-            {"signal": "nav_destination", "value": "office"},
         ],
     )
     assert sb.scene_id == "day1_morning_commute"
@@ -114,6 +113,6 @@ def test_user_prompt_includes_expected_beat_count_hint():
         ],
     )
     user_msg = client.chat.completions.create.call_args_list[0].kwargs["messages"][1]
-    # 4 actions → ceil(4/3) = 2 POV beats
+    # 4 actions → ceil(4/2) = 2 POV beats
     assert "2 cabin_pov beats" in user_msg["content"]
     assert "Total beats: 4" in user_msg["content"]

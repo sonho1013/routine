@@ -103,6 +103,7 @@ class ProactiveExecutor:
         current_context: StructuredContext,
         username: str,
         top_k: int = 0,
+        habits: Optional[List[Fact]] = None,
     ) -> RecommendationResult:
         """
         根据当前上下文推荐匹配的习惯动作。
@@ -111,6 +112,7 @@ class ProactiveExecutor:
             current_context: 当前车辆上下文
             username: 用户标识
             top_k: 最多返回 top_k 个推荐（0 = 不限制）
+            habits: 预加载的 habits 列表 (None 时从 Chroma 查询)
 
         Returns:
             RecommendationResult: 包含按距离排序的推荐动作列表
@@ -118,7 +120,10 @@ class ProactiveExecutor:
         ctx_dict = _context_to_dict(current_context)
 
         # 1. 获取所有 HABIT 类型 facts
-        all_habits = self.fact_store.get_facts(username, types=[FactType.HABIT])
+        if habits is not None:
+            all_habits = habits
+        else:
+            all_habits = self.fact_store.get_facts(username, types=[FactType.HABIT])
 
         # 2. 筛选已接受的
         accepted = [h for h in all_habits if h.accepted]

@@ -211,17 +211,23 @@ class TestPhase3RejectLinkage:
     """Tab 2 reject 后 habit 从 KG 和推荐中消失"""
 
     def test_reject_one_habit(self, engine_main):
-        """reject 一个 habit 成功"""
+        """reject 一个 habit 成功 — 整张场景卡（同 structural_key 的所有 habits）被移除"""
         status = engine_main.get_status()
         habits = status["habits"]
         assert len(habits) > 0
         target_id = habits[0]["id"]
+        target_card_id = habits[0]["card_id"]
         count_before = len(habits)
+        # 同一场景卡下的 habits 数量
+        card_habits_count = sum(1 for h in habits if h["card_id"] == target_card_id)
         ok = engine_main.reject_habit(target_id)
         assert ok is True
-        # 验证数量减少
+        # 验证数量减少（整张场景卡的 habits 都被移除）
         status2 = engine_main.get_status()
-        assert len(status2["habits"]) == count_before - 1
+        assert len(status2["habits"]) == count_before - card_habits_count
+        # 被 reject 的 habit 不再出现
+        remaining_ids = {h["id"] for h in status2["habits"]}
+        assert target_id not in remaining_ids
 
     def test_rejected_habit_not_in_kg(self, engine_main):
         """被 reject 的 habit 不再出现在 KG"""
@@ -451,15 +457,17 @@ class TestPhase7FeedbackLoop:
         assert len(accepted) >= 1
 
     def test_reject_visible_in_tab1_kg(self, engine_main):
-        """Tab 2 reject 后 Tab 1 的 KG 中 habit 消失"""
+        """Tab 2 reject 后 Tab 1 的 KG 中该场景卡的 habits 消失"""
         status = engine_main.get_status()
         count_before = len(status["habits"])
         if count_before == 0:
             pytest.skip("No habits to reject")
         target = status["habits"][-1]["id"]
+        target_card_id = status["habits"][-1]["card_id"]
+        card_habits_count = sum(1 for h in status["habits"] if h["card_id"] == target_card_id)
         engine_main.reject_habit(target)
         status2 = engine_main.get_status()
-        assert len(status2["habits"]) == count_before - 1
+        assert len(status2["habits"]) == count_before - card_habits_count
 
     def test_habit_count_consistent_across_tabs(self, engine_main):
         """Tab 1 KG count == Tab 2 Mini KG count (同一个 engine)"""

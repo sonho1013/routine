@@ -50,11 +50,37 @@ def _ensure_schema(db_path: str) -> None:
         init_conn = sqlite3.connect(db_path, isolation_level=None)
         try:
             init_conn.executescript(ddl)
+            _migrate_habits_trigger_dims(init_conn)
             log.info(f"SQLite schema initialized at {db_path}")
         finally:
             init_conn.close()
 
         _initialized_paths.add(db_path)
+
+
+# 与 trigger list 2.xlsx 对齐新增的 6 个 habits context 列。历史 DB 没有这些列时
+# 通过幂等 ALTER 追加；SQLite 不支持 IF NOT EXISTS，所以 try/except IGNORE。
+_HABIT_TRIGGER_COLUMNS = [
+    ("context_poi_type", "TEXT"),
+    ("context_wiper_state", "TEXT"),
+    ("context_temp_bucket", "TEXT"),
+    ("context_window_state", "TEXT"),
+    ("context_door_lock", "TEXT"),
+    ("context_approach_unlock", "TEXT"),
+]
+
+
+def _migrate_habits_trigger_dims(conn: sqlite3.Connection) -> None:
+    cur = conn.execute("PRAGMA table_info(habits)")
+    existing = {row[1] for row in cur.fetchall()}
+    for col, col_type in _HABIT_TRIGGER_COLUMNS:
+        if col in existing:
+            continue
+        try:
+            conn.execute(f"ALTER TABLE habits ADD COLUMN {col} {col_type}")
+            log.info(f"Migrated habits table: added column {col}")
+        except sqlite3.OperationalError as e:
+            log.warning(f"ALTER TABLE habits ADD COLUMN {col} failed: {e}")
 
 
 def reset_schema_cache() -> None:

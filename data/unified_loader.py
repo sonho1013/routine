@@ -101,7 +101,7 @@ def _normalize_window_position(pos) -> int:
 def _extract_context_signals(event: dict, header_date: str) -> List[dict]:
     """
     从 vehicle_status 事件提取上下文信号。
-    这些信号不对应用户动作，但为 StructuredContext 提供维度。
+    这些信号不对应用户动作，但为 StructuredContext 提供维度（对齐 trigger list 2.xlsx）。
     """
     signals = []
     ts_str = event.get("timestamp", "")
@@ -121,7 +121,7 @@ def _extract_context_signals(event: dict, header_date: str) -> List[dict]:
             "t": full_ts, "signal": "gear_position", "value": vs["gear"]
         })
 
-    # 雨刮 → 间接天气
+    # 雨刮档位 → 作为前置条件维度
     if "wiper_speed_level" in vs:
         wiper_level = vs["wiper_speed_level"]
         wiper_map = {0: "off", 1: "low", 2: "medium", 3: "high", 4: "max"}
@@ -130,8 +130,42 @@ def _extract_context_signals(event: dict, header_date: str) -> List[dict]:
             "value": wiper_map.get(wiper_level, "off"),
         })
 
+    # 车外温度（摄氏度）
+    if "out_temp_c" in event:
+        signals.append({
+            "t": full_ts, "signal": "outside_temp_c", "value": event["out_temp_c"],
+        })
+
+    # 车窗当前位置（快照，独立于 window_set 动作）
+    if "window_driver_position" in vs:
+        signals.append({
+            "t": full_ts, "signal": "window_state_snapshot",
+            "value": vs["window_driver_position"],
+        })
+
+    # 靠近解锁是否开启（快照，独立于 approach_unlock_set 动作）
+    if "approach_unlock_enabled" in vs:
+        signals.append({
+            "t": full_ts, "signal": "approach_unlock_state",
+            "value": vs["approach_unlock_enabled"],
+        })
+
+    # 门锁状态（raw_events 的 door_lock signal 可能不在 vehicle_state 内，
+    # 这里只抓 vehicle_state 里带的；lifecycle_plan 的离散门锁事件暂不追踪）
+    if "door_lock" in vs:
+        signals.append({
+            "t": full_ts, "signal": "door_lock_state", "value": vs["door_lock"],
+        })
+
+    # POI 类型（site_entrance / home / work / ...）
+    ps = event.get("place_semantic", {})
+    if ps.get("place_type"):
+        signals.append({
+            "t": full_ts, "signal": "poi_type", "value": ps["place_type"],
+        })
+
     # GPS: 从 place_semantic 查找坐标
-    place_id = event.get("place_semantic", {}).get("place_id")
+    place_id = ps.get("place_id")
     if place_id and place_id in PLACE_COORDS:
         lat, lng = PLACE_COORDS[place_id]
         signals.append({"t": full_ts, "signal": "gps_latitude", "value": lat})
